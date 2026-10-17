@@ -5,6 +5,8 @@ data/
 media/
 .env
 *.private
+*.key
+*.pem
 .env.*
 !.env.example
 *.db
@@ -16,3 +18,4 @@ Thumbs.db
 # Notes de travail locales, jamais nécessaires pour construire le projet.
 /REPRISE.md
 /VALIDATION.md
+/deploy/compose.local.yml

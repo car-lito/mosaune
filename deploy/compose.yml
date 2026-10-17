@@ -1,0 +1,39 @@
+name: mosaune
+services:
+  mosaune:
+    image: ghcr.io/car-lito/mosaune:0.0.23-preview
+    user: "${MOSAUNE_UID:-65532}:${MOSAUNE_GID:-65532}"
+    environment:
+      MOSAUNE_PUBLIC_URL: ${MOSAUNE_PUBLIC_URL:?Renseigner une adresse HTTPS exacte}
+      MOSAUNE_TLS_CERT: /tls/server.crt
+      MOSAUNE_TLS_KEY: /tls/server.key
+      MOSAUNE_TLS_CA: ${MOSAUNE_TLS_CA:-}
+      TZ: ${TZ:-Europe/Brussels}
+    ports:
+      - "${MOSAUNE_BIND_IP:-127.0.0.1}:${MOSAUNE_HOST_PORT:-47831}:47831"
+    volumes:
+      - type: bind
+        source: ${MOSAUNE_DATA_PATH:?Renseigner le dossier des données}
+        target: /data
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${MOSAUNE_TLS_PATH:?Renseigner le dossier des certificats}
+        target: /tls
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${MOSAUNE_MEDIA_PATH:?Renseigner le dossier des médias}
+        target: /media
+        read_only: true
+        bind:
+          create_host_path: false
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+    stop_grace_period: 20s
+    restart: unless-stopped

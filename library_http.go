@@ -2,13 +2,10 @@ package main
 
 import (
 	"crypto/rand"
-	"crypto/subtle"
 	"encoding/json"
 	"io"
 	"math"
-	"net"
 	"net/http"
-	"net/url"
 	"path/filepath"
 	"strings"
 )
@@ -36,39 +33,6 @@ func readJSON(w http.ResponseWriter, r *http.Request, value any) bool {
 		return false
 	}
 	return true
-}
-
-// Local-only is not sufficient: validate Host and Origin against DNS rebinding and
-// cross-site requests, and require a per-process token for every mutation.
-func localAccess(next http.Handler, token string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		host := r.Host
-		if h, _, err := net.SplitHostPort(host); err == nil {
-			host = h
-		}
-		if host != "127.0.0.1" && host != "localhost" {
-			problem(w, 403, "Adresse locale requise.")
-			return
-		}
-		if origin := r.Header.Get("Origin"); origin != "" {
-			u, err := url.Parse(origin)
-			if err != nil || u.Scheme != "http" || u.Host != r.Host {
-				problem(w, 403, "Origine refusée.")
-				return
-			}
-		}
-		if site := r.Header.Get("Sec-Fetch-Site"); site != "" && site != "same-origin" && site != "none" {
-			problem(w, 403, "Origine refusée.")
-			return
-		}
-		if r.Method != "GET" && r.Method != "HEAD" && (r.URL.Path == "/api/v1/auth/login" || r.URL.Path == "/api/v1/auth/setup" || r.URL.Path == "/api/v1/auth/recover" || r.URL.Path == "/api/v1/auth/activate") {
-			if subtle.ConstantTimeCompare([]byte(r.Header.Get("X-Mosaune-Token")), []byte(token)) != 1 {
-				problem(w, 403, "Rechargez la page pour reconnecter Mosaune.")
-				return
-			}
-		}
-		next.ServeHTTP(w, r)
-	})
 }
 
 func libraryRoutes(mux *secureMux, c *catalog, modules []module) string {

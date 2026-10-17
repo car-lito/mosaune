@@ -1,4 +1,4 @@
-État au 17 octobre 2026 : catalogue officiel public, intégration et dédoublonnage 0.0.22 livrés. Sources du serveur publiées sur https://github.com/car-lito/mosaune ; vérifications Windows/Linux et construction ARM64 automatisées. Les images Docker/CasaOS restent à préparer.
+État au 17 octobre 2026 : catalogue officiel public, intégration et dédoublonnage 0.0.22 livrés. Sources du serveur publiées sur https://github.com/car-lito/mosaune ; vérifications Windows/Linux et construction ARM64 automatisées. Chantier 0.0.23 : HTTPS direct, arrêt SIGTERM, images Docker et catalogue CasaOS 0.4.15 en validation. Aucun déploiement NAS.
 
 # Mosaune — comptes, personnalisation et extensions avant le NAS
 
@@ -167,9 +167,9 @@ Le retrait d’un module média présente ses dépendants et l’impact sur son 
 - [x] E-GITHUB-01 — Dépôt public du serveur, premiers commits et guide GitHub ; médias, catalogue personnel, secrets et notes locales exclus.
 - [x] E-GITHUB-02 — Tests automatiques validés sur Windows/Linux et exécutables Windows amd64, Linux amd64 et Linux arm64 produits depuis les seules sources du dépôt (première exécution GitHub réussie le 17 octobre 2026).
 - [ ] Choisir la licence du projet avant de le présenter comme open source ; compléter les notices de distribution et le processus de release.
-- [ ] Accès réseau protégé et arrêt propre du serveur en conteneur, prérequis de l'installation CasaOS.
+- [ ] E-NETWORK-01 — Valider HTTPS direct, origine autorisée, cookies sécurisés, certificat et arrêt SIGTERM du serveur en conteneur. Implémenté en 0.0.23, validation conteneurs en cours.
 - [ ] Fabrication d’images Linux ARM64 et amd64 après les tests ; publication des versions dans GitHub Container Registry (GHCR).
-- [ ] Définition CasaOS/Compose et catalogue Mosaune accessible par lien adapté à la version de CasaOS installée. Relever cette version avant de figer la procédure.
+- [ ] Définition CasaOS/Compose et catalogue Mosaune accessible par lien adapté à la version de CasaOS installée. Version utilisateur confirmée : CasaOS 0.4.15. Modèle et archive préparés ; import réel encore à valider.
 - [ ] Volumes persistants pour catalogue, configuration, images choisies et paquets d’extensions ; médias montés avec les droits nécessaires uniquement.
 - [ ] Canaux stable et test avec numéros de version identifiables ; choisir une mise à jour dans CasaOS, conserver les données, sauvegarder avant les migrations.
 - [ ] Vérifier sur Pi installation, redémarrage, mise à jour et restauration ; mesurer la consommation et valider deux comptes et les permissions.

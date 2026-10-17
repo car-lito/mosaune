@@ -4,7 +4,7 @@
 
 Un espace pour vos films, séries et musiques, hébergé chez vous. Mosaune réunit une bibliothèque locale, des fiches enrichies et la découverte de contenus dans une interface commune. Le projet privilégie un serveur léger en Go et une architecture extensible.
 
-**Prototype 0.0.22 — développement actif, accès local uniquement.** Ce dépôt public contient les sources. L'installation Docker/CasaOS et l'accès réseau protégé restent à construire ; ce n'est pas encore une bêta prête pour le NAS.
+**Prototype 0.0.23 — développement actif.** Le mode local reste le démarrage par défaut. Cette version prépare HTTPS direct, les images Docker amd64/arm64 et un catalogue CasaOS 0.4.15 ; ce n’est pas encore la bêta ni le premier déploiement validé sur NAS. [Préparation réseau et conteneurs](deploy/README.md).
 
 ## Déjà disponible
 
@@ -32,7 +32,7 @@ Les paquets officiels sont distribués dans [car-lito/mosaune-extensions](https:
 
 ## État et limites
 
-Le lecteur utilise encore les capacités du navigateur : les codecs non pris en charge ne sont pas convertis automatiquement. Les applications Android/Android TV, le mode hors ligne, les autres types de médias et le magasin universel d'extensions restent prévus. Ne pas exposer ce prototype sur Internet ; le serveur actuel écoute uniquement sur 127.0.0.1.
+Le lecteur utilise encore les capacités du navigateur : les codecs non pris en charge ne sont pas convertis automatiquement. Les applications Android/Android TV, le mode hors ligne, les autres types de médias et le magasin universel d'extensions restent prévus. Ne pas exposer ce prototype sur Internet. Le serveur écoute par défaut uniquement sur 127.0.0.1 ; l’accès réseau nécessite une adresse HTTPS et un certificat explicitement configurés.
 
 Les médias et données personnelles restent hors du dépôt. Les tests ne nécessitent pas de clé API personnelle. Ne jamais publier le dossier data, une clé privée de signature ou un export de configuration contenant des secrets.
 

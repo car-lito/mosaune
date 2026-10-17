@@ -16,8 +16,8 @@ Dans **Actions**, ouvrir une exécution réussie de « Vérifier et construire M
 
 Pour les essais actuels sous Windows, conserver le dossier `data` existant et faire une sauvegarde avant de changer d'exécutable. Ne pas lancer deux serveurs simultanément sur la même base.
 
-Sous Linux, un exécutable extrait de cette archive peut nécessiter de rétablir le droit d'exécution avec `chmod +x nom-du-fichier`. Le serveur reste limité à l'accès local ; ces téléchargements ne sont pas l'installation CasaOS.
+Sous Linux, un exécutable extrait de cette archive peut nécessiter de rétablir le droit d'exécution avec `chmod +x nom-du-fichier`. Le démarrage par défaut reste local ; ces téléchargements ne sont pas l’installation CasaOS.
 
 ## Ce qui vient ensuite
 
-Le code publié ne met pas à jour automatiquement ton serveur. Les prochaines étapes sont l'accès réseau protégé, les images Docker et l'installation CasaOS. La procédure CasaOS devra correspondre à la version installée sur le NAS. Aucun déploiement sur le NAS n'est réalisé par les vérifications GitHub de cette première étape.
+Le code publié ne met pas à jour automatiquement ton serveur. La 0.0.23 prépare l’accès HTTPS, les images Docker et le catalogue CasaOS 0.4.15. Les certificats, la migration des chemins et les autres points avant NAS restent à traiter avant l’installation. Voir deploy/README.md. Aucun déploiement sur le NAS n'est réalisé par les vérifications GitHub de cette première étape.

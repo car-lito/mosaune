@@ -1,0 +1,97 @@
+name: mosaune
+services:
+  mosaune:
+    image: ghcr.io/car-lito/mosaune:0.0.23-preview
+    container_name: mosaune
+    user: "65532:65532"
+    environment:
+      MOSAUNE_PUBLIC_URL: ""
+      MOSAUNE_TLS_CERT: /tls/server.crt
+      MOSAUNE_TLS_KEY: /tls/server.key
+      MOSAUNE_TLS_CA: /tls/ca.crt
+      TZ: Europe/Brussels
+    ports:
+      - target: 47831
+        published: "47831"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/mosaune/data
+        target: /data
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /DATA/AppData/mosaune/tls
+        target: /tls
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /DATA/Media
+        target: /media
+        read_only: true
+        bind:
+          create_host_path: false
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 256
+    stop_grace_period: 20s
+    restart: unless-stopped
+    x-casaos:
+      envs:
+        - container: MOSAUNE_PUBLIC_URL
+          description:
+            en_US: Exact HTTPS address, including the published port. Required before starting.
+            fr_FR: Adresse HTTPS exacte avec le port publié. À renseigner avant le démarrage.
+        - container: MOSAUNE_TLS_CA
+          description:
+            en_US: Local CA certificate for health checks, or empty for a publicly trusted certificate.
+            fr_FR: Certificat de l'autorité locale, ou vide pour un certificat reconnu publiquement.
+        - container: TZ
+          description:
+            en_US: Time zone
+            fr_FR: Fuseau horaire
+      ports:
+        - container: "47831"
+          description:
+            en_US: HTTPS interface
+            fr_FR: Interface HTTPS
+      volumes:
+        - container: /data
+          description:
+            en_US: Persistent catalogue, accounts, artwork and extension packages
+            fr_FR: Catalogue, comptes, affiches et extensions conservés lors des mises à jour
+        - container: /tls
+          description:
+            en_US: Prepared HTTPS certificate and private key (read-only)
+            fr_FR: Certificat HTTPS et clé privée préparés (lecture seule)
+        - container: /media
+          description:
+            en_US: Media folder (read-only)
+            fr_FR: Dossier des médias (lecture seule)
+x-casaos:
+  architectures: [amd64, arm64]
+  main: mosaune
+  author: car-lito
+  developer: car-lito
+  category: Media
+  icon: https://raw.githubusercontent.com/car-lito/mosaune/main/deploy/casaos/Apps/Mosaune/icon.svg
+  index: /
+  port_map: "47831"
+  scheme: https
+  title:
+    en_US: Mosaune Preview
+    fr_FR: Mosaune — préversion
+  tagline:
+    en_US: Your films, series and music at home.
+    fr_FR: Vos films, séries et musiques, chez vous.
+  description:
+    en_US: Development preview. Requires HTTPS certificates and prepared persistent folders. Read the deployment guide before installing.
+    fr_FR: Préversion de développement. Nécessite des certificats HTTPS et des dossiers persistants préparés. Lire le guide avant l'installation.
+  tips:
+    before_install:
+      en_US: "Not ready for the first NAS deployment yet. Preparation guide: https://github.com/car-lito/mosaune/blob/main/deploy/README.md"
+      fr_FR: "Premier déploiement NAS encore en préparation. Guide : https://github.com/car-lito/mosaune/blob/main/deploy/README.md"

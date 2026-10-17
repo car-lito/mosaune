@@ -1,6 +1,6 @@
 # Construire et vérifier Mosaune
 
-Mosaune est un prototype en développement. Le serveur écoute uniquement sur cet ordinateur (`127.0.0.1`). La construction ARM64 ne signifie pas encore que l'installation réseau sur NAS est prête.
+Mosaune est un prototype en développement. Le serveur écoute par défaut uniquement sur cet ordinateur (`127.0.0.1`). Le mode réseau HTTPS et Docker est décrit dans [deploy/README.md](deploy/README.md). La construction ARM64 ne signifie pas encore que l'installation réseau sur NAS est prête.
 
 ## Prérequis
 
@@ -27,10 +27,10 @@ Ou les deux : `node scripts/project.mjs ci`.
 
 Le script compile le fournisseur Wasm, construit l'interface embarquée, vérifie Svelte et les tests web, puis les deux modules Go. La construction produit trois exécutables, leurs empreintes SHA-256 et les notices des dépendances dans `build/`. Conserver ces notices avec les exécutables redistribués. On peut indiquer un chemin Go particulier avec la variable `MOSAUNE_GO`.
 
-Les exécutables restent liés à la machine locale. `DEMARRER-WINDOWS.cmd` lance la version construite sous Windows. Pour Linux :
+Le démarrage par défaut reste local. `DEMARRER-WINDOWS.cmd` lance la version construite sous Windows. Pour Linux :
 
 ```sh
-./build/mosaune-0.0.22-linux-amd64 -data-dir ./data
+./build/mosaune-0.0.23-linux-amd64 -data-dir ./data
 ```
 
 Remplacer `amd64` par `arm64` pour une machine ARM64. Le code d'installation du premier administrateur est affiché dans le terminal.
@@ -39,7 +39,7 @@ Remplacer `amd64` par `arm64` pour une machine ARM64. Le code d'installation du 
 
 Chaque envoi sur `main`, proposition de modification ou lancement manuel déclenche les tests sur Windows et Linux. Le travail Linux produit aussi les exécutables des trois plateformes. Les téléchargements de test restent disponibles quatorze jours dans la section **Artifacts** de l'exécution réussie.
 
-Ces fichiers ne sont pas encore une release stable ni des images Docker. Aucune action ne déploie Mosaune sur un NAS. Les actions n'ont qu'un accès en lecture au dépôt ; aucun secret personnel n'est nécessaire aux tests.
+Ces fichiers ne sont pas encore une release stable. Les étapes suivantes du workflow testent des conteneurs HTTPS sur amd64 et arm64 (émulé), puis publient une préversion GHCR uniquement depuis main. Seule cette dernière étape possède le droit de publier des paquets, avec le jeton temporaire GitHub ; aucun secret personnel n’est nécessaire aux tests. Aucune action ne déploie Mosaune sur un NAS.
 
 ## Données et contributions
 

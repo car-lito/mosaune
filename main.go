@@ -16,6 +16,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -24,7 +25,7 @@ import (
 //go:embed all:web/dist
 var frontend embed.FS
 
-const version = "0.0.22"
+const version = "0.0.23"
 
 type module struct {
 	ID    string   `json:"id"`
@@ -55,6 +56,10 @@ func enabledModules(value string) ([]module, error) {
 }
 
 func newHandler(ui fs.FS, modules []module, catalog *catalog) http.Handler {
+	return newNetworkHandler(ui, modules, catalog, networkConfig{})
+}
+
+func newNetworkHandler(ui fs.FS, modules []module, catalog *catalog, network networkConfig) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -68,7 +73,7 @@ func newHandler(ui fs.FS, modules []module, catalog *catalog) http.Handler {
 	catalog.authRoutes(mux, token)
 	mux.HandleFunc("GET /api/", func(w http.ResponseWriter, r *http.Request) { http.NotFound(w, r) })
 	mux.Handle("GET /", http.FileServer(http.FS(ui)))
-	guarded := localAccess(catalog.authenticated(mux), token)
+	guarded := network.access(catalog.authenticated(mux), token)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "no-referrer")
@@ -78,18 +83,32 @@ func newHandler(ui fs.FS, modules []module, catalog *catalog) http.Handler {
 }
 
 func run() error {
-	port := flag.Int("port", 47831, "port du prototype local")
+	port := flag.Int("port", 47831, "port d’écoute")
+	listen := flag.String("listen", envDefault("MOSAUNE_LISTEN", "127.0.0.1"), "adresse IP d’écoute")
+	publicURL := flag.String("public-url", os.Getenv("MOSAUNE_PUBLIC_URL"), "origine HTTPS exacte utilisée par les clients")
+	cert := flag.String("tls-cert", os.Getenv("MOSAUNE_TLS_CERT"), "certificat HTTPS PEM avec sa chaîne")
+	key := flag.String("tls-key", os.Getenv("MOSAUNE_TLS_KEY"), "clé privée HTTPS PEM")
+	ca := flag.String("tls-ca", os.Getenv("MOSAUNE_TLS_CA"), "autorité locale optionnelle pour le contrôle de santé")
+	healthcheck := flag.Bool("healthcheck", false, "vérifier le serveur déjà démarré, puis quitter")
 	moduleList := flag.String("modules", "video,music", "modules actifs : video,music")
 	executable, err := os.Executable()
 	if err != nil {
 		return err
 	}
-	dataDir := flag.String("data-dir", filepath.Join(filepath.Dir(executable), "data"), "dossier du catalogue SQLite")
+	dataDir := flag.String("data-dir", envDefault("MOSAUNE_DATA_DIR", filepath.Join(filepath.Dir(executable), "data")), "dossier du catalogue SQLite")
 	recoverName := flag.String("recover-admin", "", "récupérer le compte administrateur indiqué")
 	extensionSafeMode := flag.Bool("safe-mode", false, "démarrer sans appliquer les extensions externes")
 	flag.Parse()
-	if *port < 1 || *port > 65535 {
-		return errors.New("port invalide")
+	network := networkConfig{Listen: *listen, Port: *port, PublicURL: *publicURL, Cert: *cert, Key: *key, CA: *ca}
+	if err := network.validate(); err != nil {
+		return err
+	}
+	if *healthcheck {
+		return network.healthcheck()
+	}
+	tlsConfig, err := network.loadTLS()
+	if err != nil {
+		return err
 	}
 	modules, err := enabledModules(*moduleList)
 	if err != nil {
@@ -99,11 +118,11 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	// LAN deployment remains deferred until TLS and NAS setup are validated.
-	listener, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", *port))
+	listener, err := net.Listen("tcp", network.address())
 	if err != nil {
-		return fmt.Errorf("impossible de démarrer le serveur local : %w", err)
+		return fmt.Errorf("impossible de démarrer le serveur : %w", err)
 	}
+	defer listener.Close()
 	catalog, err := openCatalog(*dataDir)
 	if err != nil {
 		listener.Close()
@@ -126,9 +145,9 @@ func run() error {
 	if catalog.auth.code != "" {
 		log.Printf("Code unique de configuration / récupération : %s", catalog.auth.code)
 	}
-	server := &http.Server{Handler: newHandler(ui, modules, catalog), ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	server := &http.Server{Handler: newNetworkHandler(ui, modules, catalog, network), ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second, BaseContext: func(net.Listener) context.Context { return ctx }}
 	workerDone := make(chan struct{})
 	go func() {
 		defer close(workerDone)
@@ -148,18 +167,15 @@ func run() error {
 		<-metadataDone
 	}()
 	defer func() { stop(); <-workerDone }()
-	go func() {
-		<-ctx.Done()
-		shutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		_ = server.Shutdown(shutdown)
-	}()
-	log.Printf("Mosaune %s — http://%s — Ctrl+C pour arrêter", version, listener.Addr())
-	err = server.Serve(listener)
-	if errors.Is(err, http.ErrServerClosed) {
-		return nil
+	log.Printf("Mosaune %s — %s — Ctrl+C pour arrêter", version, network.origin())
+	return serveHTTP(ctx, server, listener, tlsConfig)
+}
+
+func envDefault(name, fallback string) string {
+	if value := os.Getenv(name); value != "" {
+		return value
 	}
-	return err
+	return fallback
 }
 
 func main() {
