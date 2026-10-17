@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import https from 'node:https';
 import net from 'node:net';
+import { checkServerIdentity } from 'node:tls';
 
 const image = process.argv[2];
 if (!image) throw new Error('Usage: node scripts/test-container.mjs IMAGE');
@@ -44,7 +45,11 @@ try {
   const ca = readFileSync(join(certDirectory, 'server.crt'));
   function request(path, { method = 'GET', body, headers = {} } = {}) {
     return new Promise((resolve, reject) => {
-      const req = https.request(origin + path, { method, ca, headers, timeout: 10000 }, response => {
+      // Verify the actual TLS destination even when testing a forged HTTP Host.
+      // Node otherwise derives the TLS server name from that injected header.
+      const req = https.request(origin + path, { method, ca, headers, timeout: 10000,
+        servername: '', checkServerIdentity: (_, certificate) => checkServerIdentity('127.0.0.1', certificate),
+      }, response => {
         const chunks = []; response.on('data', chunk => chunks.push(chunk));
         response.on('end', () => resolve({ status: response.statusCode, headers: response.headers, text: Buffer.concat(chunks).toString() }));
       });
@@ -66,7 +71,8 @@ try {
   assert((await request('/healthz', { headers: { Host: 'attacker.invalid' } })).status === 403, 'Foreign Host accepted');
   assert((await request('/api/v1/auth/state', { headers: { Origin: 'https://attacker.invalid' } })).status === 403, 'Foreign Origin accepted');
   const state = JSON.parse((await request('/api/v1/auth/state')).text);
-  const logs = docker(['logs', id]) + command('docker', ['logs', id]).stderr;
+  const logResult = command('docker', ['logs', id]);
+  const logs = logResult.stdout + logResult.stderr;
   const code = logs.match(/configuration \/ récupération : (\S+)/)?.[1];
   assert(state.setup && code, 'Initial setup not available');
   const password = randomUUID();
