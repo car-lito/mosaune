@@ -56,5 +56,6 @@ jobs:
             build/mosaune-*-linux-amd64
             build/mosaune-*-linux-arm64
             build/mosaune-*-SHA256SUMS.txt
+            build/THIRD-PARTY-NOTICES.txt
           if-no-files-found: error
           retention-days: 14

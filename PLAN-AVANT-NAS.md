@@ -1,4 +1,4 @@
-État au 17 octobre 2026 : catalogue officiel public, intégration et dédoublonnage 0.0.22 livrés. Publication publique du serveur autorisée ; préparation des sources et des vérifications automatiques en cours. Les images Docker/CasaOS restent à préparer.
+État au 17 octobre 2026 : catalogue officiel public, intégration et dédoublonnage 0.0.22 livrés. Sources du serveur publiées sur https://github.com/car-lito/mosaune ; vérifications Windows/Linux et construction ARM64 automatisées. Les images Docker/CasaOS restent à préparer.
 
 # Mosaune — comptes, personnalisation et extensions avant le NAS
 
@@ -164,8 +164,11 @@ Le retrait d’un module média présente ses dépendants et l’impact sur son 
 
 ## E. Publication GitHub et installation CasaOS
 
-- [ ] Guider la création et l’utilisation du dépôt GitHub : sources, commits, versions et données exclues (médias, catalogue personnel, secrets).
-- [ ] Workflow de tests puis fabrication d’images Linux ARM64 et amd64 ; publication des versions dans GitHub Container Registry (GHCR).
+- [x] E-GITHUB-01 — Dépôt public du serveur, premiers commits et guide GitHub ; médias, catalogue personnel, secrets et notes locales exclus.
+- [ ] E-GITHUB-02 — Valider les tests automatiques sur Windows/Linux et la production des exécutables Windows amd64, Linux amd64 et Linux arm64 depuis les seules sources du dépôt.
+- [ ] Choisir la licence du projet avant de le présenter comme open source ; compléter les notices de distribution et le processus de release.
+- [ ] Accès réseau protégé et arrêt propre du serveur en conteneur, prérequis de l'installation CasaOS.
+- [ ] Fabrication d’images Linux ARM64 et amd64 après les tests ; publication des versions dans GitHub Container Registry (GHCR).
 - [ ] Définition CasaOS/Compose et catalogue Mosaune accessible par lien adapté à la version de CasaOS installée. Relever cette version avant de figer la procédure.
 - [ ] Volumes persistants pour catalogue, configuration, images choisies et paquets d’extensions ; médias montés avec les droits nécessaires uniquement.
 - [ ] Canaux stable et test avec numéros de version identifiables ; choisir une mise à jour dans CasaOS, conserver les données, sauvegarder avant les migrations.

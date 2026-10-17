@@ -5,6 +5,7 @@ import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname, relative, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { buildNotices } from './build-notices.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const go = process.env.MOSAUNE_GO || 'go';
@@ -52,6 +53,7 @@ try {
       checksums.push(`${hash}  ${name}`);
     }
     writeFileSync(join(root, 'build', `mosaune-${version}-SHA256SUMS.txt`), `${checksums.join('\n')}\n`);
+    buildNotices(root, go, env);
   }
 } catch (error) {
   console.error(error.message);

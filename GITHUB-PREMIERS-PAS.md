@@ -1,6 +1,6 @@
 # Le dépôt GitHub de Mosaune
 
-Adresse prévue : https://github.com/car-lito/mosaune
+Adresse du dépôt public : https://github.com/car-lito/mosaune
 
 Le dépôt du serveur est distinct de [mosaune-extensions](https://github.com/car-lito/mosaune-extensions), qui distribue les paquets d'extensions.
 

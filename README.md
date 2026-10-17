@@ -1,5 +1,7 @@
 # Mosaune
 
+[![Vérifications](https://github.com/car-lito/mosaune/actions/workflows/verify.yml/badge.svg)](https://github.com/car-lito/mosaune/actions/workflows/verify.yml)
+
 Un espace pour vos films, séries et musiques, hébergé chez vous. Mosaune réunit une bibliothèque locale, des fiches enrichies et la découverte de contenus dans une interface commune. Le projet privilégie un serveur léger en Go et une architecture extensible.
 
 **Prototype 0.0.22 — développement actif, accès local uniquement.** Ce dépôt public contient les sources. L'installation Docker/CasaOS et l'accès réseau protégé restent à construire ; ce n'est pas encore une bêta prête pour le NAS.

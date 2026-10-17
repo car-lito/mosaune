@@ -25,7 +25,7 @@ node scripts/project.mjs build
 
 Ou les deux : `node scripts/project.mjs ci`.
 
-Le script compile le fournisseur Wasm, construit l'interface embarquée, vérifie Svelte et les tests web, puis les deux modules Go. La construction produit trois exécutables et leurs empreintes SHA-256 dans `build/`. On peut indiquer un chemin Go particulier avec la variable `MOSAUNE_GO`.
+Le script compile le fournisseur Wasm, construit l'interface embarquée, vérifie Svelte et les tests web, puis les deux modules Go. La construction produit trois exécutables, leurs empreintes SHA-256 et les notices des dépendances dans `build/`. Conserver ces notices avec les exécutables redistribués. On peut indiquer un chemin Go particulier avec la variable `MOSAUNE_GO`.
 
 Les exécutables restent liés à la machine locale. `DEMARRER-WINDOWS.cmd` lance la version construite sous Windows. Pour Linux :
 
