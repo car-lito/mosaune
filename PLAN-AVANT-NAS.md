@@ -165,7 +165,7 @@ Le retrait d’un module média présente ses dépendants et l’impact sur son 
 ## E. Publication GitHub et installation CasaOS
 
 - [x] E-GITHUB-01 — Dépôt public du serveur, premiers commits et guide GitHub ; médias, catalogue personnel, secrets et notes locales exclus.
-- [ ] E-GITHUB-02 — Valider les tests automatiques sur Windows/Linux et la production des exécutables Windows amd64, Linux amd64 et Linux arm64 depuis les seules sources du dépôt.
+- [x] E-GITHUB-02 — Tests automatiques validés sur Windows/Linux et exécutables Windows amd64, Linux amd64 et Linux arm64 produits depuis les seules sources du dépôt (première exécution GitHub réussie le 17 octobre 2026).
 - [ ] Choisir la licence du projet avant de le présenter comme open source ; compléter les notices de distribution et le processus de release.
 - [ ] Accès réseau protégé et arrêt propre du serveur en conteneur, prérequis de l'installation CasaOS.
 - [ ] Fabrication d’images Linux ARM64 et amd64 après les tests ; publication des versions dans GitHub Container Registry (GHCR).
