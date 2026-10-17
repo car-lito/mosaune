@@ -1,0 +1,59 @@
+// Entrée commune aux postes de développement et à GitHub Actions.
+// Les commandes sont bornées : aucun serveur personnel n'est lancé ou arrêté.
+import { spawnSync } from 'node:child_process';
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve, dirname, relative, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const go = process.env.MOSAUNE_GO || 'go';
+const env = { ...process.env, CGO_ENABLED: '0', GOTELEMETRY: 'off', GOOS: '', GOARCH: '' };
+const mode = process.argv[2];
+if (!['check', 'build', 'ci'].includes(mode)) {
+  console.error('Usage : node scripts/project.mjs check|build|ci');
+  process.exit(2);
+}
+function run(command, args, directory = root, extra = {}) {
+  console.log(`\n> ${relative(root, directory) || '.'} : ${command === go ? 'go' : 'node'} ${args.join(' ')}`);
+  const result = spawnSync(command, args, { cwd: directory, env: { ...env, ...extra }, stdio: 'inherit', windowsHide: true });
+  if (result.error) throw result.error;
+  if (result.status !== 0) throw new Error(`La commande a échoué (${result.status ?? result.signal}).`);
+}
+const kit = join(root, 'extension-kit');
+function wasm(output, source) {
+  run(go, ['build', '-trimpath', '-ldflags=-s -w', '-o', output, source], kit, { GOOS: 'wasip1', GOARCH: 'wasm' });
+}
+try {
+  wasm('providers/tmdb/provider.wasm', './providers/tmdb/source');
+  // Le serveur embarque l'interface : elle est nécessaire même pour les tests Go.
+  run(process.execPath, ['node_modules/vite/bin/vite.js', 'build']);
+  if (mode !== 'build') {
+    wasm('examples/demo/provider.wasm', './examples/demo/source');
+    wasm('runtime/testdata/probe.wasm', './runtime/testdata/probe');
+    run(process.execPath, ['node_modules/svelte-check/bin/svelte-check', '--tsconfig', './tsconfig.json']);
+    const tests = readdirSync(join(root, 'web/src')).filter(name => name.endsWith('.test.mjs')).sort().map(name => `web/src/${name}`);
+    run(process.execPath, ['--test', ...tests]);
+    for (const directory of [kit, root]) {
+      run(go, ['test', '-timeout', '5m', './...'], directory);
+      run(go, ['vet', './...'], directory);
+    }
+  }
+  if (mode !== 'check') {
+    const { version } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+    const serverVersion = readFileSync(join(root, 'main.go'), 'utf8').match(/const version = "([^"]+)"/)?.[1];
+    if (version !== serverVersion) throw new Error('La version du serveur et celle du paquet ne correspondent pas.');
+    mkdirSync(join(root, 'build'), { recursive: true });
+    const checksums = [];
+    for (const [os, arch, suffix] of [['windows', 'amd64', '.exe'], ['linux', 'amd64', ''], ['linux', 'arm64', '']]) {
+      const name = `mosaune-${version}-${os}-${arch}${suffix}`;
+      run(go, ['build', '-trimpath', '-ldflags=-s -w', '-o', `build/${name}`, '.'], root, { GOOS: os, GOARCH: arch });
+      const hash = createHash('sha256').update(readFileSync(join(root, 'build', name))).digest('hex');
+      checksums.push(`${hash}  ${name}`);
+    }
+    writeFileSync(join(root, 'build', `mosaune-${version}-SHA256SUMS.txt`), `${checksums.join('\n')}\n`);
+  }
+} catch (error) {
+  console.error(error.message);
+  process.exitCode = 1;
+}

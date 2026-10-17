@@ -1,0 +1,60 @@
+name: Vérifier et construire Mosaune
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Récupérer les sources
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Préparer Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Préparer Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: |
+            go.sum
+            extension-kit/go.sum
+      - name: Installer les dépendances verrouillées
+        run: npm ci
+      - name: Vérifier le serveur, l'interface et le moteur d'extensions
+        run: node scripts/project.mjs check
+      - name: Construire Windows, Linux et ARM64
+        if: runner.os == 'Linux'
+        run: node scripts/project.mjs build
+      - name: Conserver les exécutables de test
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: mosaune-test-${{ github.sha }}
+          path: |
+            build/mosaune-*-windows-amd64.exe
+            build/mosaune-*-linux-amd64
+            build/mosaune-*-linux-arm64
+            build/mosaune-*-SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "id": "atelier.ambre",
+  "name": "Ambre",
+  "publisher": "Atelier Mosaune — exemple local",
+  "version": "1.0.0",
+  "description": "Une palette de papier chaud et d’ambre, avec une variante sombre inspirée d’une salle de cinéma.",
+  "family": "interface",
+  "minCore": "0.0.14",
+  "api": 1,
+  "requires": ["ui.theme.v1"],
+  "permissions": [],
+  "theme": {
+    "light": {
+      "canvas": "#faf3e7", "surface": "#fffaf2", "ink": "#352619",
+      "muted": "#74583c", "line": "#d8c8ae", "accent": "#884417",
+      "accentInk": "#ffffff", "sidebar": "#352619", "sidebarInk": "#f6e8d4"
+    },
+    "dark": {
+      "canvas": "#201b17", "surface": "#2d251e", "ink": "#f7e9d7",
+      "muted": "#cbb89e", "line": "#66503a", "accent": "#efb76c",
+      "accentInk": "#201b17", "sidebar": "#181411", "sidebarInk": "#f6e8d4"
+    }
+  }
+}

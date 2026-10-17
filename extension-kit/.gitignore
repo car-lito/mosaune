@@ -1,0 +1,3 @@
+/examples/demo/provider.wasm
+/runtime/testdata/probe.wasm
+/providers/tmdb/provider.wasm

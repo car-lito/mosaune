@@ -1,0 +1,24 @@
+.settings-layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:2.5rem;align-items:stretch;flex:1;min-height:0;margin:1rem 0}
+.settings-navigation{display:flex;flex-direction:column;gap:.5rem;padding-right:1rem;border-right:1px solid var(--m-settings-navigation-border-right);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;min-height:0}
+.settings-navigation button{display:flex;flex-direction:column;gap:.4rem;padding:1rem;border:0;border-radius:var(--m-settings-navigation-button-border-radius);text-align:left;background:var(--m-settings-navigation-button-background);color:var(--m-settings-navigation-button-color);transition:background .15s}
+.settings-navigation button:hover{background:var(--m-settings-navigation-button-hover-background)}.settings-navigation button.selected{background:var(--m-settings-navigation-button-selected-background);color:var(--m-settings-navigation-button-selected-color)}.settings-navigation strong{font-size:var(--m-settings-navigation-strong-font-size)}.settings-navigation small{font-weight:var(--m-settings-navigation-small-font-weight);line-height:var(--m-settings-navigation-small-line-height);color:var(--m-settings-navigation-small-color)}
+.settings-content{min-width:0}.settings-content .library-manager{margin-top:0}.settings-content .metadata-settings{margin-top:0}.settings-content .download-settings{padding-top:0}.settings-server{padding:1.5rem 0}.settings-server dl{display:grid;grid-template-columns:130px 1fr;gap:1rem}.settings-server dt{color:var(--m-settings-server-dt-color)}.settings-server dd{margin:0}.settings-server p{color:var(--m-settings-server-p-color);line-height:var(--m-settings-server-p-line-height);max-width:60ch}
+.settings-navigation button{flex-shrink:0}.settings-navigation button:hover{color:var(--m-settings-navigation-button-color)}
+.settings-content{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:0 .5rem 2rem}
+.experience-shell main.settings-main{height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden;padding-bottom:1rem}
+.settings-main .topbar{flex-shrink:0}.settings-main .settings-page:not([hidden]){display:flex;flex-direction:column;min-height:0;flex:1}.settings-main .page-heading{padding:1.5rem 0;margin:0;flex-shrink:0}.settings-main .page-heading h1{margin:10px 0}.settings-main .page-heading p{margin:0}.settings-main>footer,.settings-main>.credits{display:none}
+.with-player.experience-shell main.settings-main{height:calc(100dvh - 150px)}
+@media(max-width:1000px){.settings-layout{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);gap:1rem}.settings-navigation{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--m-settings-navigation-border-bottom-max-width-1250px);padding:0 0 .7rem;scrollbar-gutter:auto}.settings-navigation button{white-space:nowrap}.settings-navigation small{display:none}.settings-main .page-heading{padding:1rem 0}}
+@media(max-width:760px){.with-player.experience-shell main.settings-main{height:calc(100dvh - 190px)}}
+@media(max-width:600px){.settings-navigation button{padding:.8rem}.settings-server dl{grid-template-columns:1fr;gap:.5rem}.settings-server dd{margin-bottom:.7rem}.settings-main .page-heading>.eyebrow,.settings-main .page-heading>p{display:none}}
+@media(max-width:760px){
+ .experience-shell[data-ui-section="settings"]{display:flex;flex-direction:column;height:100dvh;min-height:0;overflow:hidden;padding-bottom:0}
+ .experience-shell[data-ui-section="settings"].with-player{height:calc(100dvh - 190px)}
+ .experience-shell[data-ui-section="settings"] .sidebar{flex-shrink:0}
+ .experience-shell[data-ui-section="settings"] .sidebar-bottom{position:static;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.5rem}
+ .experience-shell[data-ui-section="settings"] .account-identity{padding:0;min-width:0;flex:1}
+ .experience-shell[data-ui-section="settings"] .settings-nav{flex-shrink:0}
+ .experience-shell[data-ui-section="settings"] main.settings-main{height:auto;flex:1;min-height:0}
+ .settings-main .page-heading{min-height:0;padding:.5rem 0}
+ .settings-main .experience-topbar{margin-bottom:0}
+}

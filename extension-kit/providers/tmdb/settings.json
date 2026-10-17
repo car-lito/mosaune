@@ -1,0 +1,12 @@
+{
+ "version":1,
+ "title":"Connexion à TMDB",
+ "description":"La même connexion est utilisée par le module et le fournisseur intégré. Votre clé reste sur le serveur ; elle n’est jamais transmise au module d’extension.",
+ "instructions":[
+  "Créez un compte TMDB puis ouvrez Paramètres → API.",
+  "Demandez un accès développeur pour votre application personnelle Mosaune. Copiez le jeton API Read Access Token ou la clé API v3.",
+  "Collez-le dans le champ ci-dessous. Un champ laissé vide conserve la clé déjà enregistrée."
+ ],
+ "links":[{"label":"Créer un compte TMDB","url":"https://www.themoviedb.org/signup"},{"label":"Ouvrir les paramètres API","url":"https://www.themoviedb.org/settings/api"}],
+ "fields":[{"id":"apiToken","label":"Jeton de lecture ou clé API","type":"secret","help":"Sans préfixe Bearer. La clé est conservée dans le catalogue local du serveur.","minLength":20,"maxLength":2048,"format":"token"}]
+}

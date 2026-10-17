@@ -1,0 +1,14 @@
+<script lang="ts">
+ import {onMount} from 'svelte';import {acquisition,type DownloadRequest} from './acquisition';import type {Work} from './types';
+ export let work:Work;export let season=-1;export let token:string;export let close:()=>void;
+ type Preview={title:string;connector:string;root:string;profile:string;library:string;existing:boolean;seasons:number[];confirmation:string};
+ let dialog:HTMLDialogElement;let preview:Preview|undefined;let busy=true;let sending=false;let result:DownloadRequest|undefined;let error='';let alive=true;
+ onMount(()=>{dialog.showModal();void load();return()=>{alive=false;};});
+ async function load(){busy=true;error='';try{const p=await acquisition<Preview>(token,'preview','POST',{workId:work.id,season});if(alive)preview=p;}catch(e){if(alive)error=e instanceof Error?e.message:'Vérification impossible.';}finally{if(alive)busy=false;}}
+ async function send(){if(!preview)return;busy=true;sending=true;error='';try{result=await acquisition<DownloadRequest>(token,'requests','POST',{workId:work.id,season,confirmation:preview.confirmation});}catch(e){error=e instanceof Error?e.message:'Envoi non confirmé. Consultez Demandes avant de réessayer.';preview=undefined;}finally{busy=false;sending=false;}}
+</script>
+<dialog bind:this={dialog} class="media-dialog request-dialog" onclose={close} oncancel={e=>{if(sending)e.preventDefault();}} aria-labelledby="download-title">
+ <span class="eyebrow">AJOUTER À VOTRE COLLECTION</span><h2 id="download-title">{work.metadata.title}</h2><p>{work.kind==='films'?'Ce film':season>=0?`Saison ${season}`:'La série entière, y compris ses épisodes spéciaux et ses futures saisons'}</p>
+ {#if result}<p class="notice" role="status">{result.message}</p><p>Retrouvez le suivi dans <strong>Demandes</strong>, dans le menu de gauche.</p>{:else if preview}<dl class="request-summary"><dt>Service</dt><dd>{preview.connector==='radarr'?'Radarr':'Sonarr'}</dd><dt>Qualité</dt><dd>{preview.profile}</dd><dt>Destination</dt><dd>{preview.root}</dd><dt>Bibliothèque Mosaune</dt><dd>{preview.library}</dd>{#if work.kind==='series'}<dt>Saisons concernées</dt><dd>{preview.seasons.map(n=>n===0?'Spéciaux':String(n)).join(', ')}</dd>{/if}</dl><p>{preview.existing?'Déjà présent dans le service : le dossier et le profil existants sont conservés.':'Cette œuvre sera ajoutée au service avec ces réglages.'} La confirmation active sa surveillance et recherche les fichiers manquants. Le téléchargement dépend des disponibilités et de vos règles dans le service.</p><button class="primary" disabled={busy} onclick={send}>{sending?'Envoi…':'Confirmer la demande'}</button>{:else if busy}<p role="status">Vérification du service et de la destination…</p>{/if}
+ {#if error}<p class="playback-error" role="alert">{error}</p>{/if}<button class="secondary" disabled={sending} onclick={()=>dialog.close()}>{result?'Fermer':'Annuler'}</button>
+</dialog>

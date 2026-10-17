@@ -1,0 +1,49 @@
+{
+  "platform": "windows/amd64",
+  "goVersion": "go1.27.2",
+  "engine": "wazero v1.12.0",
+  "moduleBytes": 4954343,
+  "moduleSHA256": "f7b6a698c3dd5d8993800b80994100494858bc66248a39ab77efd3899bcc5214",
+  "loadMs": 1147.307,
+  "firstCallMs": 7.782,
+  "warmMedianMs": 6.758,
+  "warmSamplesMs": [
+    6.758,
+    6.031,
+    7.979,
+    6.607,
+    6.543,
+    7.537,
+    3.544,
+    11.012,
+    6.765
+  ],
+  "linearMemoryLimitMiB": 64,
+  "Before": {
+    "allocatedBytes": 516600,
+    "runtimeReservedBytes": 7688192
+  },
+  "Loaded": {
+    "allocatedBytes": 9192056,
+    "runtimeReservedBytes": 81981440
+  },
+  "AfterCalls": {
+    "allocatedBytes": 9250488,
+    "runtimeReservedBytes": 82006016
+  },
+  "AfterClose": {
+    "allocatedBytes": 592792,
+    "runtimeReservedBytes": 82006016
+  },
+  "checks": [
+    "chargement inactif",
+    "recherche dans l’extension",
+    "fiche normalisée et identifiant opaque",
+    "désactivation",
+    "réactivation",
+    "retrait"
+  ],
+  "filmTitle": "Voyage sous les étoiles",
+  "observedPeakWorkingSetBytes": 109342720,
+  "measurementNote": "Single local Windows run; peak working set sampled every 25 ms; Go heap snapshots after GC; not Raspberry Pi measurements."
+}

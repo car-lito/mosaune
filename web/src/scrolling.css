@@ -1,0 +1,3 @@
+/* Keep native scrolling and keyboard/touch interaction, hide only its chrome. */
+html, body, * { scrollbar-width: none !important; scrollbar-gutter: auto !important; }
+*::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }

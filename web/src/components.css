@@ -1,0 +1,13 @@
+/* Host components consume the public theme contract, including settings. */
+:root{color-scheme:light}:root[data-theme="dark"]{color-scheme:dark}
+.app-shell{background:var(--m-app-background);color:var(--m-app-color);font-family:var(--m-app-font-family);font-weight:var(--m-app-font-weight)}
+.tile-status.local{color:var(--m-tile-status-local-color)}
+.tile-status{font-family:var(--m-tile-status-font-family)}
+.primary{font-family:var(--m-button-primary-font-family)}
+.secondary{font-family:var(--m-button-secondary-font-family)}
+.primary{border-radius:var(--m-button-primary-border-radius)}
+.secondary{border-radius:var(--m-button-secondary-border-radius)}
+.sidebar{font-family:var(--m-sidebar-font-family)}
+.page-heading h1{font-family:var(--m-page-heading-h1-font-family)}
+.season-cover>span{background:var(--m-season-cover-span-background)}
+.season-cover>span{color:var(--m-season-cover-span-color)}

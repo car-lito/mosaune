@@ -1,0 +1,18 @@
+node_modules/
+web/dist/
+build/
+data/
+media/
+.env
+*.private
+.env.*
+!.env.example
+*.db
+*.db-*
+*.log
+.DS_Store
+Thumbs.db
+
+# Notes de travail locales, jamais nécessaires pour construire le projet.
+/REPRISE.md
+/VALIDATION.md
