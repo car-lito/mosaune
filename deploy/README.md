@@ -76,3 +76,9 @@ La définition [Apps/Mosaune/docker-compose.yml](casaos/Apps/Mosaune/docker-comp
 GitHub teste d'abord les sources sur Windows et Linux. Il construit ensuite l'image amd64, puis arm64, et vérifie HTTPS, le contrôle de santé, la création d'un compte, la lecture partielle d'un média fictif, l'arrêt SIGTERM et la conservation du compte/catalogue après redémarrage. ARM64 est exécuté sous émulation : cela ne mesure pas les performances du Pi. La publication GHCR ne démarre qu'après réussite de ces étapes, sur la branche principale.
 
 Références : [Docker — constructions multiarchitectures](https://docs.docker.com/build/building/multi-platform/), [GitHub — publication d'images](https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images), [CasaOS — exemples de définitions](https://github.com/IceWhaleTech/CasaOS-AppStore/tree/main/Apps). Le magasin récent ZimaOS utilise un protocole différent ; cette préparation cible CasaOS 0.4.15.
+
+## Validation de la préversion 0.0.23
+
+Le 17 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-lito/mosaune/actions/runs/39049806714), tests Windows/Linux puis exécution des conteneurs amd64 et arm64 sous émulation pour ce dernier. HTTPS, refus d’origine étrangère, cookies sécurisés, lecture partielle d’un média fictif, arrêt propre et conservation du compte/catalogue après redémarrage sont vérifiés. Aucun test sur le NAS réel.
+
+Image publique : `ghcr.io/car-lito/mosaune:0.0.23-preview`. Empreinte de l’index des deux architectures : `sha256:cedacea3659104943b6baf1084ce3b5beb83f007404f493c1fb8cffe73df51b3`. Le catalogue CasaOS publié a été comparé au ZIP généré localement. Ces vérifications ne valident pas encore l’import dans l’interface CasaOS 0.4.15, les performances du Pi ni la migration des données Windows.
