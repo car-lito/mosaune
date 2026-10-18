@@ -128,7 +128,7 @@ func (p *tmdbProvider) activeSearch(ctx context.Context, secret string, q Metada
 		if e != nil || id <= 0 || id > 2147483647 {
 			return nil, errors.New("Identifiant TMDB invalide.")
 		}
-		candidates = append(candidates, MetadataCandidate{ID: item.ID, Title: item.Title, OriginalTitle: item.OriginalTitle, Year: item.Year, Overview: item.Overview})
+		candidates = append(candidates, MetadataCandidate{Presentation: item.Presentation, ID: item.ID, Title: item.Title, OriginalTitle: item.OriginalTitle, Year: item.Year, Overview: item.Overview})
 	}
 	return candidates, nil
 }

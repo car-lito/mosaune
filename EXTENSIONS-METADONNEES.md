@@ -1,3 +1,7 @@
+## Présentation dans la recherche — 0.0.25
+
+Le champ facultatif `presentation` traverse les fiches normalisées et les contrats du moteur. Le type affiché, les mots-clés et les proportions ne sont pas codés en dur dans le renderer. Voir le [contrat et l’exemple Jeu/Console](extension-kit/presentation/v1/README.md).
+
 ## Cycle de vie hôte — 0.0.24
 
 L’activation du fournisseur est indépendante du choix natif/Wasm. Le pilote TMDB expose `PUT /api/v1/metadata/providers/tmdb/state` (administrateur, corps `{ "enabled": false }`). La liste des fournisseurs expose `enabled`, distinct de `configured`.

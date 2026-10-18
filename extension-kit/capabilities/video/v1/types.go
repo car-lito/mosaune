@@ -5,6 +5,7 @@ package v1
 import (
 	"errors"
 	"math"
+	presentation "mosaune/extensionkit/presentation/v1"
 	"strings"
 )
 
@@ -36,26 +37,27 @@ type Trailer struct {
 	Thumbnail string `json:"thumbnail,omitempty"`
 }
 type Details struct {
-	Title        string        `json:"title"`
-	Series       string        `json:"series,omitempty"`
-	Season       int           `json:"season,omitempty"`
-	Episode      int           `json:"episode,omitempty"`
-	Year         int           `json:"year,omitempty"`
-	Overview     string        `json:"overview,omitempty"`
-	ArtworkRef   string        `json:"artworkRef,omitempty"`
-	Cast         []string      `json:"cast,omitempty"`
-	Genres       []string      `json:"genres,omitempty"`
-	Runtime      int           `json:"runtime,omitempty"`
-	Tagline      string        `json:"tagline,omitempty"`
-	Rating       float64       `json:"rating,omitempty"`
-	VoteCount    int           `json:"voteCount,omitempty"`
-	Status       string        `json:"status,omitempty"`
-	ReleaseDate  string        `json:"releaseDate,omitempty"`
-	Countries    []string      `json:"countries,omitempty"`
-	Languages    []string      `json:"languages,omitempty"`
-	Contributors []Contributor `json:"contributors,omitempty"`
-	Seasons      []SeasonInfo  `json:"seasons,omitempty"`
-	Trailers     []Trailer     `json:"trailers,omitempty"`
+	Presentation *presentation.Result `json:"presentation,omitempty"`
+	Title        string               `json:"title"`
+	Series       string               `json:"series,omitempty"`
+	Season       int                  `json:"season,omitempty"`
+	Episode      int                  `json:"episode,omitempty"`
+	Year         int                  `json:"year,omitempty"`
+	Overview     string               `json:"overview,omitempty"`
+	ArtworkRef   string               `json:"artworkRef,omitempty"`
+	Cast         []string             `json:"cast,omitempty"`
+	Genres       []string             `json:"genres,omitempty"`
+	Runtime      int                  `json:"runtime,omitempty"`
+	Tagline      string               `json:"tagline,omitempty"`
+	Rating       float64              `json:"rating,omitempty"`
+	VoteCount    int                  `json:"voteCount,omitempty"`
+	Status       string               `json:"status,omitempty"`
+	ReleaseDate  string               `json:"releaseDate,omitempty"`
+	Countries    []string             `json:"countries,omitempty"`
+	Languages    []string             `json:"languages,omitempty"`
+	Contributors []Contributor        `json:"contributors,omitempty"`
+	Seasons      []SeasonInfo         `json:"seasons,omitempty"`
+	Trailers     []Trailer            `json:"trailers,omitempty"`
 }
 
 func (s Selection) Validate() error {
@@ -65,6 +67,9 @@ func (s Selection) Validate() error {
 	return nil
 }
 func (d Details) Validate() error {
+	if err := d.Presentation.Validate(); err != nil {
+		return err
+	}
 	bad := errors.New("invalid video details")
 	if strings.TrimSpace(d.Title) == "" || len(d.Title) > 500 || len(d.Series) > 500 || len(d.Overview) > 8000 || len(d.ArtworkRef) > 512 || d.Year < 0 || d.Year > 3000 || d.Runtime < 0 || d.Runtime > 100000 || d.Season < 0 || d.Season > 10000 || d.Episode < 0 || d.Episode > 100000 || len(d.Tagline) > 500 || len(d.Status) > 200 || len(d.ReleaseDate) > 32 || math.IsNaN(d.Rating) || math.IsInf(d.Rating, 0) || d.Rating < 0 || d.Rating > 10 || d.VoteCount < 0 || d.VoteCount > 2147483647 {
 		return bad

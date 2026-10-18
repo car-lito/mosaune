@@ -1,6 +1,9 @@
 package main
 
-import "context"
+import (
+	"context"
+	presentation "mosaune/extensionkit/presentation/v1"
+)
 
 // MetadataProvider is the version 1, built-in provider contract. The host owns
 // credentials, persistence, matching policy and manual choices. A future plugin
@@ -38,11 +41,12 @@ type MetadataSelection struct {
 	Episode int
 }
 type MetadataCandidate struct {
-	ID            string `json:"id"`
-	Title         string `json:"title"`
-	OriginalTitle string `json:"originalTitle"`
-	Year          int    `json:"year"`
-	Overview      string `json:"overview"`
+	Presentation  *presentation.Result `json:"presentation,omitempty"`
+	ID            string               `json:"id"`
+	Title         string               `json:"title"`
+	OriginalTitle string               `json:"originalTitle"`
+	Year          int                  `json:"year"`
+	Overview      string               `json:"overview"`
 }
 type Contributor struct {
 	Image string `json:"image,omitempty"`
@@ -71,20 +75,21 @@ type SeasonInfo struct {
 	Episodes int    `json:"episodes"`
 }
 type Metadata struct {
-	DetailVersion int            `json:"detailVersion,omitempty"`
-	Seasons       []SeasonInfo   `json:"seasons,omitempty"`
-	Runtime       int            `json:"runtime,omitempty"`
-	ReleaseDate   string         `json:"releaseDate,omitempty"`
-	Tagline       string         `json:"tagline,omitempty"`
-	Rating        float64        `json:"rating,omitempty"`
-	VoteCount     int            `json:"voteCount,omitempty"`
-	Status        string         `json:"status,omitempty"`
-	Countries     []string       `json:"countries,omitempty"`
-	Languages     []string       `json:"languages,omitempty"`
-	Contributors  []Contributor  `json:"contributors,omitempty"`
-	Trailers      []Trailer      `json:"trailers,omitempty"`
-	Tracks        []CatalogTrack `json:"tracks,omitempty"`
-	Edition       string         `json:"edition,omitempty"`
+	Presentation  *presentation.Result `json:"presentation,omitempty"`
+	DetailVersion int                  `json:"detailVersion,omitempty"`
+	Seasons       []SeasonInfo         `json:"seasons,omitempty"`
+	Runtime       int                  `json:"runtime,omitempty"`
+	ReleaseDate   string               `json:"releaseDate,omitempty"`
+	Tagline       string               `json:"tagline,omitempty"`
+	Rating        float64              `json:"rating,omitempty"`
+	VoteCount     int                  `json:"voteCount,omitempty"`
+	Status        string               `json:"status,omitempty"`
+	Countries     []string             `json:"countries,omitempty"`
+	Languages     []string             `json:"languages,omitempty"`
+	Contributors  []Contributor        `json:"contributors,omitempty"`
+	Trailers      []Trailer            `json:"trailers,omitempty"`
+	Tracks        []CatalogTrack       `json:"tracks,omitempty"`
+	Edition       string               `json:"edition,omitempty"`
 
 	Title       string            `json:"title"`
 	Series      string            `json:"series,omitempty"`

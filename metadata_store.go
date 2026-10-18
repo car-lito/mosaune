@@ -180,6 +180,9 @@ func (c *catalog) mediaMetadata(ctx context.Context, id string) (media, error) {
 	return m, nil
 }
 func (c *catalog) saveMetadata(ctx context.Context, m media, md Metadata) error {
+	if err := md.Presentation.Validate(); err != nil {
+		return err
+	}
 	unlock, e := providerCommit(ctx)
 	if e != nil {
 		return e

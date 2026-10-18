@@ -71,6 +71,9 @@ func contentKind(kind string) bool { return videoKind(kind) || kind == "music" }
 func videoKind(kind string) bool   { return kind == "films" || kind == "series" }
 
 func (c *catalog) rememberWork(ctx context.Context, kind string, m Metadata, detailed bool) (string, error) {
+	if err := m.Presentation.Validate(); err != nil {
+		return "", err
+	}
 	if !contentKind(kind) || m.Provider == "" || m.ProviderID == "" || len(m.ProviderID) > 200 || m.Title == "" {
 		return "", errors.New("Œuvre invalide.")
 	}
@@ -105,7 +108,7 @@ func (c *catalog) rememberWork(ctx context.Context, kind string, m Metadata, det
 	defer tx.Rollback()
 	// Keep saved works indefinitely, cap transient catalog entries at 1000.
 	_, err = tx.ExecContext(ctx, `INSERT INTO works(id,kind,data,artwork_ref,detailed,touched) VALUES(?,?,?,?,?,?)
- ON CONFLICT(id) DO UPDATE SET data=CASE WHEN excluded.detailed=1 THEN excluded.data ELSE works.data END,
+ ON CONFLICT(id) DO UPDATE SET data=CASE WHEN excluded.detailed=1 THEN excluded.data WHEN json_type(excluded.data,'$.presentation')='object' THEN json_set(works.data,'$.presentation',json_extract(excluded.data,'$.presentation')) ELSE works.data END,
  artwork_ref=CASE WHEN excluded.artwork_ref<>'' THEN excluded.artwork_ref ELSE works.artwork_ref END,
  detailed=MAX(works.detailed,excluded.detailed),touched=excluded.touched`, id, kind, string(data), m.ArtworkRef, detailed, time.Now().UnixNano())
 	if err != nil {

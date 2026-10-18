@@ -4,6 +4,7 @@ package v1
 
 import (
 	"errors"
+	presentation "mosaune/extensionkit/presentation/v1"
 	"strings"
 )
 
@@ -20,11 +21,12 @@ type Selection struct {
 	ID string `json:"id"`
 }
 type Candidate struct {
-	OriginalTitle string `json:"originalTitle,omitempty"`
-	ID            string `json:"id"`
-	Title         string `json:"title"`
-	Year          int    `json:"year"`
-	Overview      string `json:"overview"`
+	Presentation  *presentation.Result `json:"presentation,omitempty"`
+	OriginalTitle string               `json:"originalTitle,omitempty"`
+	ID            string               `json:"id"`
+	Title         string               `json:"title"`
+	Year          int                  `json:"year"`
+	Overview      string               `json:"overview"`
 }
 type SearchResult struct {
 	Items []Candidate `json:"items"`
@@ -37,6 +39,9 @@ func (q Query) Validate() error {
 	return nil
 }
 func (c Candidate) Validate() error {
+	if err := c.Presentation.Validate(); err != nil {
+		return err
+	}
 	if strings.TrimSpace(c.ID) == "" || len(c.ID) > 160 || strings.TrimSpace(c.Title) == "" || len(c.Title) > 500 || len(c.OriginalTitle) > 500 || c.Year < 0 || c.Year > 3000 || len(c.Overview) > 16000 {
 		return errors.New("invalid metadata candidate")
 	}

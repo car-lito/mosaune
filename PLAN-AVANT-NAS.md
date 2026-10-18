@@ -13,6 +13,14 @@ Livré pour TMDB en 0.0.24 : état indépendant et persistant, annulation des op
 
 À la migration, TMDB reste actif comme il l’était effectivement auparavant : l’ancien interrupteur sélectionnait seulement le moteur. Désactivez-le une première fois avec le nouvel interrupteur pour couper ses accès. La désinstallation du paquet exécutable reste distincte de la suppression du fournisseur intégré, de sa clé et de ses données privées.
 
+## Présentation des résultats — 0.0.25
+
+- [x] D-SEARCH-01 — Aperçus adaptés au contenu et type affiché sous le titre ; renderer commun thémable.
+- [x] D-SEARCH-02 — Objet de présentation versionné, labels/mots-clés libres, proportions et cadrage validés ; transmission depuis les contrats de métadonnées jusqu’au catalogue et à la recherche.
+- [ ] D-SEARCH-03 — Nouvelles sources de recherche pour personnes, saisons et modules média supplémentaires ; ce contrat n’installe pas ces sources à lui seul.
+
+Guide : [Présentation v1](extension-kit/presentation/v1/README.md).
+
 ## Avancement 0.0.20 — catalogue et dépôts publics
 
 - [x] C-STORE-01 — Index versionné séparé des formats de paquets, cartes filtrables, choix de version et installation après aperçu.

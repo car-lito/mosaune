@@ -1,6 +1,7 @@
 import { groupMedia, type Group } from './collection.ts';
 import type { Entry, Work, Kind, CatalogTrack } from './types.ts';
-export type Card = {key:string;title:string;subtitle:string;kind:Kind;image?:string;fallbackImage?:string;local:boolean;work?:Work;group?:Group;entry?:Entry;position?:number;duration?:number};
+import type {ResultPresentation} from './search-presentation.ts';
+export type Card = {presentation?:ResultPresentation;key:string;title:string;subtitle:string;kind:Kind;image?:string;fallbackImage?:string;local:boolean;work?:Work;group?:Group;entry?:Entry;position?:number;duration?:number};
 export const workCard=(w:Work):Card=>({key:w.id,title:w.metadata.title,subtitle:[w.metadata.artist,w.metadata.year].filter(Boolean).join(' · '),kind:w.kind,image:w.posterUrl||(w.poster?`/api/v1/discovery/works/${w.id}/poster`:undefined),local:w.localIds.length>0,work:w});
 export const groupCard=(g:Group):Card=>({key:g.key,title:g.title,subtitle:g.subtitle,kind:g.kind,image:g.entries.find(e=>e.posterUrl)?.posterUrl||(g.entries.find(e=>e.workId)?.workId?`/api/v1/discovery/works/${g.entries.find(e=>e.workId)!.workId}/poster`:g.imageId?`/api/v1/artwork/${g.imageId}`:undefined),fallbackImage:g.imageId?`/api/v1/artwork/${g.imageId}`:undefined,local:true,group:g});
 export function recentGroups(entries:Entry[],kind:Kind){return groupMedia(entries.filter(e=>e.kind===kind)).sort((a,b)=>Math.max(...b.entries.map(e=>e.addedAt??0))-Math.max(...a.entries.map(e=>e.addedAt??0))).map(groupCard);}

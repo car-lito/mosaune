@@ -1,5 +1,7 @@
+import type {ResultPresentation} from './search-presentation';
 export type Kind = 'films' | 'series' | 'music';
 export type Metadata = {
+  presentation?:ResultPresentation;
   runtime?: number; releaseDate?: string; tagline?: string; rating?: number; voteCount?: number; status?: string; countries?: string[]; languages?: string[]; contributors?: Contributor[]; seasons?: {number:number;name:string;image?:string;episodes:number}[]; trailers?: {name:string;url:string;thumbnail?:string;language?:string}[]; tracks?: CatalogTrack[]; edition?: string;
   title: string; series?: string; season?: number; episode?: number; episodeEnd?: number;
   artist?: string; album?: string; albumArtist?: string; track?: number; disc?: number;

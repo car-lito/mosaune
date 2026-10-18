@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	presentation "mosaune/extensionkit/presentation/v1"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -104,9 +105,12 @@ type mbRelease struct {
 	Date           string
 	Country        string
 	Disambiguation string
-	Group          struct{ ID string } `json:"release-group"`
-	Credits        []mbCredit          `json:"artist-credit"`
-	Media          []struct {
+	Group          struct {
+		ID          string
+		PrimaryType string `json:"primary-type"`
+	} `json:"release-group"`
+	Credits []mbCredit `json:"artist-credit"`
+	Media   []struct {
 		Position int
 		Format   string
 		Tracks   []struct {
@@ -157,7 +161,11 @@ func mbMetadata(r mbRelease) Metadata {
 	if mbID.MatchString(r.Group.ID) {
 		ref += "/" + r.Group.ID
 	}
-	return Metadata{Title: truncate(r.Title, 500), Album: truncate(r.Title, 500), Artist: mbArtist(r.Credits), AlbumArtist: mbArtist(r.Credits), Year: year, ReleaseDate: r.Date, Provider: "musicbrainz", ProviderID: r.ID, MatchState: "matched", Contributors: mbPeople(r.Credits), ArtworkRef: ref, Edition: truncate(strings.Trim(r.Country+" · "+r.Date+" · "+r.Disambiguation, " ·"), 400)}
+	label := map[string]string{"Album": "Album", "Single": "Single", "EP": "EP", "Broadcast": "Émission"}[r.Group.PrimaryType]
+	if label == "" {
+		label = "Sortie musicale"
+	}
+	return Metadata{Presentation: &presentation.Result{Version: 1, Label: label, Preview: &presentation.Preview{AspectRatio: 1, Shape: "rectangle", Fit: "cover"}}, Title: truncate(r.Title, 500), Album: truncate(r.Title, 500), Artist: mbArtist(r.Credits), AlbumArtist: mbArtist(r.Credits), Year: year, ReleaseDate: r.Date, Provider: "musicbrainz", ProviderID: r.ID, MatchState: "matched", Contributors: mbPeople(r.Credits), ArtworkRef: ref, Edition: truncate(strings.Trim(r.Country+" · "+r.Date+" · "+r.Disambiguation, " ·"), 400)}
 }
 func mbQuote(s string) string {
 	return `"` + strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(s) + `"`

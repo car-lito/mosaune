@@ -1,3 +1,10 @@
+## 0.0.25 — 18 octobre 2026
+
+- Recherche : pochettes carrées pour la musique, affiches verticales pour films et séries, type visible sous le titre.
+- Distinction Album/Single/EP selon les métadonnées MusicBrainz ; repli « Sortie musicale » pour un type non renseigné. Les morceaux restent distingués des albums.
+- Contrat déclaratif partagé pour les extensions : libellé libre, mots-clés, ratio, forme et cadrage de l’aperçu. Validation à la frontière du module et avant stockage, renderer commun respectant le thème, exemple Jeu/Console documenté.
+- Pas de nouveau module Jeux ni de recherche globale de personnes/saisons dans cette version ; ces futurs résultats pourront réutiliser le contrat.
+
 ## 0.0.24 — 18 octobre 2026
 
 - Interrupteur TMDB global, distinct du moteur natif ou extension ; état conservé après redémarrage et en mode secours.

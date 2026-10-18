@@ -5745,7 +5745,7 @@
       "type": "radius",
       "uses": [
         {
-          "selector": ".search-result img,.search-icon",
+          "selector": ".search-preview",
           "property": "border-radius",
           "source": "experience.css"
         }
@@ -5755,7 +5755,7 @@
       "type": "color",
       "uses": [
         {
-          "selector": ".search-icon",
+          "selector": ".search-preview",
           "property": "background",
           "source": "experience.css"
         }
