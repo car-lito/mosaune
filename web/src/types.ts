@@ -9,5 +9,5 @@ export type Metadata = {
 export type Contributor = { id: string; name: string; role?: string; image?:string };
 export type CatalogTrack = {id:string; title:string; disc:number; number:number; duration:number; artists?:Contributor[]};
 export type Entry = { posterUrl?:string; addedAt?:number; lastPlayed?:number; workId?:string; id: string; name: string; filename: string; kind: Kind; url: string; size: number; libraryId?: string; position?: number; duration?: number; completed?: boolean; revision?: string; metadata?: Metadata };
-export type Provider = { id: string; name: string; contractVersion: number; kinds: Kind[]; configured: boolean; requiresCredential: boolean; discovery?: boolean; attribution: string; website: string };
+export type Provider = { id: string; name: string; contractVersion: number; kinds: Kind[]; configured: boolean; enabled: boolean; requiresCredential: boolean; discovery?: boolean; attribution: string; website: string };
 export type Work = { posterUrl?:string; id: string; kind: Kind; metadata: Metadata; favorite: boolean; watchlist: boolean; localIds: string[]; watched: boolean; poster: boolean };

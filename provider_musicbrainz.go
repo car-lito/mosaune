@@ -84,7 +84,7 @@ func (p *musicBrainzProvider) get(ctx context.Context, endpoint string, params u
 		return errors.New("Réponse musicale illisible.")
 	}
 	if p.db != nil {
-		_, _ = p.db.ExecContext(ctx, `DELETE FROM provider_cache WHERE expires<?`, time.Now().Unix())
+		_, _ = p.db.ExecContext(ctx, `DELETE FROM provider_cache WHERE expires<? AND NOT (key LIKE 'visual-image:v2:%' AND length(body)>0)`, time.Now().Unix())
 		_, _ = p.db.ExecContext(ctx, `INSERT OR REPLACE INTO provider_cache(provider,key,body,expires) SELECT 'musicbrainz',?,?,? WHERE (SELECT COALESCE(SUM(length(body)),0) FROM provider_cache)+?<16777216`, key, data, time.Now().Add(24*time.Hour).Unix(), len(data))
 	}
 	return nil

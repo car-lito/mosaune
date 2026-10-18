@@ -14,6 +14,7 @@ type MetadataProvider interface {
 }
 
 type ProviderInfo struct {
+	Enabled            bool     `json:"enabled"`
 	Discovery          bool     `json:"discovery"`
 	ID                 string   `json:"id"`
 	Name               string   `json:"name"`

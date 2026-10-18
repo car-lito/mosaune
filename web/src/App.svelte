@@ -70,6 +70,7 @@
   $: sectionTitle = view === 'home' ? 'Votre espace, à votre rythme.' : labels[view];
 
   async function refreshIdentified(){await refreshLibrary();if(page?.type==='content'&&inspected){const group=groupMedia(entries).find(g=>g.entries.some(e=>e.id===inspected?.id));if(group){page={type:'content',card:groupCard(group)};pageKey++;}}}
+  async function refreshProviders(){try{const r=await fetch('/api/v1/metadata/providers');if(!r.ok)return;const next:Provider[]=await r.json();const stamp=(list:Provider[])=>list.map(p=>p.id+':'+p.enabled+':'+p.configured).join('|');if(stamp(next)!==stamp(providers)){providers=next;pageKey++;}}catch{/* Existing state remains usable offline. */}}
   async function connect() {
     loading = true;
     connectionError = false;
@@ -91,8 +92,8 @@
     catch { musicMessage = 'Ce navigateur ne permet pas de conserver la file d’écoute.'; }
     void connect();
     void refreshAppearance();
-    const extensionTimer=setInterval(()=>{if(!document.hidden)void refreshAppearance()},30000);
-    const extensionRefresh=()=>void refreshAppearance();
+    const extensionTimer=setInterval(()=>{if(!document.hidden){void refreshAppearance();void refreshProviders();}},30000);
+    const extensionRefresh=()=>{void refreshAppearance();void refreshProviders();};
     window.addEventListener('mosaune:extensions-changed',extensionRefresh);
     window.addEventListener('focus',extensionRefresh);
     const arrivalTimer=setInterval(()=>void checkArrivals(),30000);
@@ -212,7 +213,7 @@
  <aside class="sidebar"><a class="brand" href="#accueil" onclick={()=>navigate('home')} aria-label="Mosaune, accueil"><span class="brand-mark"><span></span><span></span><span></span></span><span>Mosaune<small>LE GOÛT DES HISTOIRES</small></span></a>
  <div class="nav-caption">VOTRE ESPACE</div><nav aria-label="Navigation principale"><button class:current={view==='home'} onclick={()=>navigate('home')}><Icon name="home"/>Accueil</button>{#each kinds as kind}<button class:current={view===kind} onclick={()=>navigate(kind)}><Icon name={kind}/>{labels[kind]}</button>{/each}</nav>
  <div class="nav-caption secondary-caption">VOS ENVIES</div><nav aria-label="Vos listes"><button class:current={view==='watchlist'} onclick={()=>navigate('watchlist')}><Icon name="bookmark"/>Ma liste</button><button class:current={view==='favorites'} onclick={()=>navigate('favorites')}><Icon name="heart"/>Favoris</button>{#if kinds.includes('music')}<button class:current={view==='playlists'} onclick={()=>navigate('playlists')}><Icon name="queue"/>Playlists</button>{/if}{#if kinds.includes('films')||kinds.includes('series')}<button class:current={view==='requests'} onclick={()=>navigate('requests')}><Icon name="server"/>Demandes</button>{/if}</nav>
- <div class="sidebar-bottom"><div class="account-identity"><strong>{user.name}</strong><button class="text-action" onclick={onlogout}>Se déconnecter</button></div><button class="settings-nav" class:current={view==='settings'} onclick={()=>navigate('settings')}><Icon name="settings"/>Réglages</button><div class="server-card"><Icon name="server"/><div><strong>Votre collection, chez vous</strong><span>{connectionError?'Serveur inaccessible':loading?'Connexion…':'Connecté à cet ordinateur'}</span></div></div><div class="version">PROJET MOSAUNE <span>v{status?.version??'0.0.23'}</span></div></div></aside>
+ <div class="sidebar-bottom"><div class="account-identity"><strong>{user.name}</strong><button class="text-action" onclick={onlogout}>Se déconnecter</button></div><button class="settings-nav" class:current={view==='settings'} onclick={()=>navigate('settings')}><Icon name="settings"/>Réglages</button><div class="server-card"><Icon name="server"/><div><strong>Votre collection, chez vous</strong><span>{connectionError?'Serveur inaccessible':loading?'Connexion…':'Connecté à cet ordinateur'}</span></div></div><div class="version">PROJET MOSAUNE <span>v{status?.version??'0.0.24'}</span></div></div></aside>
  <main id="main" class:settings-main={view==='settings'}><header class="topbar experience-topbar"><div class="page-navigation">{#if page}<button class="icon-button" aria-label="Revenir à la page précédente" onclick={back}>←</button>{/if}<span>{labels[view]}</span></div>{#if status}<SearchBox {entries} {providers} {kinds} context={view} token={status.token} open={openCard}/>{/if}{#if kinds.includes('music')}<button class="queue-toggle" aria-label="Ouvrir la file d’écoute" aria-expanded={queueOpen} onclick={()=>queueOpen=!queueOpen}><Icon name="queue"/><span>{musicQueue.items.length}</span></button>{/if}</header>
  {#if connectionError}<div class="connection-warning" role="alert">Le serveur ne répond pas. <button onclick={connect}>Réessayer</button></div>{/if}
  {#if libraryError}<p class="playback-error" role="alert">{libraryError}</p>{/if}

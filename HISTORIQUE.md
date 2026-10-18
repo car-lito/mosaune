@@ -1,3 +1,11 @@
+## 0.0.24 — 18 octobre 2026
+
+- Interrupteur TMDB global, distinct du moteur natif ou extension ; état conservé après redémarrage et en mode secours.
+- Arrêt des nouvelles recherches, suggestions, fiches, images et identifications automatiques ; annulation des opérations et rejet de leurs résultats tardifs.
+- Catalogue, affiches enregistrées, corrections, clé et choix du moteur conservés ; MusicBrainz indépendant.
+- Recherche et accueil actualisés après le changement, avec explication de l’état désactivé.
+- Migration du catalogue vers le format 14 avec sauvegarde préalable. L’ancienne préférence de moteur ne désactive pas automatiquement le fournisseur.
+
 # Notes historiques de développement
 
 Ces notes décrivent les étapes précédentes. Pour compiler la version actuelle, suivre DEVELOPPEMENT.md ; pour le périmètre actuel, lire README.md. Les mentions de version, de statut de publication et de chemins ci-dessous sont historiques.

@@ -17,6 +17,7 @@ import (
 )
 
 type tmdbProvider struct {
+	state     providerLifecycle
 	extension tmdbExtension
 	db        *sql.DB
 	client    *http.Client
@@ -35,6 +36,9 @@ func (p *tmdbProvider) Info() ProviderInfo {
 func (p *tmdbProvider) wait(ctx context.Context) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	if ctx.Err() != nil {
+		return context.Cause(ctx)
+	}
 	if delay := time.Until(p.next); delay > 0 {
 		timer := time.NewTimer(delay)
 		defer timer.Stop()
@@ -48,6 +52,11 @@ func (p *tmdbProvider) wait(ctx context.Context) error {
 	return nil
 }
 func (p *tmdbProvider) get(ctx context.Context, secret, endpoint string, params url.Values, out any) error {
+	ctx, done, e := beginProvider(ctx, p)
+	if e != nil {
+		return e
+	}
+	defer done()
 	if secret == "" {
 		return errors.New("Configurez TMDB pour récupérer les fiches en ligne.")
 	}
@@ -98,13 +107,21 @@ func (p *tmdbProvider) get(ctx context.Context, secret, endpoint string, params 
 	if err = json.Unmarshal(data, out); err != nil {
 		return errors.New("Réponse TMDB illisible.")
 	}
+	if cause := context.Cause(ctx); cause != nil {
+		return cause
+	}
 	if p.db != nil {
+		unlock, e := providerCommit(ctx)
+		if e != nil {
+			return e
+		}
+		defer unlock()
 		// Public metadata only: credentials are never part of the cache key or body.
 		ttl := 7 * 24 * time.Hour
 		if endpoint == "/movie/now_playing" || endpoint == "/movie/upcoming" || endpoint == "/tv/popular" {
 			ttl = 6 * time.Hour
 		}
-		_, _ = p.db.ExecContext(ctx, `DELETE FROM provider_cache WHERE expires<?`, time.Now().Unix())
+		_, _ = p.db.ExecContext(ctx, `DELETE FROM provider_cache WHERE expires<? AND NOT (key LIKE 'visual-image:v2:%' AND length(body)>0)`, time.Now().Unix())
 		_, _ = p.db.ExecContext(ctx, `INSERT OR REPLACE INTO provider_cache(provider,key,body,expires) SELECT 'tmdb',?,?,? WHERE (SELECT COALESCE(SUM(length(body)),0) FROM provider_cache)+? < 16777216`, key, data, time.Now().Add(ttl).Unix(), len(data))
 	}
 	return nil
@@ -286,7 +303,7 @@ func (p *tmdbProvider) detailsNative(ctx context.Context, secret string, s Metad
 
 var artworkPath = regexp.MustCompile(`^/[A-Za-z0-9_-]+\.(?:jpg|png)$`)
 
-func (p *tmdbProvider) Discover(ctx context.Context, secret string, q DiscoveryQuery) (DiscoveryPage, error) {
+func (p *tmdbProvider) activeDiscover(ctx context.Context, secret string, q DiscoveryQuery) (DiscoveryPage, error) {
 	page := DiscoveryPage{Items: []Metadata{}, Page: q.Page}
 	if !videoKind(q.Kind) || q.Page < 1 || q.Page > 50 {
 		return page, errors.New("Recherche invalide.")
@@ -322,7 +339,7 @@ func (p *tmdbProvider) Discover(ctx context.Context, secret string, q DiscoveryQ
 	return page, nil
 }
 
-func (p *tmdbProvider) Artwork(ctx context.Context, _ string, ref string) ([]byte, error) {
+func (p *tmdbProvider) activeArtwork(ctx context.Context, _ string, ref string) ([]byte, error) {
 	if strings.HasPrefix(ref, "yt:") {
 		key := strings.TrimPrefix(ref, "yt:")
 		if !youtubeKey.MatchString(key) {

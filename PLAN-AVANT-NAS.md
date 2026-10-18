@@ -1,15 +1,17 @@
-État au 17 octobre 2026 : catalogue officiel public, intégration et dédoublonnage 0.0.22 livrés. Sources du serveur publiées sur https://github.com/car-lito/mosaune ; vérifications Windows/Linux et construction ARM64 automatisées. 0.0.23 : HTTPS direct et arrêt SIGTERM validés, images Docker amd64/arm64 publiées et téléchargements anonymes vérifiés. Catalogue CasaOS 0.4.15 préparé ; import réel encore à tester. Aucun déploiement NAS.
+État au 18 octobre 2026 : catalogue officiel public, intégration et dédoublonnage 0.0.22 livrés. Sources du serveur publiées sur https://github.com/car-lito/mosaune ; vérifications Windows/Linux et construction ARM64 automatisées. 0.0.23 : HTTPS direct et arrêt SIGTERM validés, images Docker amd64/arm64 publiées et téléchargements anonymes vérifiés. Catalogue CasaOS 0.4.15 préparé ; import réel encore à tester. Aucun déploiement NAS.
 
 # Mosaune — comptes, personnalisation et extensions avant le NAS
 
-## Obligatoire avant le NAS : désactivation réelle des fournisseurs
+## Désactivation réelle des fournisseurs — pilote TMDB 0.0.24
 
-- [ ] C-LIFECYCLE-01 — Distinguer l’activation du fournisseur du choix de son moteur (intégré ou extension). « Désactivé » doit arrêter le fournisseur, sans retour silencieux au moteur intégré.
-- [ ] Bloquer tous ses nouveaux accès réseau : recherche, découverte, fiches, images, enrichissement automatique et tâches de fond ; annuler les traitements en cours lorsque possible et ignorer leurs réponses tardives.
-- [ ] Conserver les métadonnées communes déjà acquises, les affiches conservées localement, les corrections et les préférences. Ne pas affecter les autres fournisseurs actifs, par exemple MusicBrainz lorsque TMDB est arrêté.
-- [ ] Expliquer l’état dans l’interface et tester l’absence de nouveaux appels, y compris après redémarrage et lors d’une recherche déjà en cours.
+- [x] C-LIFECYCLE-01 — Distinguer l’activation du fournisseur du choix de son moteur (intégré ou extension). « Désactivé » doit arrêter le fournisseur, sans retour silencieux au moteur intégré.
+- [x] Bloquer tous ses nouveaux accès réseau : recherche, découverte, fiches, images, enrichissement automatique et tâches de fond ; annuler les traitements en cours lorsque possible et ignorer leurs réponses tardives.
+- [x] Conserver les métadonnées communes déjà acquises, les affiches conservées localement, les corrections et les préférences. Ne pas affecter les autres fournisseurs actifs, par exemple MusicBrainz lorsque TMDB est arrêté.
+- [x] Expliquer l’état dans l’interface et tester l’absence de nouveaux appels, y compris après redémarrage et lors d’une recherche déjà en cours.
 
-Constat 0.0.22 : l’interrupteur TMDB désactive actuellement son moteur d’extension et réactive le fournisseur intégré. Ce chantier n’est donc pas terminé, même si le cycle de vie du paquet exécutable fonctionne.
+Livré pour TMDB en 0.0.24 : état indépendant et persistant, annulation des opérations natives/Wasm, protection contre les réponses tardives et conservation du catalogue. Contrat hôte facultatif réutilisable par les futurs fournisseurs ; MusicBrainz reste actif et n’a pas encore son propre interrupteur. Guide : [ESSAYER-TMDB-024.md](ESSAYER-TMDB-024.md).
+
+À la migration, TMDB reste actif comme il l’était effectivement auparavant : l’ancien interrupteur sélectionnait seulement le moteur. Désactivez-le une première fois avec le nouvel interrupteur pour couper ses accès. La désinstallation du paquet exécutable reste distincte de la suppression du fournisseur intégré, de sa clé et de ses données privées.
 
 ## Avancement 0.0.20 — catalogue et dépôts publics
 

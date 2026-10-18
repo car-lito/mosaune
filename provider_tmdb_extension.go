@@ -39,10 +39,11 @@ func migrateProviderRuntime(db *sql.DB) error {
 	return err
 }
 func (p *tmdbProvider) extensionStatus() map[string]bool {
+	active := providerEnabled(p)
 	p.extension.mu.Lock()
 	defer p.extension.mu.Unlock()
 	blocked := p.extension.blocked != nil && p.extension.blocked()
-	return map[string]bool{"enabled": p.extension.enabled, "effective": p.extension.enabled && !blocked, "loaded": p.extension.engine != nil, "safeMode": blocked}
+	return map[string]bool{"enabled": p.extension.enabled, "providerEnabled": active, "effective": active && p.extension.enabled && !blocked, "loaded": p.extension.engine != nil, "safeMode": blocked}
 }
 func (p *tmdbProvider) setExtension(ctx context.Context, enabled bool) error {
 	p.extension.mu.Lock()
@@ -71,7 +72,7 @@ func (p *tmdbProvider) closeExtension() {
 		p.extension.engine = nil
 	}
 }
-func (p *tmdbProvider) Search(ctx context.Context, secret string, q MetadataQuery) ([]MetadataCandidate, error) {
+func (p *tmdbProvider) activeSearch(ctx context.Context, secret string, q MetadataQuery) ([]MetadataCandidate, error) {
 	p.extension.mu.Lock()
 	enabled := p.extension.enabled && (p.extension.blocked == nil || !p.extension.blocked())
 	p.extension.mu.Unlock()

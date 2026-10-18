@@ -14,7 +14,7 @@
   let busy=false;
   let message='';
   let results: {id:string;title:string;year:number;overview:string}[]=[];
-  $: compatible=providers.filter(p=>p.kinds.includes(entry.kind));
+  $: compatible=providers.filter(p=>p.enabled&&p.kinds.includes(entry.kind));
   $: if (!compatible.some(p=>p.id===provider)) provider=compatible[0]?.id ?? '';
   $: configured=compatible.find(p=>p.id===provider)?.configured;
   $: m=entry.metadata;

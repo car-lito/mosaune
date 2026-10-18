@@ -202,7 +202,7 @@ func TestProviderPackageMigrationBackup(t *testing.T) {
 	var v int
 	_ = c.db.QueryRow(`PRAGMA user_version`).Scan(&v)
 	backups, _ := filepath.Glob(filepath.Join(dir, "mosaune-before-extensions-*.db"))
-	if v != 13 || len(backups) != 1 {
+	if v != 14 || len(backups) != 1 {
 		t.Fatal(v, backups)
 	}
 	w := httptest.NewRecorder()

@@ -13,12 +13,15 @@
  $: trackResults=query.trim()&&scope.includes('music')?entries.filter(e=>e.kind==='music'&&(e.metadata?.title||e.name).toLocaleLowerCase('fr').includes(query.toLocaleLowerCase('fr').trim())).slice(0,4).map<Card>(e=>({key:'track:'+e.id,title:e.metadata?.title||e.name,subtitle:`Morceau · ${e.metadata?.artist||''}`,kind:e.kind,local:true,entry:e,image:e.metadata?.imageId?`/api/v1/artwork/${e.metadata.imageId}`:undefined})):[];
  $: local=[...groupResults,...trackResults];
  $: results=[...local,...remote.filter(w=>!local.some(c=>c.group?.entries.some(e=>e.workId===w.id||(e.metadata?.provider===w.metadata.provider&&e.metadata?.providerId===w.metadata.providerId&&e.kind===w.kind)))).slice(0,12).map(workCard)];
+ $: providerStamp=providers.map(p=>p.id+':'+p.enabled+':'+p.configured).join('|');
+ let previousProviders='';
+ $: if(providerStamp!==previousProviders){previousProviders=providerStamp;close();remote=[];warning='';}
  let previousContext=context;
  $: if(context!==previousContext){previousContext=context;close();query='';remote=[];}
  function close(){expanded=false;activeIndex=-1;serial++;abort?.abort();clearTimeout(timer);searching=false;}
  function update(){expanded=true;activeIndex=-1;remote=[];warning='';clearTimeout(timer);abort?.abort();const id=++serial;searching=false;if(query.trim().length<2)return;timer=setTimeout(()=>void search(id),400);}
- async function search(id:number){abort=new AbortController();searching=true;const term=query.trim();const sources=providers.filter(p=>p.discovery&&p.configured);try{
-  const batches=await Promise.all(scope.map(async kind=>{const p=sources.find(p=>p.kinds.includes(kind));if(!p){if(kind!=='music')return {items:[],error:'Configurez TMDB dans Réglages pour les résultats en ligne.'};return {items:[],error:''};}try{const r=await fetch('/api/v1/discovery/browse',{method:'POST',headers:{'Content-Type':'application/json','X-Mosaune-Token':token},body:JSON.stringify({provider:p.id,kind,query:term,page:1}),signal:abort?.signal});const data=await r.json();return r.ok?{items:data.items,error:''}:{items:[],error:data.error};}catch{return {items:[],error:'La recherche en ligne est momentanément indisponible.'};}}));
+ async function search(id:number){abort=new AbortController();searching=true;const term=query.trim();const sources=providers.filter(p=>p.discovery&&p.enabled&&p.configured);try{
+  const batches=await Promise.all(scope.map(async kind=>{const p=sources.find(p=>p.kinds.includes(kind));if(!p){if(kind!=='music')return {items:[],error:providers.some(p=>p.id==='tmdb'&&!p.enabled)?'TMDB est désactivé. La recherche dans votre collection reste disponible.':'Configurez TMDB dans Réglages pour les résultats en ligne.'};return {items:[],error:''};}try{const r=await fetch('/api/v1/discovery/browse',{method:'POST',headers:{'Content-Type':'application/json','X-Mosaune-Token':token},body:JSON.stringify({provider:p.id,kind,query:term,page:1}),signal:abort?.signal});const data=await r.json();return r.ok?{items:data.items,error:''}:{items:[],error:data.error};}catch{return {items:[],error:'La recherche en ligne est momentanément indisponible.'};}}));
   if(id===serial){remote=batches.flatMap(b=>b.items.slice(0,scope.length===1?12:4));warning=[...new Set(batches.map(b=>b.error).filter(Boolean))].join(' ');}
  }finally{if(id===serial)searching=false;}}
  function choose(card:Card){close();query='';remote=[];open(card);}

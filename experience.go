@@ -120,6 +120,12 @@ func experienceRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 		if input.Kind == "music" {
 			selector = input.Artist
 		}
+		ctx, done, e := beginProvider(ctx, p)
+		if e != nil {
+			problem(w, 409, e.Error())
+			return
+		}
+		defer done()
 		page, err := sp.Shelf(ctx, c.credential(ctx, p.Info().ID), input.Shelf, selector)
 		if err != nil {
 			problem(w, 502, err.Error())
@@ -161,6 +167,12 @@ func experienceRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 		}
 		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
 		defer cancel()
+		ctx, done, e := beginProvider(ctx, p)
+		if e != nil {
+			problem(w, 409, e.Error())
+			return
+		}
+		defer done()
 		profile, err := pp.Profile(ctx, c.credential(ctx, p.Info().ID), r.PathValue("id"), page)
 		if err != nil {
 			problem(w, 502, err.Error())

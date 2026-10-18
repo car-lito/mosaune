@@ -26,7 +26,7 @@ func migrateMetadata(db *sql.DB) error {
 	if err := db.QueryRow(`PRAGMA user_version`).Scan(&version); err != nil {
 		return err
 	}
-	if version > 13 {
+	if version > 14 {
 		return errors.New("Ce catalogue appartient à une version plus récente de Mosaune.")
 	}
 	if version >= 2 {
@@ -158,6 +158,7 @@ func (c *catalog) providerInfo(ctx context.Context) []ProviderInfo {
 	infos := []ProviderInfo{}
 	for _, p := range c.providers {
 		info := p.Info()
+		info.Enabled = providerEnabled(p)
 		_, info.Discovery = p.(DiscoveryProvider)
 		info.Configured = !info.RequiresCredential || c.credential(ctx, info.ID) != ""
 		infos = append(infos, info)
@@ -179,6 +180,11 @@ func (c *catalog) mediaMetadata(ctx context.Context, id string) (media, error) {
 	return m, nil
 }
 func (c *catalog) saveMetadata(ctx context.Context, m media, md Metadata) error {
+	unlock, e := providerCommit(ctx)
+	if e != nil {
+		return e
+	}
+	defer unlock()
 	data, err := json.Marshal(md)
 	if err != nil {
 		return err

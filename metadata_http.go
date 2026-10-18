@@ -19,6 +19,11 @@ func (c *catalog) provider(id string) MetadataProvider {
 	return nil
 }
 func (c *catalog) applyProvider(ctx context.Context, p MetadataProvider, secret string, m media, id string, manual bool) error {
+	ctx, done, e := beginProvider(ctx, p)
+	if e != nil {
+		return e
+	}
+	defer done()
 	if m.Metadata.EpisodeEnd > m.Metadata.Episode {
 		return errors.New("Cet épisode multiple garde sa fiche locale pour le moment.")
 	}
@@ -30,7 +35,12 @@ func (c *catalog) applyProvider(ctx context.Context, p MetadataProvider, secret 
 	if md.ArtworkRef != "" {
 		data, imageErr := p.Artwork(ctx, secret, md.ArtworkRef)
 		if imageErr == nil {
+			unlock, e := providerCommit(ctx)
+			if e != nil {
+				return e
+			}
 			md.ImageID, err = storeArtwork(ctx, c.db, data)
+			unlock()
 			if err != nil {
 				return err
 			}
@@ -41,6 +51,7 @@ func (c *catalog) applyProvider(ctx context.Context, p MetadataProvider, secret 
 
 func metadataRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 	tmdbExtensionRoutes(mux, c)
+	providerStateRoutes(mux, c)
 	metadataQueueRoutes(mux, c, allowed)
 	mux.HandleFunc("GET /api/v1/metadata/providers", func(w http.ResponseWriter, r *http.Request) { sendJSON(w, 200, c.providerInfo(r.Context())) })
 	mux.HandleFunc("PUT /api/v1/metadata/providers/{provider}", func(w http.ResponseWriter, r *http.Request) {

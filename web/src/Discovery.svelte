@@ -28,7 +28,7 @@
   let alive = true;
   let searchSpec: { provider: string; kind: string; query: string; seed: string } | null = null;
   const controller = new AbortController();
-  $: compatible = providers.filter(p => p.discovery && p.kinds.includes(kind as Kind));
+  $: compatible = providers.filter(p => p.enabled && p.discovery && p.kinds.includes(kind as Kind));
   $: if (!compatible.some(p => p.id === provider)) provider = compatible[0]?.id ?? '';
   $: configured = compatible.find(p => p.id === provider)?.configured;
   $: seeds = library.filter(w => w.kind === kind && w.metadata.provider === provider).sort((a,b) => Number(b.favorite) - Number(a.favorite) || Number(b.watched) - Number(a.watched));
@@ -43,7 +43,7 @@
       if (!alive) return;
       library = data;
       if (focusMedia) selected = library.find(w => w.localIds.includes(focusMedia)) ?? null;
-      const first = [...library].sort((a,b) => Number(b.favorite) - Number(a.favorite) || Number(b.watched) - Number(a.watched)).find(w => providers.some(p => p.id === w.metadata.provider && p.discovery));
+      const first = [...library].sort((a,b) => Number(b.favorite) - Number(a.favorite) || Number(b.watched) - Number(a.watched)).find(w => providers.some(p => p.id === w.metadata.provider && p.enabled && p.discovery));
       if (first) {
         kind = first.kind; provider = first.metadata.provider; seed = first.id;
         await tick();

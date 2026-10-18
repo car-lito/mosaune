@@ -266,7 +266,7 @@ func TestDiscoveryMigrationPreservesV3(t *testing.T) {
 		t.Fatal("credential lost")
 	}
 	var v int
-	if err = next.db.QueryRow(`PRAGMA user_version`).Scan(&v); err != nil || v != 13 {
+	if err = next.db.QueryRow(`PRAGMA user_version`).Scan(&v); err != nil || v != 14 {
 		t.Fatal(err, v)
 	}
 }

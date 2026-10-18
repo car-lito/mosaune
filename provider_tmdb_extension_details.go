@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-func (p *tmdbProvider) Details(ctx context.Context, secret string, s MetadataSelection) (Metadata, error) {
+func (p *tmdbProvider) activeDetails(ctx context.Context, secret string, s MetadataSelection) (Metadata, error) {
 	p.extension.mu.Lock()
 	enabled := p.extension.enabled && (p.extension.blocked == nil || !p.extension.blocked())
 	p.extension.mu.Unlock()

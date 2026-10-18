@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func (p *tmdbProvider) Posters(ctx context.Context, secret string, s MetadataSelection, language string) ([]PosterOption, error) {
+func (p *tmdbProvider) activePosters(ctx context.Context, secret string, s MetadataSelection, language string) ([]PosterOption, error) {
 	id, e := strconv.Atoi(s.ID)
 	if e != nil || id <= 0 || !videoKind(s.Kind) {
 		return nil, errors.New("Œuvre invalide.")

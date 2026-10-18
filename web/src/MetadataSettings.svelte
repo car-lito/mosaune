@@ -19,7 +19,7 @@
     try {
       const response=await fetch(url,{method,headers:{'Content-Type':'application/json','X-Mosaune-Token':token},body:body ? JSON.stringify(body) : undefined});
       const data=response.status===204 ? {} : await response.json(); if(!response.ok) throw new Error(data.error ?? 'Action impossible.');
-      secrets={}; await load(); await refresh(); message=data.message ?? (method==='DELETE' ? 'Fournisseur déconnecté. Les fiches déjà enregistrées restent disponibles.' : 'Clé enregistrée. L’identification démarre automatiquement si elle n’est pas en pause.');
+      secrets={}; await load(); await refresh(); message=data.message ?? (method==='DELETE' ? 'Fournisseur déconnecté. Les fiches déjà enregistrées restent disponibles.' : 'Clé enregistrée. L’identification reprend si le fournisseur est actif et le suivi n’est pas en pause.');
     } catch(e) { error=e instanceof Error ? e.message : 'Serveur indisponible.'; }
     finally { busy=''; }
   }
@@ -29,7 +29,7 @@
   <summary>{onlyProvider?'Connexion au fournisseur':'Affiches et fournisseurs'} <span>{providers.some(p=>(!onlyProvider||p.id===onlyProvider)&&p.configured) ? 'Configuré' : 'À configurer'}</span></summary>
   <p>{onlyProvider?'Retrouvez ici la connexion utilisée par ce fournisseur.':'Les tags musicaux sont lus sur place. Pour les films et séries, un fournisseur peut compléter les titres avec des affiches, résumés et acteurs.'}</p>
   {#each providers.filter(p=>!onlyProvider||p.id===onlyProvider) as provider}
-    <div class="provider-config"><h3>{provider.name} <small>{provider.configured ? 'Clé enregistrée' : 'Non connecté'}</small></h3>
+    <div class="provider-config"><h3>{provider.name} {#if !provider.enabled}<small>Désactivé · activation dans Extensions</small>{/if}<small>{provider.configured ? 'Clé enregistrée' : 'Non connecté'}</small></h3>
       {#if provider.id==='tmdb'}
         <ol><li>Créez un compte sur <a href="https://www.themoviedb.org" target="_blank" rel="noreferrer">TMDB</a>, puis ouvrez <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noreferrer">Paramètres → API</a>.</li><li>Demandez un accès développeur pour votre application personnelle Mosaune. Copiez le <strong>API Read Access Token</strong> (ou la clé API v3).</li><li>Collez-le ci-dessous. Il sera conservé dans le catalogue local, jamais renvoyé dans les fiches du navigateur.</li></ol>
       {/if}

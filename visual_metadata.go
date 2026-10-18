@@ -19,6 +19,7 @@ func assetURL(provider, ref string) string {
 
 // Image bytes stay in the bounded shared artwork cache. Small references and
 // negative results expire, so a missing remote image isn't requested on every view.
+// Positive references may be reused offline while a provider is disabled.
 func (c *catalog) visualImage(ctx context.Context, p MetadataProvider, ref string) ([]byte, error) {
 	c.posterMu.Lock()
 	defer c.posterMu.Unlock()
@@ -29,7 +30,7 @@ func (c *catalog) visualImage(ctx context.Context, p MetadataProvider, ref strin
 	defer cancel()
 	key := "visual-image:v2:" + ref
 	var id []byte
-	if c.db.QueryRowContext(ctx, `SELECT body FROM provider_cache WHERE provider=? AND key=? AND expires>?`, p.Info().ID, key, time.Now().Unix()).Scan(&id) == nil {
+	if c.db.QueryRowContext(ctx, `SELECT body FROM provider_cache WHERE provider=? AND key=? AND (expires>? OR ? AND length(body)>0)`, p.Info().ID, key, time.Now().Unix(), !providerEnabled(p)).Scan(&id) == nil {
 		if len(id) == 0 {
 			return nil, errors.New("Image absente.")
 		}
@@ -38,7 +39,17 @@ func (c *catalog) visualImage(ctx context.Context, p MetadataProvider, ref strin
 			return data, nil
 		}
 	}
+	ctx, done, err := beginProvider(ctx, p)
+	if err != nil {
+		return nil, err
+	}
+	defer done()
 	raw, err := p.Artwork(ctx, c.credential(ctx, p.Info().ID), ref)
+	unlock, e := providerCommit(ctx)
+	if e != nil {
+		return nil, e
+	}
+	defer unlock()
 	imageID := ""
 	if err == nil {
 		imageID, err = storeArtwork(ctx, c.db, raw)
@@ -50,7 +61,7 @@ func (c *catalog) visualImage(ctx context.Context, p MetadataProvider, ref strin
 	if imageID == "" {
 		ttl = 10 * time.Minute
 	}
-	_, _ = c.db.ExecContext(ctx, `DELETE FROM provider_cache WHERE expires<?`, time.Now().Unix())
+	_, _ = c.db.ExecContext(ctx, `DELETE FROM provider_cache WHERE expires<? AND NOT (key LIKE 'visual-image:v2:%' AND length(body)>0)`, time.Now().Unix())
 	_, _ = c.db.ExecContext(ctx, `INSERT OR REPLACE INTO provider_cache(provider,key,body,expires) SELECT ?,?,?,? WHERE (SELECT COALESCE(SUM(length(body)),0) FROM provider_cache)+?<16777216`, p.Info().ID, key, []byte(imageID), time.Now().Add(ttl).Unix(), len(imageID))
 	if err != nil || imageID == "" {
 		return nil, errors.New("Image indisponible.")

@@ -123,6 +123,11 @@ func (c *catalog) savePoster(ctx context.Context, t posterTarget, raw []byte, so
 	if len(data) == 0 {
 		return errors.New("Image invalide. Choisissez un JPEG ou PNG de 8 Mo et 16 millions de pixels maximum.")
 	}
+	unlock, err := providerCommit(ctx)
+	if err != nil {
+		return err
+	}
+	defer unlock()
 	sum := sha256.Sum256(data)
 	id := hex.EncodeToString(sum[:])
 	tx, e := c.db.BeginTx(ctx, nil)
@@ -206,6 +211,12 @@ func posterRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 			if !readJSON(w, r, &in) {
 				return
 			}
+			ctx, done, err := beginProvider(ctx, c.provider(t.provider))
+			if err != nil {
+				problem(w, 409, err.Error())
+				return
+			}
+			defer done()
 			options, err := c.posterOptions(ctx, t)
 			if err != nil {
 				problem(w, 502, err.Error())

@@ -96,11 +96,11 @@ func openCatalog(dir string) (*catalog, error) {
 		db.Close()
 		return nil, e
 	}
-	if oldVersion > 13 {
+	if oldVersion > 14 {
 		db.Close()
 		return nil, errors.New("Catalogue créé par une version plus récente de Mosaune.")
 	}
-	if oldVersion > 0 && oldVersion < 13 {
+	if oldVersion > 0 && oldVersion < 14 {
 		backup := filepath.Join(dir, "mosaune-before-extensions-"+time.Now().Format("20060102-150405.000000000")+".db")
 		if _, e := db.Exec("VACUUM INTO ?", backup); e != nil {
 			db.Close()
@@ -155,6 +155,10 @@ func openCatalog(dir string) (*catalog, error) {
 		db.Close()
 		return nil, err
 	}
+	if err = migrateProviderStates(db); err != nil {
+		db.Close()
+		return nil, err
+	}
 	reader, e := sql.Open("sqlite", filepath.Join(dir, "mosaune.db"))
 	if e != nil {
 		db.Close()
@@ -172,6 +176,13 @@ func openCatalog(dir string) (*catalog, error) {
 	}
 	c.providers = []MetadataProvider{newTMDBProvider(db), newMusicBrainzProvider(db)}
 	p := c.providers[0].(*tmdbProvider)
+	var active = true
+	if e := db.QueryRow("SELECT enabled FROM provider_states WHERE id='tmdb'").Scan(&active); e != nil && e != sql.ErrNoRows {
+		reader.Close()
+		db.Close()
+		return nil, e
+	}
+	p.state.disabled = !active
 	p.extension.blocked = func() bool { return c.extensionSafeMode }
 	_ = db.QueryRow(`SELECT enabled FROM provider_runtime WHERE id='tmdb'`).Scan(&p.extension.enabled)
 	return c, nil

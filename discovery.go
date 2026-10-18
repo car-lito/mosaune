@@ -91,6 +91,11 @@ func (c *catalog) rememberWork(ctx context.Context, kind string, m Metadata, det
 	if err != nil {
 		return "", err
 	}
+	unlock, e := providerCommit(ctx)
+	if e != nil {
+		return "", e
+	}
+	defer unlock()
 	c.discoveryMu.Lock()
 	defer c.discoveryMu.Unlock()
 	tx, err := c.db.BeginTx(ctx, nil)
@@ -303,6 +308,12 @@ func discoveryRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 		}
 		ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 		defer cancel()
+		ctx, done, e := beginProvider(ctx, p)
+		if e != nil {
+			problem(w, 409, e.Error())
+			return
+		}
+		defer done()
 		page, err := dp.Discover(ctx, c.credential(ctx, input.Provider), q)
 		if err != nil {
 			problem(w, 502, err.Error())
@@ -386,9 +397,15 @@ func discoveryRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 		warning := ""
 		if !item.detailed || ((item.Metadata.Provider == "tmdb" || item.Metadata.Provider == "musicbrainz") && item.Metadata.DetailVersion < 2) {
 			p := c.provider(item.Metadata.Provider)
-			if p != nil && supportsProvider(p, item.Kind) {
+			if p != nil && providerEnabled(p) && supportsProvider(p, item.Kind) {
 				ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 				defer cancel()
+				ctx, done, e := beginProvider(ctx, p)
+				if e != nil {
+					problem(w, 409, e.Error())
+					return
+				}
+				defer done()
 				md, err := p.Details(ctx, c.credential(ctx, p.Info().ID), MetadataSelection{Kind: item.Kind, ID: item.Metadata.ProviderID})
 				if err != nil {
 					warning = err.Error()

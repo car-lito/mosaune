@@ -1,3 +1,11 @@
+## Cycle de vie hôte — 0.0.24
+
+L’activation du fournisseur est indépendante du choix natif/Wasm. Le pilote TMDB expose `PUT /api/v1/metadata/providers/tmdb/state` (administrateur, corps `{ "enabled": false }`). La liste des fournisseurs expose `enabled`, distinct de `configured`.
+
+Le contrat interne facultatif `lifecycleProvider` fournit un état et des contextes annulables appartenant à l’hôte. Une opération complète garde son contexte jusqu’à la persistance ; les écritures finales utilisent `providerCommit` avant toute transaction SQL. La désactivation annule les contextes existants ; une réactivation ne les ressuscite pas. Les invités Wasm ne peuvent pas modifier cet état.
+
+La désactivation ne supprime ni les données communes ni les secrets. Les images déjà enregistrées restent consultables, même si la référence de cache a expiré. Aucun téléchargement d’image manquante n’est effectué. Les limites de stockage restent appliquées. Les autres fournisseurs ne sont pas arrêtés. Ce contrat ne remplace pas encore le cycle générique de désinstallation des futurs paquets.
+
 # Fournisseurs de métadonnées — contrat initial v1
 
 > **État actuel 0.0.19 :** le programme TMDB peut être installé et actualisé depuis une archive signée indépendante du serveur. [Guide](ESSAYER-LES-FOURNISSEURS-019.md), [contrat](extension-kit/PAQUETS-FOURNISSEURS.md). Le catalogue et les clés restent gérés par l’hôte ; les opérations d’images et de suggestions spécialisées demeurent natives. Les notes précédentes ci-dessous sont historiques.

@@ -67,6 +67,9 @@ func (c *catalog) queueProviders(ctx context.Context, allowed func(string) bool)
 	providers := map[string]MetadataProvider{}
 	for _, p := range c.providers {
 		info := p.Info()
+		if !providerEnabled(p) {
+			continue
+		}
 		if info.RequiresCredential && c.credential(ctx, info.ID) == "" {
 			continue
 		}
@@ -145,7 +148,7 @@ func (c *catalog) metadataStatus(ctx context.Context, allowed func(string) bool)
 		s.Message = "Identification terminée. Les correspondances incertaines restent à vérifier."
 	case len(c.queueProviders(ctx, allowed)) == 0:
 		s.State = "unconfigured"
-		s.Message = "Configurez un fournisseur vidéo pour identifier les fiches en attente."
+		s.Message = "Activez et configurez un fournisseur vidéo pour identifier les fiches en attente."
 	case s.RetryAt > time.Now().Unix():
 		s.State = "retry"
 	case pending == 0 && failed > 0:
@@ -207,7 +210,7 @@ func (c *catalog) metadataStep(ctx context.Context, allowed func(string) bool) t
 	run, cancel := context.WithTimeout(ctx, 40*time.Second)
 	defer cancel()
 	err = c.identifyQueued(run, m, providers[m.Kind])
-	if ctx.Err() != nil {
+	if ctx.Err() != nil || errors.Is(err, errProviderDisabled) {
 		return time.Second
 	} // Interrupted work stays pending, never a permanent error.
 	if err != nil {
@@ -220,6 +223,11 @@ func (c *catalog) metadataStep(ctx context.Context, allowed func(string) bool) t
 	return 500 * time.Millisecond
 }
 func (c *catalog) identifyQueued(ctx context.Context, m media, p MetadataProvider) error {
+	ctx, done, e := beginProvider(ctx, p)
+	if e != nil {
+		return e
+	}
+	defer done()
 	// A path confirmed by an acquisition service supplies an identity directly.
 	// Never replace an existing association or a choice marked for review here.
 	var workID string
@@ -228,7 +236,7 @@ func (c *catalog) identifyQueued(ctx context.Context, m media, p MetadataProvide
 		w, err := c.work(ctx, workID)
 		if err == nil && w.Kind == m.Kind {
 			candidate := c.provider(w.Metadata.Provider)
-			if candidate != nil && supportsProvider(candidate, m.Kind) {
+			if candidate != nil && providerEnabled(candidate) && supportsProvider(candidate, m.Kind) {
 				m.Metadata.Season = season
 				m.Metadata.Episode = episode
 				return c.applyProvider(ctx, candidate, c.credential(ctx, w.Metadata.Provider), m, w.Metadata.ProviderID, false)
