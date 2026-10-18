@@ -90,3 +90,11 @@ Le 18 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-li
 Image publique : `ghcr.io/car-lito/mosaune:0.0.24-preview`. Empreinte de l’index : `sha256:1dbbc271367a508cc1fb91d848d5f64c820565413d174e8aab5a97c8cf5c003c`. Les fichiers de chaque architecture ont été téléchargés anonymement et leur SHA-256 vérifié ; le catalogue CasaOS publié est identique à l’archive locale. Aucun essai sur le NAS réel.
 
 La vérification locale du serveur livré avec comptes fictifs a réussi. Le contrôle visuel de cette version dans le navigateur intégré n’a pas pu être effectué : connexion à l’instance de test en échec. La compilation et la vérification statique Svelte sont réussies.
+
+## Validation de la préversion 0.0.25
+
+Le 18 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-lito/mosaune/actions/runs/39131942173) pour le commit `6fe626ca22ca83da24e54d48ad950f749c3d9243`. Tests Windows/Linux, trois exécutables et conteneurs amd64/arm64 (ARM sous émulation). Contrat de présentation validé côté Go et interface, libellés MusicBrainz, préservation des anciennes fiches détaillées et rejet des formats invalides testés.
+
+Image publique : `ghcr.io/car-lito/mosaune:0.0.25-preview`. Empreinte de l’index : `sha256:33acccbc28dca64d43800d18f5322627027371a6dc9428edc43c7312284cbd64`. Téléchargement anonyme des fichiers de chaque architecture avec contrôle SHA-256 ; archive CasaOS publiée identique à l’archive locale. Aucun essai sur le NAS réel.
+
+Localement : 21 tests web réussis, Svelte sans erreur ni avertissement, tests et analyse Go du serveur et du kit réussis, trois exécutables construits. Le serveur livré a accepté une bibliothèque synthétique de trois fichiers. La vérification visuelle reste à faire : le navigateur intégré n’a pas pu joindre cette instance de test, malgré son fonctionnement via l’API locale. Guide : [Essayer la recherche](../ESSAYER-RECHERCHE-025.md).
