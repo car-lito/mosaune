@@ -1,4 +1,4 @@
-État au 18 octobre 2026 : catalogue officiel public, intégration et dédoublonnage 0.0.22 livrés. Sources du serveur publiées sur https://github.com/car-lito/mosaune ; vérifications Windows/Linux et construction ARM64 automatisées. 0.0.23 : HTTPS direct et arrêt SIGTERM validés, images Docker amd64/arm64 publiées et téléchargements anonymes vérifiés. Catalogue CasaOS 0.4.15 préparé ; import réel encore à tester. Aucun déploiement NAS.
+État au 18 octobre 2026 : catalogue officiel public, intégration et dédoublonnage 0.0.22 livrés. Sources du serveur publiées sur https://github.com/car-lito/mosaune ; vérifications Windows/Linux et construction ARM64 automatisées. 0.0.23 : HTTPS direct et arrêt SIGTERM validés, images Docker amd64/arm64 publiées et téléchargements anonymes vérifiés. Catalogue CasaOS 0.4.15 préparé ; import réel encore à tester. 0.0.24 : désactivation réelle de TMDB livrée et images publiées après tests. Aucun déploiement NAS.
 
 # Mosaune — comptes, personnalisation et extensions avant le NAS
 
@@ -170,7 +170,7 @@ Le retrait d’un module média présente ses dépendants et l’impact sur son 
 - [x] E-GITHUB-02 — Tests automatiques validés sur Windows/Linux et exécutables Windows amd64, Linux amd64 et Linux arm64 produits depuis les seules sources du dépôt (première exécution GitHub réussie le 17 octobre 2026).
 - [ ] Choisir la licence du projet avant de le présenter comme open source ; compléter les notices de distribution et le processus de release.
 - [x] E-NETWORK-01 — HTTPS direct, origine autorisée, cookies sécurisés, certificat et arrêt SIGTERM vérifiés dans les conteneurs amd64 et arm64 (ARM sous émulation).
-- [x] Fabrication d’images Linux ARM64 et amd64 après les tests ; publication GHCR de `0.0.23-preview` et d’une étiquette liée au commit, récupération anonyme vérifiée.
+- [x] Fabrication d’images Linux ARM64 et amd64 après les tests ; publication GHCR de `0.0.24-preview` et d’une étiquette liée au commit, récupération anonyme vérifiée.
 - [ ] Définition CasaOS/Compose et catalogue Mosaune accessible par lien adapté à la version de CasaOS installée. Version utilisateur confirmée : CasaOS 0.4.15. Modèle et archive préparés ; import réel encore à valider.
 - [x] Volume persistant `/data` pour catalogue, configuration, images choisies et paquets ; médias en lecture seule. Compte et catalogue conservés après redémarrage en test conteneur ; droits des dossiers réels du NAS encore à préparer.
 - [ ] Canaux stable et test avec numéros de version identifiables ; choisir une mise à jour dans CasaOS, conserver les données, sauvegarder avant les migrations.

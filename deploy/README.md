@@ -82,3 +82,11 @@ Références : [Docker — constructions multiarchitectures](https://docs.docker
 Le 17 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-lito/mosaune/actions/runs/39049806714), tests Windows/Linux puis exécution des conteneurs amd64 et arm64 sous émulation pour ce dernier. HTTPS, refus d’origine étrangère, cookies sécurisés, lecture partielle d’un média fictif, arrêt propre et conservation du compte/catalogue après redémarrage sont vérifiés. Aucun test sur le NAS réel.
 
 Image publique : `ghcr.io/car-lito/mosaune:0.0.23-preview`. Empreinte de l’index des deux architectures : `sha256:cedacea3659104943b6baf1084ce3b5beb83f007404f493c1fb8cffe73df51b3`. Le catalogue CasaOS publié a été comparé au ZIP généré localement. Ces vérifications ne valident pas encore l’import dans l’interface CasaOS 0.4.15, les performances du Pi ni la migration des données Windows.
+
+## Validation de la préversion 0.0.24
+
+Le 18 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-lito/mosaune/actions/runs/39110256760) pour le commit `9488407c81711108f4fd5e4ae73cfbadbfa1a26c`. Tests Windows/Linux, construction des trois exécutables et essais des conteneurs amd64 et arm64 (ARM sous émulation). Désactivation TMDB testée sur moteurs natif/Wasm, annulation du scan sans échec consommé, réponses tardives rejetées, permissions et état après redémarrage.
+
+Image publique : `ghcr.io/car-lito/mosaune:0.0.24-preview`. Empreinte de l’index : `sha256:1dbbc271367a508cc1fb91d848d5f64c820565413d174e8aab5a97c8cf5c003c`. Les fichiers de chaque architecture ont été téléchargés anonymement et leur SHA-256 vérifié ; le catalogue CasaOS publié est identique à l’archive locale. Aucun essai sur le NAS réel.
+
+La vérification locale du serveur livré avec comptes fictifs a réussi. Le contrôle visuel de cette version dans le navigateur intégré n’a pas pu être effectué : connexion à l’instance de test en échec. La compilation et la vérification statique Svelte sont réussies.
