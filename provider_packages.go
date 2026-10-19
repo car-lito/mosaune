@@ -39,10 +39,19 @@ func migrateProviderPackages(db *sql.DB) error {
 }
 
 type providerPackageState struct {
-	Package          *packageformat.Package `json:"package"`
-	PreviousVersion  string                 `json:"previousVersion"`
-	PreviousChecksum string                 `json:"previousChecksum"`
-	Runtime          map[string]bool        `json:"runtime"`
+	Registration        *providerRegistration  `json:"registration,omitempty"`
+	RegistrationWarning string                 `json:"registrationWarning,omitempty"`
+	Package             *packageformat.Package `json:"package"`
+	PreviousVersion     string                 `json:"previousVersion"`
+	PreviousChecksum    string                 `json:"previousChecksum"`
+	Runtime             map[string]bool        `json:"runtime"`
+}
+
+type providerRegistration struct {
+	Revision     int64             `json:"revision"`
+	Wanted       bool              `json:"wanted"`
+	Dependencies []string          `json:"dependencies"`
+	Choices      map[string]string `json:"choices"`
 }
 
 func (p *tmdbProvider) packageKey() ed25519.PublicKey {
@@ -72,6 +81,13 @@ func (p *tmdbProvider) packageState(ctx context.Context) (providerPackageState, 
 		return state, err
 	}
 	state.Package = &current
+	entry, revision, registeredErr := p.registeredPackage(ctx, current)
+	if registeredErr != nil {
+		state.RegistrationWarning = "L’enregistrement de ce paquet doit être réparé avant son démarrage. Installez une version vérifiée plus récente."
+	} else {
+		deps := append([]string{}, entry.Descriptor.Dependencies...)
+		state.Registration = &providerRegistration{Revision: revision, Wanted: entry.Enabled, Dependencies: deps, Choices: entry.Choices}
+	}
 	var raw []byte
 	err = p.db.QueryRowContext(ctx, `SELECT previous,previous_checksum FROM provider_packages WHERE id='tmdb'`).Scan(&raw, &state.PreviousChecksum)
 	if err != nil {
@@ -86,7 +102,7 @@ func (p *tmdbProvider) packageState(ctx context.Context) (providerPackageState, 
 	}
 	return state, nil
 }
-func prepareProviderEngine(ctx context.Context, d protocol.Descriptor, code []byte, health bool) (*runtime.Engine, error) {
+func prepareProviderEngine(ctx context.Context, d protocol.Descriptor, code []byte, health bool, savedChoices ...map[string]string) (*runtime.Engine, error) {
 	limits := runtime.DefaultLimits()
 	limits.Modules = 1
 	limits.Timeout = 15 * time.Second
@@ -95,7 +111,11 @@ func prepareProviderEngine(ctx context.Context, d protocol.Descriptor, code []by
 		err = engine.Load(ctx, d, code)
 	}
 	if err == nil {
-		err = engine.Enable(d.ID)
+		var choices map[string]string
+		if len(savedChoices) > 0 {
+			choices = savedChoices[0]
+		}
+		err = engine.EnableWithProviders(d.ID, choices)
 	}
 	if err == nil && health {
 		// Health checks have no service grants, network, credentials or catalogue.
@@ -124,7 +144,14 @@ func prepareProviderEngine(ctx context.Context, d protocol.Descriptor, code []by
 func (p *tmdbProvider) effectiveEngine(ctx context.Context) (*runtime.Engine, error) {
 	pack, err := p.installedPackage(ctx)
 	if err == nil {
-		return prepareProviderEngine(ctx, pack.Manifest.Descriptor, pack.Code, true)
+		entry, _, e := p.registeredPackage(ctx, pack)
+		if e != nil {
+			return nil, e
+		}
+		if !entry.Enabled {
+			return nil, errors.New("Le paquet n’est pas activé dans le registre. Actualisez son choix de moteur.")
+		}
+		return prepareProviderEngine(ctx, pack.Manifest.Descriptor, pack.Code, true, entry.Choices)
 	}
 	if err != sql.ErrNoRows {
 		return nil, errors.New("Paquet installé illisible. Utilisez le mode de secours ou restaurez le fournisseur.")
@@ -183,6 +210,9 @@ func (p *tmdbProvider) installPackage(ctx context.Context, pack packageformat.Pa
 	if err == nil {
 		_, err = tx.ExecContext(ctx, `INSERT INTO provider_runtime(id,enabled) VALUES('tmdb',?) ON CONFLICT(id) DO UPDATE SET enabled=excluded.enabled`, enabled)
 	}
+	if err == nil {
+		err = registerProviderPackage(ctx, tx, pack, enabled, rollback)
+	}
 	if err != nil {
 		return err
 	}
@@ -219,6 +249,9 @@ func (p *tmdbProvider) removePackage(ctx context.Context, checksum string) error
 		return errors.New("Paquet absent ou modifié. Actualisez la liste.")
 	}
 	if _, err = tx.ExecContext(ctx, `UPDATE provider_runtime SET enabled=0 WHERE id='tmdb'`); err != nil {
+		return err
+	}
+	if err = removeRegisteredProvider(ctx, tx); err != nil {
 		return err
 	}
 	if err = tx.Commit(); err != nil {

@@ -1,5 +1,9 @@
 # Laboratoire des extensions Mosaune
 
+## Dépendances partagées — travail du 19 octobre 2026
+
+Le moteur prend désormais en charge les [dépendances par capacités](dependencies/README.md) : choix explicite entre fournisseurs, protection contre le retrait d’un fournisseur utilisé, aperçu des consommateurs et désactivation en cascade. Le [registre durable 0.0.26](registry/README.md) conserve ces choix, restaure les modules avec états réels et raccorde le paquet TMDB à une transaction commune. Les installateurs et l’interface ne sont pas encore généralisés. [Cible lecteurs remplaçables et thèmes](../LECTEURS-ET-EXTENSIONS.md).
+
 ## Distribution depuis un dépôt — 0.0.20
 
 [Contrat des dépôts GitHub](DEPOTS-GITHUB.md) : index v1, chemins et empreintes, paquets vérifiés puis remis aux installateurs existants. Catalogue local et dépôts publics ajoutables ; aucune confiance d’exécution accordée par l’ajout d’une source. [Guide utilisateur](../ESSAYER-LE-CATALOGUE-020.md).

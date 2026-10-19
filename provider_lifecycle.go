@@ -119,6 +119,13 @@ func (p *tmdbProvider) setProviderEnabled(ctx context.Context, enabled bool) err
 	return nil
 }
 func migrateProviderStates(db *sql.DB) error {
+	var v int
+	if err := db.QueryRow(`PRAGMA user_version`).Scan(&v); err != nil {
+		return err
+	}
+	if v >= 14 {
+		return nil
+	}
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS provider_states(id TEXT PRIMARY KEY,enabled INTEGER NOT NULL DEFAULT 1 CHECK(enabled IN (0,1))); PRAGMA user_version=14;`)
 	return err
 }

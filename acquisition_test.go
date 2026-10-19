@@ -398,7 +398,7 @@ func TestAcquisitionSchemaFiveUpgrade(t *testing.T) {
 	}
 	var version int
 	_ = next.db.QueryRow(`PRAGMA user_version`).Scan(&version)
-	if version != 14 {
+	if version != catalogSchemaVersion {
 		t.Fatal(version)
 	}
 }

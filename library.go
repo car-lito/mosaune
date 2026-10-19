@@ -96,11 +96,11 @@ func openCatalog(dir string) (*catalog, error) {
 		db.Close()
 		return nil, e
 	}
-	if oldVersion > 14 {
+	if oldVersion > catalogSchemaVersion {
 		db.Close()
 		return nil, errors.New("Catalogue créé par une version plus récente de Mosaune.")
 	}
-	if oldVersion > 0 && oldVersion < 14 {
+	if oldVersion > 0 && oldVersion < catalogSchemaVersion {
 		backup := filepath.Join(dir, "mosaune-before-extensions-"+time.Now().Format("20060102-150405.000000000")+".db")
 		if _, e := db.Exec("VACUUM INTO ?", backup); e != nil {
 			db.Close()
@@ -156,6 +156,10 @@ func openCatalog(dir string) (*catalog, error) {
 		return nil, err
 	}
 	if err = migrateProviderStates(db); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if err = migrateExtensionRegistry(db); err != nil {
 		db.Close()
 		return nil, err
 	}

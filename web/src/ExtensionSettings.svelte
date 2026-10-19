@@ -6,12 +6,12 @@
  import ProviderPackagePanel from './ProviderPackagePanel.svelte';
  import ExtensionRepositoryStore from './ExtensionRepositoryStore.svelte';
  import {accountRequest,type Account} from './accounts';
- import {extensionsChanged,type ExtensionPackage,type ExtensionAppearance} from './extensions';
+ import {extensionsChanged,type ExtensionPackage,type ExtensionAppearance,type ProviderPackageState} from './extensions';
  export let user:Account;export let token:string;
  export let refresh:()=>Promise<void>;export let openSettings:(id:string)=>void;
  let tab:'installed'|'available'='installed';let selected='';let filter='';let heading:HTMLElement;
  let runtime:{providerEnabled:boolean;enabled:boolean;effective:boolean;loaded:boolean;safeMode:boolean}|null=null;
- let providerPackage:{package:{manifest:{module:{version:string}};checksum:string}|null;previousVersion:string;previousChecksum:string}|null=null;
+ let providerPackage:ProviderPackageState|null=null;
  async function providerInstalled(){await load();tab='installed';await show('tmdb');notice='Paquet fournisseur installé. Vos fiches et votre connexion sont conservées.';}
  async function repositoryInstalled(kind:string,id:string){await load();tab='installed';await show(kind==='provider'?'tmdb':id);notice='Paquet installé. Retrouvez ses réglages ci-dessous.';}
  $: selectedPackage=packages.find(p=>p.manifest.id===selected);

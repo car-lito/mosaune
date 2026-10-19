@@ -26,7 +26,7 @@ func migrateMetadata(db *sql.DB) error {
 	if err := db.QueryRow(`PRAGMA user_version`).Scan(&version); err != nil {
 		return err
 	}
-	if version > 14 {
+	if version > catalogSchemaVersion {
 		return errors.New("Ce catalogue appartient à une version plus récente de Mosaune.")
 	}
 	if version >= 2 {

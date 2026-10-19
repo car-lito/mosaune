@@ -269,7 +269,7 @@ func TestExtensionsMigrationAndRestart(t *testing.T) {
 	}
 	var v int
 	_ = c.db.QueryRow("PRAGMA user_version").Scan(&v)
-	if v != 14 {
+	if v != catalogSchemaVersion {
 		t.Fatal(v)
 	}
 	p, e := parseExtensionPackage(extensionZIP(t, exampleTheme, "extension.json"))

@@ -17,6 +17,7 @@ type Descriptor struct {
 	Version      string               `json:"version"`
 	Capabilities []string             `json:"capabilities"`
 	Services     []ServiceRequirement `json:"services,omitempty"`
+	Dependencies []string             `json:"dependencies,omitempty"`
 }
 
 // A request for access, never a grant. The host must independently authorize
@@ -58,6 +59,16 @@ func (d Descriptor) Validate() error {
 			return errors.New("invalid or duplicated capability")
 		}
 		seen[c] = true
+	}
+	if len(d.Dependencies) > 16 {
+		return errors.New("too many dependencies")
+	}
+	dependencies := map[string]bool{}
+	for _, c := range d.Dependencies {
+		if len(c) > 96 || !capability.MatchString(c) || dependencies[c] || seen[c] {
+			return errors.New("invalid, duplicated or self-provided dependency")
+		}
+		dependencies[c] = true
 	}
 	if len(d.Services) > 16 {
 		return errors.New("too many services")

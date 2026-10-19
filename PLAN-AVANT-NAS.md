@@ -1,6 +1,32 @@
-État au 18 octobre 2026 : catalogue officiel public, intégration et dédoublonnage 0.0.22 livrés. Sources du serveur publiées sur https://github.com/car-lito/mosaune ; vérifications Windows/Linux et construction ARM64 automatisées. 0.0.23 : HTTPS direct et arrêt SIGTERM validés, images Docker amd64/arm64 publiées et téléchargements anonymes vérifiés. Catalogue CasaOS 0.4.15 préparé ; import réel encore à tester. 0.0.24 : désactivation réelle de TMDB livrée et images publiées après tests. 0.0.25 : présentation extensible des résultats de recherche livrée et images publiées après tests. Aucun déploiement NAS.
+État au 19 octobre 2026 : catalogue officiel public, intégration et dédoublonnage 0.0.22 livrés. Sources du serveur publiées sur https://github.com/car-lito/mosaune ; vérifications Windows/Linux et construction ARM64 automatisées. 0.0.23 : HTTPS direct et arrêt SIGTERM validés, images Docker amd64/arm64 publiées et téléchargements anonymes vérifiés. Catalogue CasaOS 0.4.15 préparé ; import réel encore à tester. 0.0.24 : désactivation réelle de TMDB livrée et images publiées après tests. 0.0.25 : présentation extensible des résultats de recherche livrée et images publiées après tests. Aucun déploiement NAS.
 
 # Mosaune — comptes, personnalisation et extensions avant le NAS
+
+## Priorités confirmées le 19 octobre 2026
+
+Le premier déploiement NAS attend un système d’extensions fonctionnel pour les familles prévues et des lecteurs personnalisés pour films, séries et musique. Le pilote TMDB seul ne remplit pas ce critère. Ordre de travail : terminer et généraliser les extensions, puis livrer les lecteurs, puis tester une installation neuve sur CasaOS. La publication du code et des images de test peut continuer entre-temps.
+
+- [ ] Généraliser le cycle complet des paquets : dépendances, réglages et stockage isolés, permissions, installation, mise à jour, désactivation et désinstallation ; arrêt réel des tâches et conservation des données communes.
+- [ ] Extraire les modules Films, Séries, Musique, les fournisseurs et les connecteurs en paquets réellement indépendants ; vérifier qu’un module peut fonctionner sans les autres.
+- [ ] Rendre les contributions d’interface, menus, réglages et langues utilisables par des extensions externes, avec les contrats de thèmes existants ; documenter et démontrer un paquet créé hors du noyau.
+- [ ] Valider les dépôts officiels/communautaires, les dépendances manquantes et les pannes de paquets sans rendre Mosaune inutilisable. Les travaux détaillés C et D ci-dessous restent la checklist de référence.
+- [ ] Lecteur vidéo Mosaune pour films et séries : commandes propres, navigation dans la lecture, reprise, plein écran, sélection des pistes audio/sous-titres et gestion explicite des formats non pris en charge. Séparer interface, session de lecture et moteur de décodage ; réutiliser des moteurs éprouvés sans réécrire les codecs. Prévoir l’adaptation des flux côté serveur lorsqu’elle est nécessaire, avec limites adaptées au Pi.
+- [ ] Lecteur musique Mosaune : commandes propres, file, précédent/suivant, lecture aléatoire/répétition, déplacement dans le morceau, volume et continuité pendant la navigation ; intégration aux thèmes et modules.
+- [ ] Vérifier ces parcours avant le premier déploiement NAS. Les applications Android/TV et la parité complète Plex/Plexamp restent des jalons distincts.
+
+Installation NAS choisie : repartir de zéro, créer le premier administrateur et installer/configurer les extensions comme un nouvel utilisateur. Aucun transfert du catalogue Windows n’est requis. CasaOS expose les médias par des volumes : Mosaune utilise les chemins à l’intérieur du conteneur. Il faudra seulement vérifier ces montages et leurs permissions, notamment les correspondances avec les chemins des conteneurs Radarr/Sonarr.
+
+Précisions lecteurs : [cahier des charges du 19 octobre](LECTEURS-ET-EXTENSIONS.md). Lecteur vidéo livré automatiquement avec Films ou Séries, une seule dépendance partagée ; lecteur audio livré avec Musique ; tous deux remplaçables et thémables. Références Plex pour bandeau vidéo et plein écran, Spotify pour bandeau musical et vue immersive ouverte par clic sur la pochette avec indication au survol/focus.
+
+### Découpage des extensions en cours — 19 octobre
+
+- [x] C-DEPS-01 — Résolution de capacités et associations explicites intégrées au moteur ; dépendance partagée, protection des consommateurs actifs et arrêt en cascade explicite. [Contrat et limites actuelles](extension-kit/dependencies/README.md).
+- [ ] C-DEPS-02 — Registre persistant commun et choix de fournisseurs exposés dans l’interface ; intégration aux installateurs et dépendances de versions.
+- [x] C-DEPS-02a — 0.0.26 : registre SQLite et révisions, choix conservés, plans d’installation/mise à jour/retrait, restauration d’un moteur et états de panne ; premier raccordement transactionnel du paquet TMDB et section Dépendances et démarrage. [Contrat du registre](extension-kit/registry/README.md).
+- [ ] C-DEPS-02b — Généraliser les familles et réglages privés, la sélection interactive entre fournisseurs et les politiques de compatibilité des paquets ; le pilote TMDB refuse encore les dépendances externes.
+- [ ] C-DEPS-03 — Dépendances officielles installées une fois, aperçu des changements, mises à jour et restauration cohérentes.
+
+La 0.0.26 raccorde le premier installateur à ce socle ; elle ne termine pas le système d’extensions et n’extrait pas encore les modules média. Guide : [Essayer cette étape](ESSAYER-LES-EXTENSIONS-026.md).
 
 ## Désactivation réelle des fournisseurs — pilote TMDB 0.0.24
 
@@ -183,13 +209,13 @@ Le retrait d’un module média présente ses dépendants et l’impact sur son 
 - [x] Volume persistant `/data` pour catalogue, configuration, images choisies et paquets ; médias en lecture seule. Compte et catalogue conservés après redémarrage en test conteneur ; droits des dossiers réels du NAS encore à préparer.
 - [ ] Canaux stable et test avec numéros de version identifiables ; choisir une mise à jour dans CasaOS, conserver les données, sauvegarder avant les migrations.
 - [ ] Vérifier sur Pi installation, redémarrage, mise à jour et restauration ; mesurer la consommation et valider deux comptes et les permissions.
-- [ ] Migrer les chemins du catalogue Windows vers les dossiers montés du NAS sans perdre associations et progressions.
+- [ ] Option ultérieure, non bloquante pour le NAS : déplacer une bibliothèque ou migrer un catalogue existant en conservant associations et progressions. L’utilisateur choisit une installation NAS neuve.
 
 Parcours cible : publication d’une version sur GitHub → tests et construction automatique → image sur GHCR → récupération de cette version par CasaOS. La publication seule ne met pas le NAS à jour : il doit récupérer l’image et recréer le conteneur en gardant ses volumes. L’automatisation de cette dernière action reste un choix distinct.
 
 ## Limite du premier jalon NAS
 
-Objectif proposé : comptes réellement séparés, paramètres organisés, affiches personnalisées et première version fonctionnelle du système de paquets (y compris ajout d’un dépôt communautaire et retrait propre), puis déploiement CasaOS. Le catalogue communautaire fourni, la liberté absolue de refaire tous les écrans et la parité des thèmes sur Android/TV ne sont pas des prérequis du premier essai NAS.
+Objectif confirmé le 19 octobre 2026 : comptes séparés, paramètres organisés, affiches personnalisées, système d’extensions fonctionnel couvrant les familles prévues et lecteurs Mosaune pour films, séries et musique, puis installation neuve sur CasaOS. Les critères de la section « Priorités confirmées » et des étapes C/D s’appliquent ; un pilote de fournisseur ne suffit plus à autoriser le jalon NAS. Le nombre de contributions communautaires disponibles et les applications Android/TV ne conditionnent pas ce premier essai.
 
 Les étapes A à D restent testables sur Windows. Les essais ARM64 et la préparation du conteneur peuvent avancer avant le déploiement définitif pour détecter tôt les contraintes matérielles.
 

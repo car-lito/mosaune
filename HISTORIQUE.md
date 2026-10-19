@@ -1,3 +1,11 @@
+## 0.0.26 — 19 octobre 2026
+
+- Moteur : dépendances par capacités, choix explicites entre fournisseurs, protection des consommateurs actifs et désactivation en cascade.
+- Registre commun SQLite : plans de changements, révisions contre les écritures périmées, choix persistants et restauration avec états réels ; aucune sélection silencieuse d’une alternative.
+- Paquet TMDB installé : archive et registre modifiés dans la même transaction lors des installations, mises à jour, restaurations et retraits ; choix de moteur durable et contrôle avant démarrage. Section Dépendances et démarrage dans sa fiche.
+- Migration du catalogue au schéma 15 avec sauvegarde et reprise des paquets existants vérifiés, sans exécuter de code à la migration.
+- Le pilote TMDB refuse encore les dépendances externes. Extraction des modules média, autres installateurs, réglages privés et interface générale des choix restent en cours. Lecteurs personnalisés prévus après les extensions, installation NAS neuve ensuite.
+
 ## 0.0.25 — 18 octobre 2026
 
 - Recherche : pochettes carrées pour la musique, affiches verticales pour films et séries, type visible sous le titre.

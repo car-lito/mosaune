@@ -17,6 +17,7 @@ import (
 	"github.com/tetratelabs/wazero"
 	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
 	"github.com/tetratelabs/wazero/sys"
+	"mosaune/extensionkit/dependencies"
 	"mosaune/extensionkit/protocol"
 	"mosaune/extensionkit/services"
 )
@@ -53,6 +54,7 @@ func (l Limits) validate() error {
 
 type plugin struct {
 	descriptor protocol.Descriptor
+	bindings   map[string]string
 	compiled   wazero.CompiledModule
 	enabled    bool
 	running    bool
@@ -179,6 +181,7 @@ func (e *Engine) Load(ctx context.Context, d protocol.Descriptor, code []byte) e
 	}
 	// Own all slices: a caller must not change declared permissions after Load.
 	d.Capabilities = slices.Clone(d.Capabilities)
+	d.Dependencies = slices.Clone(d.Dependencies)
 	d.Services = slices.Clone(d.Services)
 	for i := range d.Services {
 		d.Services[i].Operations = slices.Clone(d.Services[i].Operations)
@@ -188,13 +191,36 @@ func (e *Engine) Load(ctx context.Context, d protocol.Descriptor, code []byte) e
 	return nil
 }
 func (e *Engine) Enable(id string) error {
+	return e.EnableWithProviders(id, nil)
+}
+
+// EnableWithProviders binds declared capabilities to active providers. Choices
+// are made by the host; changing an active binding requires disabling first.
+func (e *Engine) EnableWithProviders(id string, choices map[string]string) error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	p := e.plugins[id]
 	if e.closed || e.ctx.Err() != nil || p == nil {
 		return ErrUnavailable
 	}
+	if p.enabled {
+		for capability, selected := range choices {
+			if selected == "" || p.bindings[capability] != selected {
+				return errors.New("disable extension before changing its providers")
+			}
+		}
+		return nil
+	}
+	available := make([]dependencies.Candidate, 0, len(e.plugins))
+	for _, candidate := range e.plugins {
+		available = append(available, dependencies.Candidate{Descriptor: candidate.descriptor, Enabled: candidate.enabled})
+	}
+	bindings, err := dependencies.Resolve(p.descriptor, available, choices)
+	if err != nil {
+		return err
+	}
 	if !p.enabled {
+		p.bindings = bindings
 		p.ctx, p.cancel = context.WithCancel(e.ctx)
 		p.enabled = true
 	}
@@ -210,6 +236,9 @@ func (e *Engine) Disable(id string) error {
 	if p == nil {
 		return ErrUnavailable
 	}
+	if dependents := e.dependentsLocked(id); len(dependents) > 0 {
+		return &DependentsError{Module: id, Dependents: dependents}
+	}
 	if p.enabled {
 		p.enabled = false
 		p.cancel()
@@ -222,6 +251,10 @@ func (e *Engine) Unload(id string) error {
 	if p == nil {
 		e.mu.Unlock()
 		return ErrUnavailable
+	}
+	if dependents := e.dependentsLocked(id); len(dependents) > 0 {
+		e.mu.Unlock()
+		return &DependentsError{Module: id, Dependents: dependents}
 	}
 	delete(e.plugins, id)
 	if p.cancel != nil {

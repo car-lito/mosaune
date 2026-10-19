@@ -52,7 +52,18 @@ func (p *tmdbProvider) setExtension(ctx context.Context, enabled bool) error {
 		return errors.New("Le mode de secours empêche l’activation des extensions.")
 	}
 	if p.db != nil {
-		if _, err := p.db.ExecContext(ctx, `INSERT INTO provider_runtime(id,enabled) VALUES('tmdb',?) ON CONFLICT(id) DO UPDATE SET enabled=excluded.enabled`, enabled); err != nil {
+		tx, err := p.db.BeginTx(ctx, nil)
+		if err != nil {
+			return errors.New("Réglage non enregistré.")
+		}
+		defer tx.Rollback()
+		if _, err = tx.ExecContext(ctx, `INSERT INTO provider_runtime(id,enabled) VALUES('tmdb',?) ON CONFLICT(id) DO UPDATE SET enabled=excluded.enabled`, enabled); err != nil {
+			return errors.New("Réglage non enregistré.")
+		}
+		if err = setRegisteredProviderWanted(ctx, tx, enabled); err != nil {
+			return errors.New("Choix de l’extension non enregistré.")
+		}
+		if err = tx.Commit(); err != nil {
 			return errors.New("Réglage non enregistré.")
 		}
 	}

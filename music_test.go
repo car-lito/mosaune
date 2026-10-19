@@ -152,7 +152,7 @@ func TestMusicMigrationPreservesExistingCatalog(t *testing.T) {
 	defer reopened.close()
 	var schema int
 	var value string
-	if err = reopened.db.QueryRow(`PRAGMA user_version`).Scan(&schema); err != nil || schema != 14 {
+	if err = reopened.db.QueryRow(`PRAGMA user_version`).Scan(&schema); err != nil || schema != catalogSchemaVersion {
 		t.Fatal(schema, err)
 	}
 	if err = reopened.db.QueryRow(`SELECT secret FROM provider_settings WHERE id='example'`).Scan(&value); err != nil || value != "test-value" {
