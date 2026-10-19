@@ -1,6 +1,6 @@
 # Réglages déclaratifs v1
 
-Livrés dans Mosaune 0.0.18 pour le module TMDB fourni. Ce contrat décrit un formulaire ; il ne permet pas encore d’installer un fournisseur exécutable externe. Le fichier réel est [providers/tmdb/settings.json](../providers/tmdb/settings.json).
+Livrés dans Mosaune 0.0.18 pour le module TMDB fourni. Ce contrat décrit un formulaire ; il ne gère pas l’installation du code. Depuis la 0.0.19, un installateur distinct accepte les paquets TMDB signés reconnus. Le fichier réel est [providers/tmdb/settings.json](../providers/tmdb/settings.json).
 
 ## Responsabilités
 
@@ -50,4 +50,4 @@ Le moteur prend l’intersection des opérations déclarées et des services acc
 
 ## Prochaines étapes
 
-Schémas et droits ne suffisent pas encore à rendre les fournisseurs installables : restent le manifeste complet et ses politiques, le stockage isolé générique, la gestion des dépendances, les migrations, l’installation/mise à jour de paquets et les budgets globaux du moteur. L’import ZIP actuel demeure réservé aux thèmes.
+En 0.0.26, l’installation/mise à jour du paquet TMDB signé et le registre durable des dépendances sont disponibles, séparément de ce contrat de formulaire. Restent le stockage isolé générique, les migrations privées, les politiques d’autorisation des autres familles et les budgets globaux du moteur. Les réglages TMDB utilisent encore leur adaptateur dédié ; un paquet tiers ne peut pas déclarer son propre stockage exécutable à travers ce formulaire. Voir le [registre commun](../registry/README.md) pour son périmètre actuel.

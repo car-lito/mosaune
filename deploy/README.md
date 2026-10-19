@@ -98,3 +98,11 @@ Le 18 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-li
 Image publique : `ghcr.io/car-lito/mosaune:0.0.25-preview`. Empreinte de l’index : `sha256:33acccbc28dca64d43800d18f5322627027371a6dc9428edc43c7312284cbd64`. Téléchargement anonyme des fichiers de chaque architecture avec contrôle SHA-256 ; archive CasaOS publiée identique à l’archive locale. Aucun essai sur le NAS réel.
 
 Localement : 21 tests web réussis, Svelte sans erreur ni avertissement, tests et analyse Go du serveur et du kit réussis, trois exécutables construits. Le serveur livré a accepté une bibliothèque synthétique de trois fichiers. La vérification visuelle reste à faire : le navigateur intégré n’a pas pu joindre cette instance de test, malgré son fonctionnement via l’API locale. Guide : [Essayer la recherche](../ESSAYER-RECHERCHE-025.md).
+
+## Validation de la préversion 0.0.26
+
+Le 19 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-lito/mosaune/actions/runs/39270056280) pour le commit `8eafc143d736bc5cc3f0b3324ca6f73b203623f4`. Tests Windows/Linux, trois exécutables et conteneurs amd64/arm64 (ARM sous émulation). Résolution des dépendances, protection des consommateurs, choix persistants, restauration du moteur et échecs isolés testés. Le paquet TMDB installé est raccordé au registre commun ; les autres familles ne sont pas encore extraites.
+
+Image publique : `ghcr.io/car-lito/mosaune:0.0.26-preview`. Empreinte de l’index : `sha256:25a254ce47b7476e5161edc33aafd0964e0bb6d230ab2e7c3c3033006853414d`. Téléchargement anonyme des fichiers de chaque architecture avec contrôle SHA-256 ; archive CasaOS publiée identique à l’archive locale. Aucun essai sur le NAS réel.
+
+Localement : 21 tests web réussis, Svelte sans erreur ni avertissement, tests et analyse Go du serveur et du kit réussis, trois exécutables construits. Tests de migration du schéma 14 vers 15 avec sauvegarde, d’installation/mise à jour/restauration/retrait transactionnels du paquet TMDB et de refus des écritures concurrentes. Aucun catalogue personnel utilisé pour ces essais. La nouvelle section de la fiche TMDB n’a pas fait l’objet d’une validation visuelle dans le navigateur. Guide : [Extensions 0.0.26](../ESSAYER-LES-EXTENSIONS-026.md).
