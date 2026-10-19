@@ -55,7 +55,10 @@ func TestProviderPackageInstallUpdateFailureRollbackAndRemoval(t *testing.T) {
 	}
 	first, next := resign(providerExample, ""), resign(providerUpdateExample, "")
 	ctx := context.Background()
-	_, err := c.db.Exec(`INSERT INTO provider_settings VALUES('tmdb','fixture-kept-token-123456789');INSERT INTO libraries VALUES('keep','Keep','fixture-path','films');INSERT INTO media(id,library_id,relative_path,name,size,modified,revision,position) VALUES('keep','keep','keep.mkv','Keep',1,1,'rev',42);INSERT INTO metadata VALUES('keep','rev','{"manual":true,"title":"Keep"}');`)
+	if err := c.setProviderCredential(ctx, "tmdb", "fixture-kept-token-123456789"); err != nil {
+		t.Fatal(err)
+	}
+	_, err := c.db.Exec(`INSERT INTO libraries VALUES('keep','Keep','fixture-path','films');INSERT INTO media(id,library_id,relative_path,name,size,modified,revision,position) VALUES('keep','keep','keep.mkv','Keep',1,1,'rev',42);INSERT INTO metadata VALUES('keep','rev','{"manual":true,"title":"Keep"}');`)
 	if err != nil {
 		t.Fatal(err)
 	}

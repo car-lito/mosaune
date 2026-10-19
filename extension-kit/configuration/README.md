@@ -36,7 +36,7 @@ La réponse fournit `schema`, `values` pour les valeurs ordinaires et `secretsCo
 
 Champ absent = conserver. Valeur inconnue, mauvais type, `null`, choix non déclaré, secret trop court ou modification et retrait simultanés du même secret = rejet de toute la demande avant écriture. Une erreur ne contient jamais la valeur reçue.
 
-Les routes de la tranche actuelle sont `GET` et `PUT /api/v1/extensions/bundled/{id}/configuration`, réservées à l’administrateur. L’hôte choisit l’adaptateur à partir de l’identité enregistrée ; un fichier ne peut pas choisir sa table ou accéder aux réglages d’une autre extension. TMDB réutilise `provider_settings` pour que fournisseur intégré et module partagent la même connexion. Désactiver le module conserve cette clé et les fiches ; il n’y a pas de base parallèle.
+Depuis 0.0.27, les routes sont `GET` et `PUT /api/v1/extensions/{id}/configuration`, réservées à l’administrateur ; l’ancien chemin avec `/bundled/` reste compatible. L’hôte choisit le propriétaire à partir de l’identité enregistrée ; un fichier ne peut pas choisir sa table ou accéder aux réglages d’une autre extension. TMDB utilise le [stockage commun des réglages](STORAGE.md), avec un propriétaire partagé entre fournisseur intégré et paquet. Désactiver le module conserve cette clé et les fiches ; il n’y a pas de base parallèle. Le formulaire envoie la révision lue pour éviter d’écraser une modification plus récente.
 
 ## Accès aux services
 
@@ -50,4 +50,4 @@ Le moteur prend l’intersection des opérations déclarées et des services acc
 
 ## Prochaines étapes
 
-En 0.0.26, l’installation/mise à jour du paquet TMDB signé et le registre durable des dépendances sont disponibles, séparément de ce contrat de formulaire. Restent le stockage isolé générique, les migrations privées, les politiques d’autorisation des autres familles et les budgets globaux du moteur. Les réglages TMDB utilisent encore leur adaptateur dédié ; un paquet tiers ne peut pas déclarer son propre stockage exécutable à travers ce formulaire. Voir le [registre commun](../registry/README.md) pour son périmètre actuel.
+En 0.0.27, le stockage des réglages est générique et raccordé au paquet TMDB signé ; le registre durable des dépendances reste distinct. Restent les migrations privées explicites, le chiffrement des secrets au repos, les politiques d’autorisation des autres familles et les budgets globaux du moteur. Un paquet tiers ne peut pas déclarer son propre stockage exécutable à travers ce formulaire. Voir le [registre commun](../registry/README.md) et le [contrat de stockage](STORAGE.md) pour leur périmètre actuel.

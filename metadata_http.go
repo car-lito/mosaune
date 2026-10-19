@@ -71,7 +71,7 @@ func metadataRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 			problem(w, 400, "Copiez le jeton de lecture ou la clé API, sans préfixe Bearer.")
 			return
 		}
-		_, err := c.db.ExecContext(r.Context(), `INSERT INTO provider_settings(id,secret) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET secret=excluded.secret`, p.Info().ID, input.Secret)
+		err := c.setProviderCredential(r.Context(), p.Info().ID, input.Secret)
 		if err != nil {
 			problem(w, 500, "Configuration non enregistrée.")
 			return
@@ -83,7 +83,7 @@ func metadataRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 			problem(w, 404, "Fournisseur inconnu.")
 			return
 		}
-		if _, err := c.db.ExecContext(r.Context(), `DELETE FROM provider_settings WHERE id=?`, r.PathValue("provider")); err != nil {
+		if err := c.setProviderCredential(r.Context(), r.PathValue("provider"), ""); err != nil {
 			problem(w, 500, "Configuration non modifiée.")
 			return
 		}

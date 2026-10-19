@@ -1,3 +1,7 @@
+## Réglages persistants — 0.0.27
+
+Le [stockage commun des réglages](configuration/STORAGE.md) isole les propriétaires, masque les secrets dans les réponses et contrôle les modifications concurrentes. TMDB utilise ce stockage pour ses deux moteurs. Ce contrat ne donne pas de lecture directe des clés aux modules invités et n’ajoute pas de chiffrement au repos.
+
 # Laboratoire des extensions Mosaune
 
 ## Dépendances partagées — travail du 19 octobre 2026

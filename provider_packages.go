@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"mosaune/extensionkit/configuration"
 	"mosaune/extensionkit/packageformat"
 	"mosaune/extensionkit/protocol"
 	bundled "mosaune/extensionkit/providers/tmdb"
@@ -213,6 +214,9 @@ func (p *tmdbProvider) installPackage(ctx context.Context, pack packageformat.Pa
 	if err == nil {
 		err = registerProviderPackage(ctx, tx, pack, enabled, rollback)
 	}
+	if err == nil {
+		err = (configuration.SQLStore{DB: tx}).Register(ctx, tmdbConfigurationOwner, pack.Manifest.Settings)
+	}
 	if err != nil {
 		return err
 	}
@@ -252,6 +256,11 @@ func (p *tmdbProvider) removePackage(ctx context.Context, checksum string) error
 		return err
 	}
 	if err = removeRegisteredProvider(ctx, tx); err != nil {
+		return err
+	}
+	// The bundled provider still owns these settings after removing its optional
+	// implementation package. Only an owner with no remaining consumer is removed.
+	if err = (configuration.SQLStore{DB: tx}).Register(ctx, tmdbConfigurationOwner, bundled.Settings()); err != nil {
 		return err
 	}
 	if err = tx.Commit(); err != nil {

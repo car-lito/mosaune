@@ -3,17 +3,18 @@
  import {accountRequest} from './accounts';
  export let id:string;export let token:string;export let refresh:()=>Promise<void>;
  type Field={id:string;label:string;type:'text'|'secret'|'boolean'|'select';help?:string;minLength?:number;maxLength?:number;options?:{value:string;label:string}[]};
- type Configuration={schema:{version:number;title:string;description:string;instructions?:string[];links?:{label:string;url:string}[];fields:Field[]};values:Record<string,string|boolean>;secretsConfigured:Record<string,boolean>;services:{name:string;label:string;description:string}[]};
+ type Configuration={revision:number;schema:{version:number;title:string;description:string;instructions?:string[];links?:{label:string;url:string}[];fields:Field[]};values:Record<string,string|boolean>;secretsConfigured:Record<string,boolean>;services:{name:string;label:string;description:string}[]};
  let config:Configuration|null=null;let values:Record<string,string|boolean>={};let busy=false;let error='';let message='';let clearing='';
- const route='extensions/bundled/'+encodeURIComponent(id)+'/configuration';
+ const route='extensions/'+encodeURIComponent(id)+'/configuration';
  async function load(){config=await accountRequest(token,route);values={...config!.values};}
+ async function reload(){if(busy)return;busy=true;error='';try{await load();clearing='';message='Réglages actualisés.';}catch(e){error=e instanceof Error?e.message:'Actualisation impossible.';}finally{busy=false;}}
  onMount(()=>{void load().catch(e=>error=e instanceof Error?e.message:'Réglages indisponibles.');});
  async function save(clearSecrets:string[]=[]){
   if(busy||!config)return;busy=true;error='';message='';
   const changes:Record<string,string|boolean>={};
   if(!clearSecrets.length)for(const field of config.schema.fields){const value=values[field.id];if(value!==undefined&&(field.type!=='secret'||value!==''))changes[field.id]=value;}
   try{
-   await accountRequest(token,route,'PUT',{values:changes,clearSecrets});
+   await accountRequest(token,route,'PUT',{values:changes,clearSecrets,revision:config.revision});
    values={};clearing='';await load();window.dispatchEvent(new Event('mosaune-provider-settings'));message=clearSecrets.length?'Clé retirée. Les fiches déjà enregistrées restent disponibles.':'Réglages enregistrés.';
    // Library refresh is independent: an unavailable listing must not turn a
    // successful credential save into a misleading save error.
@@ -45,6 +46,6 @@
   </form>
   {#if config.services.length}<div class="extension-access"><h3>Accès du module</h3>{#each config.services as service}<strong>{service.label}</strong><p>{service.description}</p>{/each}</div>{/if}
  {:else if !error}<p role="status">Chargement des réglages…</p>{/if}
- {#if error}<p class="form-error" role="alert">{error}</p>{/if}
+ {#if error}<p class="form-error" role="alert">{error}</p><button type="button" class="secondary" disabled={busy} onclick={reload}>Recharger les réglages</button>{/if}
  {#if message}<p class="extension-notice" role="status">{message}</p>{/if}
 </section>

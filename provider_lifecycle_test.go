@@ -103,7 +103,7 @@ func TestTMDBDisableInterruptsWorkerWithoutCountingFailure(t *testing.T) {
 			if _, e := c.scan(ctx, library{Path: dir, Kind: "films"}, true); e != nil {
 				t.Fatal(e)
 			}
-			if _, e := c.db.Exec(`INSERT INTO provider_settings(id,secret) VALUES('tmdb','fixture-token')`); e != nil {
+			if e := c.setProviderCredential(ctx, "tmdb", "fixture-token-123456789"); e != nil {
 				t.Fatal(e)
 			}
 			if e := p.setExtension(ctx, wasm); e != nil {

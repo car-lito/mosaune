@@ -39,6 +39,7 @@ type Schema struct {
 	Fields       []Field  `json:"fields"`
 }
 type Patch struct {
+	Revision     *int64                     `json:"revision,omitempty"`
 	Values       map[string]json.RawMessage `json:"values"`
 	ClearSecrets []string                   `json:"clearSecrets,omitempty"`
 }
@@ -46,6 +47,7 @@ type Patch struct {
 // State deliberately separates ordinary values from the presence of secrets.
 // No API response may contain a secret value, even for administrators.
 type State struct {
+	Revision          int64                      `json:"revision"`
 	Schema            Schema                     `json:"schema"`
 	Values            map[string]json.RawMessage `json:"values"`
 	SecretsConfigured map[string]bool            `json:"secretsConfigured"`
@@ -120,7 +122,10 @@ func (s Schema) NormalizePatch(p Patch) (Patch, error) {
 	for _, f := range s.Fields {
 		fields[f.ID] = f
 	}
-	out := Patch{Values: map[string]json.RawMessage{}}
+	if p.Revision != nil && *p.Revision < 0 {
+		return Patch{}, invalid
+	}
+	out := Patch{Values: map[string]json.RawMessage{}, Revision: p.Revision}
 	for key, raw := range p.Values {
 		f, ok := fields[key]
 		if !ok {

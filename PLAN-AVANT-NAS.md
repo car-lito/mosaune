@@ -23,10 +23,12 @@ Précisions lecteurs : [cahier des charges du 19 octobre](LECTEURS-ET-EXTENSIONS
 - [x] C-DEPS-01 — Résolution de capacités et associations explicites intégrées au moteur ; dépendance partagée, protection des consommateurs actifs et arrêt en cascade explicite. [Contrat et limites actuelles](extension-kit/dependencies/README.md).
 - [ ] C-DEPS-02 — Registre persistant commun et choix de fournisseurs exposés dans l’interface ; intégration aux installateurs et dépendances de versions.
 - [x] C-DEPS-02a — 0.0.26 : registre SQLite et révisions, choix conservés, plans d’installation/mise à jour/retrait, restauration d’un moteur et états de panne ; premier raccordement transactionnel du paquet TMDB et section Dépendances et démarrage. [Contrat du registre](extension-kit/registry/README.md).
-- [ ] C-DEPS-02b — Généraliser les familles et réglages privés, la sélection interactive entre fournisseurs et les politiques de compatibilité des paquets ; le pilote TMDB refuse encore les dépendances externes.
+- [x] C-CONFIG-01 — 0.0.27 : stockage générique des réglages par propriétaire, isolation API des secrets, révisions et raccordement transactionnel TMDB ; migration au schéma 16 avec sauvegarde. [Contrat](extension-kit/configuration/STORAGE.md).
+- [ ] C-CONFIG-02 — Migrations privées explicites et aperçu des changements ; chiffrement des secrets au repos avec gestion de clé, sauvegarde et récupération ; généralisation des services et permissions aux autres familles.
+- [ ] C-DEPS-02b — Généraliser les familles, leurs services et permissions, la sélection interactive entre fournisseurs et les politiques de compatibilité des paquets ; le pilote TMDB refuse encore les dépendances externes.
 - [ ] C-DEPS-03 — Dépendances officielles installées une fois, aperçu des changements, mises à jour et restauration cohérentes.
 
-La 0.0.26 raccorde le premier installateur à ce socle ; elle ne termine pas le système d’extensions et n’extrait pas encore les modules média. Guide : [Essayer cette étape](ESSAYER-LES-EXTENSIONS-026.md).
+Les 0.0.26 et 0.0.27 raccordent le premier installateur et ses réglages à ce socle ; cela ne termine pas le système d’extensions et n’extrait pas encore les modules média. Guide : [Essayer cette étape](ESSAYER-LES-EXTENSIONS-027.md).
 
 ## Désactivation réelle des fournisseurs — pilote TMDB 0.0.24
 

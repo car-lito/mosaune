@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"mosaune/extensionkit/configuration"
 	"mosaune/extensionkit/protocol"
 	bundled "mosaune/extensionkit/providers/tmdb"
+	"mosaune/extensionkit/registry"
 	"net/http"
 )
 
@@ -20,7 +20,28 @@ type configurationBinding struct {
 }
 
 func (c *catalog) configurationFor(id string) (configurationBinding, bool) {
-	if id != bundled.Descriptor().ID || c.provider("tmdb") == nil {
+	if id != bundled.Descriptor().ID {
+		// Only a host-registered installed module may expose its settings. A
+		// guessed owner ID or a row alone cannot create an accessible extension.
+		s, err := (registry.SQLStore{DB: c.db}).Load(context.Background())
+		if err != nil {
+			return configurationBinding{}, false
+		}
+		entry, ok := registryEntryFor(s, id)
+		if !ok {
+			return configurationBinding{}, false
+		}
+		bound, err := (configuration.SQLStore{DB: c.db}).For(id)
+		if err != nil {
+			return configurationBinding{}, false
+		}
+		state, err := bound.Read(context.Background())
+		if err != nil {
+			return configurationBinding{}, false
+		}
+		return configurationBinding{schema: state.Schema, descriptor: entry.Descriptor, read: bound.Read, write: bound.Apply}, true
+	}
+	if c.provider("tmdb") == nil {
 		return configurationBinding{}, false
 	}
 	schema := bundled.Settings()
@@ -31,31 +52,8 @@ func (c *catalog) configurationFor(id string) (configurationBinding, bool) {
 			descriptor = installed.Manifest.Descriptor
 		}
 	}
-	return configurationBinding{schema: schema, descriptor: descriptor, read: func(ctx context.Context) (configuration.State, error) {
-		var configured bool
-		err := c.db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM provider_settings WHERE id='tmdb' AND secret<>'')`).Scan(&configured)
-		return configuration.State{Schema: schema, Values: map[string]json.RawMessage{}, SecretsConfigured: map[string]bool{"apiToken": configured}}, err
-	}, write: func(ctx context.Context, patch configuration.Patch) error {
-		tx, err := c.db.BeginTx(ctx, nil)
-		if err != nil {
-			return err
-		}
-		defer tx.Rollback()
-		if raw, ok := patch.Values["apiToken"]; ok {
-			var secret string
-			if json.Unmarshal(raw, &secret) != nil {
-				return errors.New("invalid credential")
-			}
-			_, err = tx.ExecContext(ctx, `INSERT INTO provider_settings(id,secret) VALUES('tmdb',?) ON CONFLICT(id) DO UPDATE SET secret=excluded.secret`, secret)
-		}
-		if err == nil && len(patch.ClearSecrets) > 0 {
-			_, err = tx.ExecContext(ctx, `DELETE FROM provider_settings WHERE id='tmdb'`)
-		}
-		if err != nil {
-			return err
-		}
-		return tx.Commit()
-	}}, true
+	bound := tmdbConfiguration(c.db)
+	return configurationBinding{schema: schema, descriptor: descriptor, read: bound.Read, write: bound.Apply}, true
 }
 
 // The host describes the effective named services, not arbitrary manifest prose.
@@ -76,7 +74,7 @@ func serviceViews(d protocol.Descriptor) []extensionServiceView {
 	return views
 }
 func (c *catalog) extensionConfigurationRoutes(mux *secureMux) {
-	mux.HandleFunc("GET /api/v1/extensions/bundled/{id}/configuration", func(w http.ResponseWriter, r *http.Request) {
+	read := func(w http.ResponseWriter, r *http.Request) {
 		binding, ok := c.configurationFor(r.PathValue("id"))
 		if !ok {
 			problem(w, 404, "Réglages d’extension introuvables.")
@@ -91,8 +89,8 @@ func (c *catalog) extensionConfigurationRoutes(mux *secureMux) {
 			configuration.State
 			Services []extensionServiceView `json:"services"`
 		}{state, serviceViews(binding.descriptor)})
-	})
-	mux.HandleFunc("PUT /api/v1/extensions/bundled/{id}/configuration", func(w http.ResponseWriter, r *http.Request) {
+	}
+	write := func(w http.ResponseWriter, r *http.Request) {
 		binding, ok := c.configurationFor(r.PathValue("id"))
 		if !ok {
 			problem(w, 404, "Réglages d’extension introuvables.")
@@ -108,10 +106,18 @@ func (c *catalog) extensionConfigurationRoutes(mux *secureMux) {
 			return
 		}
 		if err = binding.write(r.Context(), patch); err != nil {
+			if errors.Is(err, configuration.ErrConflict) {
+				problem(w, 409, err.Error())
+				return
+			}
 			problem(w, 500, "Réglages non enregistrés.")
 			return
 		}
 		// Only acknowledge: no credential is ever serialized in this response.
 		w.WriteHeader(http.StatusNoContent)
-	})
+	}
+	for _, path := range []string{"/api/v1/extensions/{id}/configuration", "/api/v1/extensions/bundled/{id}/configuration"} {
+		mux.HandleFunc("GET "+path, read)
+		mux.HandleFunc("PUT "+path, write)
+	}
 }

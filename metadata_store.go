@@ -150,6 +150,10 @@ func indexLocalMetadata(ctx context.Context, tx *sql.Tx, root *os.Root, l librar
 }
 
 func (c *catalog) credential(ctx context.Context, id string) string {
+	if id == "tmdb" {
+		secret, _ := tmdbConfiguration(c.db).Secret(ctx, "apiToken")
+		return secret
+	}
 	var secret string
 	_ = c.db.QueryRowContext(ctx, `SELECT secret FROM provider_settings WHERE id=?`, id).Scan(&secret)
 	return secret

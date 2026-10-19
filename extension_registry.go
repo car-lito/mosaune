@@ -9,7 +9,7 @@ import (
 	"mosaune/extensionkit/registry"
 )
 
-const catalogSchemaVersion = 15
+const catalogSchemaVersion = 16
 
 // The current bridge registers only verified installed TMDB packages. Bundled
 // functions/themes still have their existing lifecycles until extracted.
@@ -18,7 +18,7 @@ func migrateExtensionRegistry(db *sql.DB) error {
 	if err := db.QueryRow(`PRAGMA user_version`).Scan(&v); err != nil {
 		return err
 	}
-	if v >= catalogSchemaVersion {
+	if v >= 15 {
 		return nil
 	}
 	ctx := context.Background()

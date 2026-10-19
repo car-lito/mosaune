@@ -1,3 +1,11 @@
+## 0.0.27 — 19 octobre 2026
+
+- Réglages des extensions : stockage générique par propriétaire dans SQLite, schémas enregistrés, valeurs ordinaires et secrets séparés, révisions contre les écrasements concurrents. Les secrets ne sont jamais renvoyés par l’API ; pas de chiffrement au repos ajouté.
+- Routes de configuration communes réservées à l’administrateur et liées aux modules enregistrés ; compatibilité des anciennes routes conservée. Rechargement proposé après une erreur.
+- Mise à jour/restauration : refus de supprimer ou reclassifier une valeur existante sans migration explicite. Le formulaire, l’archive et le registre évoluent dans une même transaction.
+- Catalogue schéma 16 avec sauvegarde : déplacement de la clé TMDB dans le stockage commun. Fournisseur intégré et paquet partagent cette clé, conservée lors du retrait du seul paquet.
+- Autres familles, services/permissions génériques, migrations privées, chiffrement des secrets et extraction des modules média restent en cours.
+
 ## 0.0.26 — 19 octobre 2026
 
 - Moteur : dépendances par capacités, choix explicites entre fournisseurs, protection des consommateurs actifs et désactivation en cascade.
