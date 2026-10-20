@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"mosaune/extensionkit/authorization"
 	"mosaune/extensionkit/configuration"
 	"mosaune/extensionkit/packageformat"
 	"mosaune/extensionkit/protocol"
@@ -217,6 +218,11 @@ func (p *tmdbProvider) installPackage(ctx context.Context, pack packageformat.Pa
 	if err == nil {
 		err = (configuration.SQLStore{DB: tx}).Register(ctx, tmdbConfigurationOwner, pack.Manifest.Settings)
 	}
+	if err == nil {
+		// The pilot format requires exactly tmdb.api.v1/get for both engines.
+		// Registration preserves an earlier denial, never grants on update.
+		err = (authorization.SQLStore{DB: tx}).Register(ctx, pack.Manifest.Descriptor)
+	}
 	if err != nil {
 		return err
 	}
@@ -261,6 +267,9 @@ func (p *tmdbProvider) removePackage(ctx context.Context, checksum string) error
 	// The bundled provider still owns these settings after removing its optional
 	// implementation package. Only an owner with no remaining consumer is removed.
 	if err = (configuration.SQLStore{DB: tx}).Register(ctx, tmdbConfigurationOwner, bundled.Settings()); err != nil {
+		return err
+	}
+	if err = (authorization.SQLStore{DB: tx}).Register(ctx, bundled.Descriptor()); err != nil {
 		return err
 	}
 	if err = tx.Commit(); err != nil {

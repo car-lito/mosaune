@@ -67,7 +67,7 @@ func (c *catalog) queueProviders(ctx context.Context, allowed func(string) bool)
 	providers := map[string]MetadataProvider{}
 	for _, p := range c.providers {
 		info := p.Info()
-		if !providerEnabled(p) {
+		if !providerAvailable(p) {
 			continue
 		}
 		if info.RequiresCredential && c.credential(ctx, info.ID) == "" {
@@ -148,7 +148,7 @@ func (c *catalog) metadataStatus(ctx context.Context, allowed func(string) bool)
 		s.Message = "Identification terminée. Les correspondances incertaines restent à vérifier."
 	case len(c.queueProviders(ctx, allowed)) == 0:
 		s.State = "unconfigured"
-		s.Message = "Activez et configurez un fournisseur vidéo pour identifier les fiches en attente."
+		s.Message = "Activez et configurez un fournisseur vidéo, puis vérifiez ses accès dans les paramètres de l’extension pour identifier les fiches en attente."
 	case s.RetryAt > time.Now().Unix():
 		s.State = "retry"
 	case pending == 0 && failed > 0:
@@ -210,7 +210,7 @@ func (c *catalog) metadataStep(ctx context.Context, allowed func(string) bool) t
 	run, cancel := context.WithTimeout(ctx, 40*time.Second)
 	defer cancel()
 	err = c.identifyQueued(run, m, providers[m.Kind])
-	if ctx.Err() != nil || errors.Is(err, errProviderDisabled) {
+	if ctx.Err() != nil || errors.Is(err, errProviderDisabled) || errors.Is(err, errProviderAccessDenied) {
 		return time.Second
 	} // Interrupted work stays pending, never a permanent error.
 	if err != nil {
@@ -236,7 +236,7 @@ func (c *catalog) identifyQueued(ctx context.Context, m media, p MetadataProvide
 		w, err := c.work(ctx, workID)
 		if err == nil && w.Kind == m.Kind {
 			candidate := c.provider(w.Metadata.Provider)
-			if candidate != nil && providerEnabled(candidate) && supportsProvider(candidate, m.Kind) {
+			if candidate != nil && providerAvailable(candidate) && supportsProvider(candidate, m.Kind) {
 				m.Metadata.Season = season
 				m.Metadata.Episode = episode
 				return c.applyProvider(ctx, candidate, c.credential(ctx, w.Metadata.Provider), m, w.Metadata.ProviderID, false)

@@ -10,7 +10,7 @@
  export let user:Account;export let token:string;
  export let refresh:()=>Promise<void>;export let openSettings:(id:string)=>void;
  let tab:'installed'|'available'='installed';let selected='';let filter='';let heading:HTMLElement;
- let runtime:{providerEnabled:boolean;enabled:boolean;effective:boolean;loaded:boolean;safeMode:boolean}|null=null;
+ let runtime:{serviceAccess?:boolean;providerEnabled:boolean;enabled:boolean;effective:boolean;loaded:boolean;safeMode:boolean}|null=null;
  let providerPackage:ProviderPackageState|null=null;
  async function providerInstalled(){await load();tab='installed';await show('tmdb');notice='Paquet fournisseur installé. Vos fiches et votre connexion sont conservées.';}
  async function repositoryInstalled(kind:string,id:string){await load();tab='installed';await show(kind==='provider'?'tmdb':id);notice='Paquet installé. Retrouvez ses réglages ci-dessous.';}
@@ -20,7 +20,7 @@
  async function show(id:string){selected=id;editing='';removing='';await tick();heading?.focus();heading?.closest('.settings-content')?.scrollTo({top:0});}
  async function back(){const previous=selected;selected='';editing='';removing='';await tick();document.getElementById('extension-card-'+previous)?.focus();}
  async function toggleRuntime(){if(!runtime)return;await perform(async()=>{runtime=await accountRequest(token,'metadata/tmdb-runtime','PUT',{enabled:!runtime?.enabled});notice=runtime?.enabled?'Moteur extension choisi. L’état actif ou désactivé de TMDB est conservé.':'Moteur intégré choisi. L’état actif ou désactivé de TMDB est conservé.';});}
- async function toggleProvider(){if(!runtime)return;await perform(async()=>{const enabled=!runtime!.providerEnabled;await accountRequest(token,'metadata/providers/tmdb/state','PUT',{enabled});notice=enabled?'TMDB activé. Les fiches en attente pourront reprendre.':'TMDB désactivé. Les recherches et traitements en cours sont arrêtés ; vos fiches et affiches conservées restent disponibles.';});}
+ async function toggleProvider(){if(!runtime)return;await perform(async()=>{const enabled=!runtime!.providerEnabled;await accountRequest(token,'metadata/providers/tmdb/state','PUT',{enabled});notice=enabled?'TMDB activé. Les consultations reprendront si son accès en ligne est autorisé.':'TMDB désactivé. Les recherches et traitements en cours sont arrêtés ; vos fiches et affiches conservées restent disponibles.';});}
  function matches(name:string,query:string){return name.toLocaleLowerCase().includes(query.toLocaleLowerCase())}
 
  let packages:ExtensionPackage[]=[];let users:Account[]=[];let appearance:ExtensionAppearance={selected:'',effective:'',stamp:'',safeMode:false};
@@ -65,10 +65,10 @@
  </div></article>
  {:else if selected==='tmdb' && user.admin && runtime}
   <p>Fournisseur de métadonnées pour les films et séries. Le module expérimental gère maintenant les recherches et les fiches détaillées ; les images sont téléchargées par Mosaune.</p>
-  <div class="extension-native-choice"><div><strong>{runtime.providerEnabled?'TMDB actif':'TMDB désactivé'}</strong><p>Ce réglage arrête toutes les recherches, suggestions et récupérations d’images de TMDB, quel que soit son moteur. Vos données et votre clé sont conservées.</p></div><button class="secondary" role="switch" aria-label="Activer TMDB" aria-checked={runtime.providerEnabled} disabled={busy} onclick={toggleProvider}>{runtime.providerEnabled?'Désactiver TMDB':'Activer TMDB'}</button></div>
+  <div class="extension-native-choice"><div><strong>{runtime.providerEnabled?(runtime.serviceAccess===false?'TMDB actif · accès en ligne retiré':'TMDB actif'):'TMDB désactivé'}</strong><p>Ce réglage arrête toutes les recherches, suggestions et récupérations d’images de TMDB, quel que soit son moteur. Vos données et votre clé sont conservées.</p></div><button class="secondary" role="switch" aria-label="Activer TMDB" aria-checked={runtime.providerEnabled} disabled={busy} onclick={toggleProvider}>{runtime.providerEnabled?'Désactiver TMDB':'Activer TMDB'}</button></div>
   <details class="extension-import"><summary>Moteur de traitement · avancé</summary><p>{runtime.enabled?'Moteur extension choisi':'Moteur intégré choisi'}. {runtime.safeMode?'Le mode de secours utilise le moteur intégré si TMDB est actif.':''} Changer de moteur ne réactive jamais un fournisseur désactivé.</p><button class="secondary" disabled={busy||runtime.safeMode&&!runtime.enabled} onclick={toggleRuntime}>{runtime.enabled?'Utiliser le moteur intégré':'Utiliser le moteur extension'}</button></details>
   <ProviderPackagePanel {token} state={providerPackage} changed={load} browse={()=>{tab='available';void show('')}}/>
-  {#key providerPackage?.package?.checksum}<ExtensionConfiguration id="mosaune.tmdb-search" {token} {refresh}/>{/key}
+  {#key providerPackage?.package?.checksum}<ExtensionConfiguration id="mosaune.tmdb-search" {token} refresh={async()=>{await load();await refresh();}}/>{/key}
  {:else if selectedNative}
   <span class="extension-tag">{selectedNative.family} · intégré</span><p>{selectedNative.description}</p>
   <p>Cette fonction fait encore partie du programme. Elle sera séparée en extension lors d’une prochaine étape ; elle ne peut pas encore être désactivée ou désinstallée ici.</p>
@@ -91,7 +91,7 @@
    <div class="extension-toolbar"><label>Rechercher une extension<input type="search" bind:value={filter} placeholder="Nom ou description…"/></label><button class="text-action" disabled={busy} onclick={()=>void load()}>Actualiser</button></div>
    {#if loading}<p role="status">Chargement des extensions…</p>{/if}
    <div class="extension-grid">
-    {#if user.admin&&runtime&&matches('TMDB métadonnées films séries',filter)}<ExtensionCard id="tmdb" name="TMDB" family="Métadonnées · expérimental" description="Recherche et fiches de films et séries, avec le moteur d’extensions." status={runtime.providerEnabled?'Actif':'Désactivé'} enabled={runtime.providerEnabled} disabled={busy} toggle={toggleProvider} open={()=>show('tmdb')}/>{/if}
+    {#if user.admin&&runtime&&matches('TMDB métadonnées films séries',filter)}<ExtensionCard id="tmdb" name="TMDB" family="Métadonnées · expérimental" description="Recherche et fiches de films et séries, avec le moteur d’extensions." status={runtime.providerEnabled?(runtime.serviceAccess===false?'Accès en ligne retiré':'Actif'):'Désactivé'} enabled={runtime.providerEnabled} disabled={busy} toggle={toggleProvider} open={()=>show('tmdb')}/>{/if}
     {#each visiblePackages as p (p.manifest.id)}<ExtensionCard id={p.manifest.id} name={p.manifest.name} family="Interface · thème" description={p.manifest.description} status={appearance.safeMode?'Suspendu':p.enabled?'Actif':'Désactivé'} enabled={p.enabled} disabled={busy||appearance.safeMode&&!p.enabled} toggle={user.admin?()=>toggle(p):undefined} open={()=>show(p.manifest.id)}/>{/each}
     {#if user.admin}{#each native.filter(p=>matches(p.name+' '+p.description,filter)) as item}<ExtensionCard id={item.id} name={item.name} family={item.family} description={item.description} status="Intégré" open={()=>show(item.id)}/>{/each}{/if}
    </div>

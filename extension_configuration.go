@@ -68,12 +68,13 @@ func serviceViews(d protocol.Descriptor) []extensionServiceView {
 	views := []extensionServiceView{}
 	for _, s := range d.Services {
 		if s.Name == "tmdb.api.v1" {
-			views = append(views, extensionServiceView{Name: s.Name, Label: "Consulter TMDB", Description: "Recherche et fiches de l’œuvre demandée via api.themoviedb.org. La clé et le cache sont gérés par Mosaune. Aucun accès direct aux fichiers ou au catalogue.", Operations: s.Operations})
+			views = append(views, extensionServiceView{Name: s.Name, Label: "Consulter TMDB", Description: "Recherches, fiches et images en ligne de TMDB, pour le fournisseur intégré et son extension. La clé reste gérée par Mosaune. Retirer cet accès arrête aussi les recherches en cours ; les fiches et images déjà conservées restent disponibles.", Operations: s.Operations})
 		}
 	}
 	return views
 }
 func (c *catalog) extensionConfigurationRoutes(mux *secureMux) {
+	c.extensionAuthorizationRoutes(mux)
 	read := func(w http.ResponseWriter, r *http.Request) {
 		binding, ok := c.configurationFor(r.PathValue("id"))
 		if !ok {
@@ -87,8 +88,9 @@ func (c *catalog) extensionConfigurationRoutes(mux *secureMux) {
 		}
 		sendJSON(w, 200, struct {
 			configuration.State
-			Services []extensionServiceView `json:"services"`
-		}{state, serviceViews(binding.descriptor)})
+			Services              []extensionServiceView `json:"services"`
+			AuthorizationsManaged bool                   `json:"authorizationsManaged"`
+		}{state, serviceViews(binding.descriptor), r.PathValue("id") == tmdbConfigurationOwner})
 	}
 	write := func(w http.ResponseWriter, r *http.Request) {
 		binding, ok := c.configurationFor(r.PathValue("id"))

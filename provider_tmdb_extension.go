@@ -40,10 +40,11 @@ func migrateProviderRuntime(db *sql.DB) error {
 }
 func (p *tmdbProvider) extensionStatus() map[string]bool {
 	active := providerEnabled(p)
+	available := providerAvailable(p)
 	p.extension.mu.Lock()
 	defer p.extension.mu.Unlock()
 	blocked := p.extension.blocked != nil && p.extension.blocked()
-	return map[string]bool{"enabled": p.extension.enabled, "providerEnabled": active, "effective": active && p.extension.enabled && !blocked, "loaded": p.extension.engine != nil, "safeMode": blocked}
+	return map[string]bool{"enabled": p.extension.enabled, "providerEnabled": active, "effective": available && p.extension.enabled && !blocked, "loaded": p.extension.engine != nil, "safeMode": blocked, "serviceAccess": available}
 }
 func (p *tmdbProvider) setExtension(ctx context.Context, enabled bool) error {
 	p.extension.mu.Lock()

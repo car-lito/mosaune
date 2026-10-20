@@ -30,7 +30,7 @@ func (c *catalog) visualImage(ctx context.Context, p MetadataProvider, ref strin
 	defer cancel()
 	key := "visual-image:v2:" + ref
 	var id []byte
-	if c.db.QueryRowContext(ctx, `SELECT body FROM provider_cache WHERE provider=? AND key=? AND (expires>? OR ? AND length(body)>0)`, p.Info().ID, key, time.Now().Unix(), !providerEnabled(p)).Scan(&id) == nil {
+	if c.db.QueryRowContext(ctx, `SELECT body FROM provider_cache WHERE provider=? AND key=? AND (expires>? OR ? AND length(body)>0)`, p.Info().ID, key, time.Now().Unix(), !providerAvailable(p)).Scan(&id) == nil {
 		if len(id) == 0 {
 			return nil, errors.New("Image absente.")
 		}

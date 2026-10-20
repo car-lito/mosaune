@@ -13,15 +13,26 @@ var errProviderDisabled = errors.New("Fournisseur désactivé. Les informations 
 // Optional host-owned lifecycle, independent of the provider's execution engine.
 // A lease covers a whole operation, including persistence of its result.
 type providerLifecycle struct {
-	changes  sync.Mutex
-	mu       sync.Mutex
-	disabled bool
-	next     uint64
-	calls    map[uint64]context.CancelCauseFunc
+	changes      sync.Mutex
+	mu           sync.Mutex
+	disabled     bool
+	accessDenied bool
+	next         uint64
+	calls        map[uint64]context.CancelCauseFunc
 }
 type lifecycleProvider interface{ lifecycle() *providerLifecycle }
 type providerLease struct{ owner *providerLifecycle }
 type providerLeaseKey struct{}
+
+func providerAvailable(p MetadataProvider) bool {
+	if managed, ok := p.(lifecycleProvider); ok {
+		s := managed.lifecycle()
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		return !s.disabled && !s.accessDenied
+	}
+	return true
+}
 
 func providerEnabled(p MetadataProvider) bool {
 	if managed, ok := p.(lifecycleProvider); ok {
@@ -45,6 +56,9 @@ func beginProvider(ctx context.Context, p MetadataProvider) (context.Context, fu
 	defer s.mu.Unlock()
 	if s.disabled {
 		return ctx, func() {}, errProviderDisabled
+	}
+	if s.accessDenied {
+		return ctx, func() {}, errProviderAccessDenied
 	}
 	if ctx.Err() != nil {
 		return ctx, func() {}, context.Cause(ctx)
@@ -71,6 +85,10 @@ func providerCommit(ctx context.Context) (func(), error) {
 		if lease.owner.disabled {
 			lease.owner.mu.Unlock()
 			return func() {}, errProviderDisabled
+		}
+		if lease.owner.accessDenied {
+			lease.owner.mu.Unlock()
+			return func() {}, errProviderAccessDenied
 		}
 		return lease.owner.mu.Unlock, nil
 	}

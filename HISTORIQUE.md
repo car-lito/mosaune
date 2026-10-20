@@ -1,3 +1,11 @@
+## 0.0.28 — 20 octobre 2026
+
+- Autorisations persistantes par extension et opération, distinctes des demandes du manifeste. Aucun nouvel accord automatique lors des mises à jour ; une opération retirée puis réintroduite nécessite un nouvel accord.
+- Premier adaptateur complet : TMDB. Accès en ligne commun aux moteurs natif et Wasm, modifiable dans sa fiche par un administrateur, avec protection contre les modifications concurrentes.
+- Révocation : interruption des opérations en cours et refus des résultats tardifs, même après réautorisation ; conservation des clés, fiches et images enregistrées. Les identifications interrompues restent en attente.
+- Catalogue schéma 17 avec sauvegarde. TMDB conserve une fois son accès historique et reste autorisé par défaut sur une installation neuve ; les nouveaux propriétaires génériques démarrent sans accord.
+- Autres adaptateurs, aperçu des nouveaux accès dans les installateurs génériques et extraction des modules média restent à raccorder. Aucun déploiement NAS.
+
 ## 0.0.27 — 19 octobre 2026
 
 - Réglages des extensions : stockage générique par propriétaire dans SQLite, schémas enregistrés, valeurs ordinaires et secrets séparés, révisions contre les écrasements concurrents. Les secrets ne sont jamais renvoyés par l’API ; pas de chiffrement au repos ajouté.

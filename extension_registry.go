@@ -9,7 +9,7 @@ import (
 	"mosaune/extensionkit/registry"
 )
 
-const catalogSchemaVersion = 16
+const catalogSchemaVersion = 17
 
 // The current bridge registers only verified installed TMDB packages. Bundled
 // functions/themes still have their existing lifecycles until extracted.
