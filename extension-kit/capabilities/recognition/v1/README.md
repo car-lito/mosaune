@@ -13,7 +13,7 @@ Champs de reconnaissance facultatifs : `year`, `series`, `season`, `episode`, `e
 
 ## Exécution et limites actuelles
 
-Un moteur temporaire par scan, un module chargé, appels par lots. Aucun dossier monté, environnement personnel, service réseau, secret ou base de données exposé au module. Le moteur est fermé en fin de scan. Limites hôte : mémoire linéaire 64 Mio, appel 2 secondes, compilation 15 secondes, entrée 64 Kio, sortie 256 Kio. Ce ne sont pas des mesures de RAM totale : compilation et moteur consomment aussi de la mémoire.
+Un moteur temporaire par scan, un module chargé, appels par lots. L'hôte choisit le mode interprété pour ces programmes courts : il évite la compilation native initiale qui dépassait le budget sous émulation ARM64. Les fournisseurs existants conservent leur mode habituel. Aucun dossier monté, environnement personnel, service réseau, secret ou base de données exposé au module. Le moteur est fermé en fin de scan. Limites hôte inchangées : mémoire linéaire 64 Mio, appel 2 secondes, préparation 15 secondes, entrée 64 Kio, sortie 256 Kio. Ce ne sont pas des mesures de RAM totale : préparation et moteur consomment aussi de la mémoire.
 
 Les réponses sont validées avant la transaction d'indexation. Une erreur conserve la bibliothèque précédente. Le serveur continue à ouvrir les dossiers et à appliquer les permissions, les limites de lecture et les transactions. Les tags audio sont encore extraits par le serveur ; ils enrichissent le titre initial fourni par Musique.
 

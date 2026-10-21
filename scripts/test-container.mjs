@@ -15,6 +15,11 @@ const id = 'mosaune-ci-' + randomUUID();
 const directory = mkdtempSync(join(tmpdir(), id));
 const certDirectory = join(directory, 'tls');
 const mediaDirectory = join(directory, 'media');
+const fixtures = [
+  { kind: 'music', name: 'sample.mp3' },
+  { kind: 'films', name: 'Iron.Man.2008.mkv' },
+  { kind: 'series', name: 'Example.S01E02.Title.mkv' },
+];
 mkdirSync(certDirectory); mkdirSync(mediaDirectory);
 let created = false, volumeCreated = false;
 function command(exe, args, allowFailure = false) {
@@ -33,7 +38,10 @@ try {
   command('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-sha256', '-nodes', '-days', '1', '-subj', '/CN=Mosaune CI temporary', '-addext', 'subjectAltName=IP:127.0.0.1', '-keyout', join(certDirectory, 'server.key'), '-out', join(certDirectory, 'server.crt')]);
   // Test key is disposable and mounted in an isolated container, never a real key.
   chmodSync(certDirectory, 0o755); chmodSync(join(certDirectory, 'server.key'), 0o644);
-  writeFileSync(join(mediaDirectory, 'sample.mp3'), '0123456789');
+  for (const fixture of fixtures) {
+    mkdirSync(join(mediaDirectory, fixture.kind));
+    writeFileSync(join(mediaDirectory, fixture.kind, fixture.name), '0123456789');
+  }
   docker(['volume', 'create', id]); volumeCreated = true;
   docker(['create', '--name', id, '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges:true', '--pids-limit=256', '--tmpfs', '/tmp:size=64m,mode=1777', '-p', `127.0.0.1:${port}:47831`,
     '-e', `MOSAUNE_PUBLIC_URL=${origin}`, '-e', 'MOSAUNE_TLS_CERT=/tls/server.crt', '-e', 'MOSAUNE_TLS_KEY=/tls/server.key', '-e', 'MOSAUNE_TLS_CA=/tls/server.crt',
@@ -88,11 +96,17 @@ try {
   // Under ARM emulation the initial WASI compilation can exceed the ordinary
   // HTTP probe budget. This exceeds the host's bounded compilation/call budget
   // so a real host error remains visible instead of being masked by the probe.
-  const scan = await request('/api/v1/libraries', { method: 'POST', timeout: 30000, headers: auth, body: { name: 'CI only', kind: 'music', path: '/media' } });
-  assert(scan.status === 201, `Read-only media scan failed: HTTP ${scan.status}, ${scan.text}`);
+  for (const fixture of fixtures) {
+    const scan = await request('/api/v1/libraries', { method: 'POST', timeout: 30000, headers: auth, body: { name: `CI ${fixture.kind}`, kind: fixture.kind, path: `/media/${fixture.kind}` } });
+    assert(scan.status === 201, `${fixture.kind} read-only scan failed: HTTP ${scan.status}, ${scan.text}`);
+  }
   const library = JSON.parse((await request('/api/v1/library', { headers: auth })).text);
-  assert(library.items.length === 1, 'Sample media was not catalogued');
-  const streamed = await request(library.items[0].url, { headers: { ...auth, Range: 'bytes=2-5' } });
+  assert(library.items.length === fixtures.length, 'Sample media were not catalogued');
+  const movie = library.items.find(item => item.kind === 'films');
+  const episode = library.items.find(item => item.kind === 'series');
+  const music = library.items.find(item => item.kind === 'music');
+  assert(movie?.metadata?.year === 2008 && episode?.metadata?.season === 1 && episode?.metadata?.episode === 2 && music, 'Media recognizers did not return expected metadata');
+  const streamed = await request(music.url, { headers: { ...auth, Range: 'bytes=2-5' } });
   assert(streamed.status === 206 && streamed.text === '2345', 'HTTPS range streaming failed');
   docker(['stop', '--time', '15', id]);
   assert(JSON.parse(docker(['inspect', id]))[0].State.ExitCode === 0, 'SIGTERM did not stop cleanly');
@@ -102,8 +116,8 @@ try {
   const login = await request('/api/v1/auth/login', { method: 'POST', headers: { Origin: origin, 'X-Mosaune-Token': after.token }, body: { name: 'ContainerTest', password } });
   assert(login.status === 200, 'Login after restart failed');
   const persisted = JSON.parse((await request('/api/v1/library', { headers: { Cookie: login.headers['set-cookie'][0].split(';')[0] } })).text);
-  assert(persisted.items.length === 1, 'Catalogue lost after restart');
-  assert(readFileSync(join(mediaDirectory, 'sample.mp3'), 'utf8') === '0123456789', 'Source media modified');
+  assert(persisted.items.length === fixtures.length, 'Catalogue lost after restart');
+  for (const fixture of fixtures) assert(readFileSync(join(mediaDirectory, fixture.kind, fixture.name), 'utf8') === '0123456789', 'Source media modified');
   docker(['exec', id, '/mosaune', '-healthcheck']);
   docker(['stop', '--time', '15', id]);
   console.log(JSON.stringify({ image, https: 'verified', cookies: 'secure', media: 'read-only + range verified', restart: 'account and catalogue preserved', sigterm: 'exit 0' }));

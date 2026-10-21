@@ -33,6 +33,9 @@ var (
 // Limits are set by the host, never accepted from a guest. Linear memory is not
 // a total process-RAM budget: compilation, stacks and engine metadata add costs.
 type Limits struct {
+	// Interpreter is a trusted host choice for short-lived, small workloads.
+	// It avoids native compilation at startup; guest manifests cannot select it.
+	Interpreter                                           bool
 	MemoryMiB                                             uint32
 	Timeout                                               time.Duration
 	CompileTimeout                                        time.Duration
@@ -88,7 +91,11 @@ func New(ctx context.Context, l Limits) (*Engine, error) {
 		return nil, err
 	}
 	lifetime, cancel := context.WithCancel(ctx)
-	config := wazero.NewRuntimeConfig().WithMemoryLimitPages(l.MemoryMiB * 16).WithCloseOnContextDone(true)
+	config := wazero.NewRuntimeConfig()
+	if l.Interpreter {
+		config = wazero.NewRuntimeConfigInterpreter()
+	}
+	config = config.WithMemoryLimitPages(l.MemoryMiB * 16).WithCloseOnContextDone(true)
 	vm := wazero.NewRuntimeWithConfig(lifetime, config)
 	if _, err := wasi_snapshot_preview1.Instantiate(lifetime, vm); err != nil {
 		cancel()

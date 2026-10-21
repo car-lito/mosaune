@@ -34,6 +34,7 @@ func loadMediaRecognizer(ctx context.Context, descriptor protocol.Descriptor, co
 	}
 	limits := runtime.DefaultLimits()
 	limits.Modules = 1
+	limits.Interpreter = true
 	engine, err := runtime.New(ctx, limits)
 	if err != nil {
 		return nil, err

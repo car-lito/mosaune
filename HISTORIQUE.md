@@ -1,7 +1,7 @@
 ## 0.0.29 — 21 octobre 2026
 
 - Reconnaissance des fichiers extraite dans trois programmes WASI : Films, Séries et Musique. Formats et règles des noms retirés du serveur ; contrat versionné commun et réponses validées.
-- Un moteur temporaire par scan, appels par lots de 32, sans accès aux fichiers, au réseau ni aux secrets. Validation avant la transaction ; catalogue précédent conservé en cas d’erreur.
+- Un moteur interprété temporaire par scan, appels par lots de 32, sans accès aux fichiers, au réseau ni aux secrets. Le mode interprété évite la compilation native initiale trop lente sous émulation ARM64, sans augmenter les limites du serveur. Validation avant la transaction ; catalogue précédent conservé en cas d’erreur.
 - Progression distincte pour la reconnaissance des noms et l’enregistrement. Tags audio et corrections existantes conservés. Construction indépendante des trois programmes sous Windows/Linux et dans Docker.
 - Ces composants sont encore livrés avec le serveur, pas installables individuellement. Les écrans, tags, catalogues spécialisés et connecteurs restent à extraire. Aucun déploiement NAS.
 

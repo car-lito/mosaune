@@ -68,6 +68,8 @@ func Identify(kind, filename string) recognition.Item {
 			m.Title = cleanTitle(base[:i[0]])
 		}
 	}
-	if m.Title == "" { m.Title = path.Base(filename) }
+	if m.Title == "" {
+		m.Title = path.Base(filename)
+	}
 	return m
 }
