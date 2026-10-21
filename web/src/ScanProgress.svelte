@@ -10,7 +10,7 @@
  <div class="scan-progress" aria-label="Progression de l’analyse des fichiers">
   <div class="scan-heading"><strong>Analyse des fichiers · {scan.name||'Nouveau dossier'}</strong><span>{scan.state==='complete'?'Terminée':scan.state==='failed'?'Interrompue':scan.state==='discovering'?'Découverte du dossier':`${percent} %`}</span></div>
   {#if scan.state==='discovering'}<progress aria-label="Découverte des fichiers"></progress><p>{scan.found} fichier{scan.found>1?'s':''} trouvé{scan.found>1?'s':''}. Le total est en cours de calcul.</p>
-  {:else}<progress aria-label="Fichiers analysés" max={Math.max(scan.total,1)} value={scan.state==='complete'&&scan.total===0?1:scan.processed}></progress><p>{scan.processed} / {scan.total} fichiers analysés{scan.state==='indexing'&&scan.processed===scan.total?' · Enregistrement…':''}. {scan.state==='complete'?'Les affiches et fiches sont traitées séparément, ci-dessous.':''}</p>{/if}
+  {:else}<progress aria-label={scan.state==='recognizing'?'Reconnaissance des noms':'Enregistrement des fichiers'} max={Math.max(scan.total,1)} value={scan.state==='complete'&&scan.total===0?1:scan.processed}></progress><p>{scan.state==='recognizing'?'Reconnaissance des noms':'Enregistrement dans la bibliothèque'} · {scan.processed} / {scan.total}{scan.state==='indexing'&&scan.processed===scan.total?' · Finalisation…':''}. {scan.state==='complete'?'Les affiches et fiches sont traitées séparément, ci-dessous.':''}</p>{/if}
   {#if scan.state==='failed'}<p class="playback-error" role="alert">{scan.message}</p>{/if}
   {#if unavailable}<p role="status">Le suivi ne répond plus. L’avancement affiché est le dernier reçu.</p>{/if}
  </div>

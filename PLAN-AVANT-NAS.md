@@ -1,3 +1,15 @@
+## Critère de sortie confirmé — 21 octobre 2026
+
+Avant le NAS, le noyau conserve les services communs (comptes, permissions, chargement, transactions et composition UI) ; toutes les fonctions médias doivent venir d’extensions réellement installables et retirables. Une séparation de fichiers source ou un interrupteur ne suffit pas. Les lecteurs personnalisés viennent après ce découpage.
+
+- [x] C-MEDIA-01 — 0.0.29 : reconnaissance locale Films/Séries/Musique exécutée dans trois modules WASI indépendants ; scan réel raccordé, lots, validation et conservation du catalogue.
+- [ ] C-MEDIA-02 — Installer, choisir, désactiver et retirer les paquets média et leurs capacités, avec dépendances et conservation des données communes. Les programmes de reconnaissance livrés ne remplissent pas encore ce critère.
+- [ ] C-MEDIA-03 — Extraire les tags audio, les règles des catalogues spécialisés et leurs comportements ; supprimer les replis métier dans le noyau.
+- [ ] C-MEDIA-04 — Contributions UI des modules (navigation, pages, réglages, recherche), thèmes et traductions, sans route centrale par type de média.
+- [ ] C-MEDIA-05 — Extraire les fournisseurs/connecteurs restants et vérifier le démarrage sans extension média, puis l’ajout et le retrait de chacune.
+
+Guide : [Extraction 0.0.29](ESSAYER-LES-EXTENSIONS-029.md). Les fonctionnalités ci-dessus ne sont pas toutes livrées.
+
 État au 20 octobre 2026 : catalogue officiel public, intégration et dédoublonnage 0.0.22 livrés. Sources du serveur publiées sur https://github.com/car-lito/mosaune ; vérifications Windows/Linux et construction ARM64 automatisées. 0.0.23 : HTTPS direct et arrêt SIGTERM validés, images Docker amd64/arm64 publiées et téléchargements anonymes vérifiés. Catalogue CasaOS 0.4.15 préparé ; import réel encore à tester. 0.0.24 : désactivation réelle de TMDB livrée et images publiées après tests. 0.0.25 : présentation extensible des résultats de recherche livrée et images publiées après tests. 0.0.26 : dépendances persistantes et premier raccordement du paquet TMDB livrés ; images publiées après tests. 0.0.27 : réglages génériques par propriétaire et migration TMDB livrés ; images publiées après tests. 0.0.28 : autorisations persistantes et premier contrôle TMDB livrés ; images publiées après tests. Aucun déploiement NAS.
 
 # Mosaune — comptes, personnalisation et extensions avant le NAS

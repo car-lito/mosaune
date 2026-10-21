@@ -113,7 +113,7 @@ func storeArtwork(ctx context.Context, db databaseAccess, data []byte) (string, 
 	return id, nil
 }
 
-func indexLocalMetadata(ctx context.Context, tx *sql.Tx, root *os.Root, l library, rel string) error {
+func indexLocalMetadata(ctx context.Context, tx *sql.Tx, root *os.Root, l library, rel string, md Metadata) error {
 	var id, revision, oldRevision string
 	err := tx.QueryRowContext(ctx, `SELECT m.id,m.revision,COALESCE(d.revision,'') FROM media m LEFT JOIN metadata d ON d.media_id=m.id WHERE m.library_id=? AND m.relative_path=?`, l.ID, rel).Scan(&id, &revision, &oldRevision)
 	if err != nil {
@@ -122,17 +122,14 @@ func indexLocalMetadata(ctx context.Context, tx *sql.Tx, root *os.Root, l librar
 	if revision == oldRevision {
 		return nil
 	}
-	var md Metadata
 	var picture []byte
 	if l.Kind == "music" {
 		f, err := root.Open(filepath.FromSlash(rel))
 		if err != nil {
 			return err
 		}
-		md, picture = localMusic(f, rel)
+		md, picture = localMusic(f, md)
 		f.Close()
-	} else {
-		md = localVideo(l.Kind, rel)
 	}
 	md.ImageID, err = storeArtwork(ctx, tx, picture)
 	if err != nil {
@@ -178,7 +175,19 @@ func (c *catalog) mediaMetadata(ctx context.Context, id string) (media, error) {
 	}
 	_ = json.Unmarshal([]byte(data), &m.Metadata)
 	if m.Metadata == nil || m.Metadata.Title == "" {
-		md := localVideo(m.Kind, m.Filename)
+		reader, e := newMediaRecognizer(ctx, m.Kind)
+		if e != nil {
+			return m, e
+		}
+		defer reader.close()
+		items, e := reader.recognize(ctx, []string{m.Filename})
+		if e != nil {
+			return m, e
+		}
+		if !items[0].Accepted {
+			return m, errors.New("Fichier non pris en charge par le module.")
+		}
+		md := filenameMetadata(items[0])
 		m.Metadata = &md
 	}
 	return m, nil

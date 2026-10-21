@@ -1,3 +1,7 @@
+## Reconnaissance des fichiers — 0.0.29
+
+Le [contrat media.recognition.v1](capabilities/recognition/v1/README.md) est utilisé par les programmes Films, Séries et Musique pendant le scan réel. Ils sont compilés séparément, sans accès aux fichiers ni au réseau. Livraison embarquée uniquement pour cette étape ; installation des familles média et extraction de leurs écrans encore à réaliser.
+
 ## Autorisations persistantes — 0.0.28
 
 Le [contrat des autorisations](authorization/README.md) distingue les demandes du manifeste des opérations accordées par l’hôte. TMDB est le premier adaptateur raccordé à la révocation et à l’interface administrateur ; les autres familles restent à intégrer.

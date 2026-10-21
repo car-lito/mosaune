@@ -42,7 +42,7 @@ func testMP3() []byte {
 	return append(header, frames.Bytes()...)
 }
 func TestLocalMetadataAndArtwork(t *testing.T) {
-	md, picture := localMusic(bytes.NewReader(testMP3()), "file.mp3")
+	md, picture := localMusic(bytes.NewReader(testMP3()), Metadata{Title: "file", Provider: "filename", MatchState: "local", Origins: map[string]string{"title": "filename"}})
 	if md.Title != "Titre de test" || md.Artist != "Artiste" || md.Album != "Album" || md.Track != 2 || len(picture) == 0 {
 		t.Fatalf("tags: %+v picture %d", md, len(picture))
 	}
@@ -71,7 +71,7 @@ func TestLocalMetadataAndArtwork(t *testing.T) {
 	if err != nil || id != "" {
 		t.Fatal("active image accepted")
 	}
-	md, _ = localMusic(bytes.NewReader([]byte("bad")), "broken.mp3")
+	md, _ = localMusic(bytes.NewReader([]byte("bad")), Metadata{Title: "broken", Provider: "filename", MatchState: "local", Origins: map[string]string{"title": "filename"}})
 	if md.Title != "broken" {
 		t.Fatal("missing filename fallback")
 	}
@@ -88,7 +88,16 @@ func TestFilenameIdentification(t *testing.T) {
 		{"Show.S01E01E02.Double.mkv", "series", "Double", "Show", 0, 1, 1, 2},
 		{"Iron.Man.2008.1080p.mkv", "films", "Iron Man", "", 2008, 0, 0, 0},
 	} {
-		m := localVideo(tc.kind, tc.file)
+		reader, err := newMediaRecognizer(context.Background(), tc.kind)
+		if err != nil {
+			t.Fatal(err)
+		}
+		items, err := reader.recognize(context.Background(), []string{tc.file})
+		reader.close()
+		if err != nil {
+			t.Fatal(err)
+		}
+		m := items[0]
 		if m.Title != tc.title || m.Series != tc.series || m.Year != tc.year || m.Season != tc.season || m.Episode != tc.episode || m.EpisodeEnd != tc.end {
 			t.Errorf("%s: %+v", tc.file, m)
 		}

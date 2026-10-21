@@ -1,0 +1,7 @@
+{
+  "id": "mosaune.series.recognizer",
+  "version": "0.1.0",
+  "capabilities": [
+    "media.recognition.v1"
+  ]
+}

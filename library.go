@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	recognition "mosaune/extensionkit/capabilities/recognition/v1"
 	"net/http"
 	"os"
 	"path"
@@ -205,14 +206,6 @@ func openCatalog(dir string) (*catalog, error) {
 	return c, nil
 }
 
-func supported(kind, name string) bool {
-	ext := strings.ToLower(filepath.Ext(name))
-	if kind == "music" {
-		return strings.Contains("|.mp3|.flac|.m4a|.aac|.ogg|.opus|.wav|.aiff|.wma|", "|"+ext+"|") && ext != ""
-	}
-	return strings.Contains("|.mp4|.mkv|.webm|.mov|.avi|.m4v|.ts|.mpeg|.mpg|", "|"+ext+"|") && ext != ""
-}
-
 func (c *catalog) libraries(ctx context.Context) ([]library, error) {
 	rows, err := c.db.QueryContext(ctx, `SELECT l.id,l.name,l.path,l.kind,COUNT(m.id) FROM libraries l LEFT JOIN media m ON m.library_id=l.id AND m.available=1 GROUP BY l.id ORDER BY l.rowid`)
 	if err != nil {
@@ -358,11 +351,17 @@ func (c *catalog) scan(ctx context.Context, l library, add bool) (result library
 		return l, errors.New("Dossier inaccessible. Le catalogue précédent est conservé.")
 	}
 	defer root.Close()
+	reader, err := newMediaRecognizer(ctx, l.Kind)
+	if err != nil {
+		return l, err
+	}
+	defer reader.close()
 	// Discover before opening the transaction: the total is honest, and remote
 	// directory traversal does not keep the catalog locked. No media bytes are kept.
 	type discovered struct {
-		rel  string
-		info fs.FileInfo
+		rel      string
+		info     fs.FileInfo
+		metadata Metadata
 	}
 	files := []discovered{}
 	err = fs.WalkDir(root.FS(), ".", func(rel string, d fs.DirEntry, walkErr error) error {
@@ -372,7 +371,7 @@ func (c *catalog) scan(ctx context.Context, l library, add bool) (result library
 		if walkErr != nil {
 			return walkErr
 		}
-		if d.Type()&os.ModeSymlink != 0 || d.IsDir() || !supported(l.Kind, d.Name()) {
+		if d.Type()&os.ModeSymlink != 0 || d.IsDir() || !reader.formats.Accepts(d.Name()) {
 			return nil
 		}
 		info, e := d.Info()
@@ -382,12 +381,30 @@ func (c *catalog) scan(ctx context.Context, l library, add bool) (result library
 		if !info.Mode().IsRegular() {
 			return nil
 		}
-		files = append(files, discovered{rel, info})
+		files = append(files, discovered{rel: rel, info: info})
 		c.setScanProgress(scanProgress{LibraryID: l.ID, Name: l.Name, Kind: l.Kind, State: "discovering", Found: len(files)})
 		return nil
 	})
 	if err != nil {
 		return l, fmt.Errorf("Analyse interrompue ; catalogue précédent conservé : %w", err)
+	}
+	c.setScanProgress(scanProgress{LibraryID: l.ID, Name: l.Name, Kind: l.Kind, State: "recognizing", Found: len(files), Total: len(files)})
+	// Run all extension code before the write transaction. An invalid batch must
+	// not mark previously catalogued files as unavailable.
+	for start := 0; start < len(files); start += recognition.BatchSize {
+		end := min(start+recognition.BatchSize, len(files))
+		names := make([]string, end-start)
+		for i := range names {
+			names[i] = files[start+i].rel
+		}
+		recognized, e := reader.recognize(ctx, names)
+		if e != nil {
+			return l, e
+		}
+		for i, item := range recognized {
+			files[start+i].metadata = filenameMetadata(item)
+		}
+		c.setScanProgress(scanProgress{LibraryID: l.ID, Name: l.Name, Kind: l.Kind, State: "recognizing", Found: len(files), Total: len(files), Processed: end})
 	}
 	c.setScanProgress(scanProgress{LibraryID: l.ID, Name: l.Name, Kind: l.Kind, State: "indexing", Found: len(files), Total: len(files)})
 	tx, err := c.db.BeginTx(ctx, nil)
@@ -422,7 +439,7 @@ func (c *catalog) scan(ctx context.Context, l library, add bool) (result library
 		rel, info := file.rel, file.info
 		_, err = stmt.ExecContext(ctx, rand.Text(), l.ID, rel, strings.TrimSuffix(info.Name(), path.Ext(info.Name())), info.Size(), info.ModTime().UnixNano(), rand.Text(), time.Now().Unix())
 		if err == nil {
-			err = indexLocalMetadata(ctx, tx, root, l, rel)
+			err = indexLocalMetadata(ctx, tx, root, l, rel, file.metadata)
 		}
 		if err == nil {
 			l.Count++

@@ -27,6 +27,7 @@ function wasm(output, source) {
 }
 try {
   wasm('providers/tmdb/provider.wasm', './providers/tmdb/source');
+  for (const kind of ['films', 'series', 'music']) wasm(`modules/${kind}/recognizer.wasm`, `./modules/${kind}/source`);
   // Le serveur embarque l'interface : elle est nécessaire même pour les tests Go.
   run(process.execPath, ['node_modules/vite/bin/vite.js', 'build']);
   if (mode !== 'build') {

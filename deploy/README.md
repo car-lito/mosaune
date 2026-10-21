@@ -1,6 +1,6 @@
 # Préparer Mosaune pour Docker et CasaOS
 
-Version 0.0.28 : autorisations communes des extensions et révocation TMDB, sur la base réseau et conteneur introduite en 0.0.23. **Préversion de développement ; le premier déploiement sur le NAS attend encore les autres points du [plan avant NAS](../PLAN-AVANT-NAS.md).** Aucun certificat, secret, média ou catalogue personnel n'est inclus dans l'image.
+Version 0.0.29 : première extraction de la reconnaissance locale des médias, sur la base réseau et conteneur introduite en 0.0.23. **Préversion de développement ; le premier déploiement sur le NAS attend encore les autres points du [plan avant NAS](../PLAN-AVANT-NAS.md).** Aucun certificat, secret, média ou catalogue personnel n'est inclus dans l'image.
 
 ## Ce que cette version apporte
 
@@ -43,7 +43,7 @@ Exemple de lancement technique, après préparation d'un certificat valide :
 
 ## Docker Compose
 
-Le fichier [compose.yml](compose.yml) utilise l'image `ghcr.io/car-lito/mosaune:0.0.28-preview`. Cette étiquette est une préversion pouvant évoluer ; chaque publication porte aussi `sha-<commit complet>` pour choisir exactement un build. Aucun canal `latest` ou stable n'est publié à ce stade.
+Le fichier [compose.yml](compose.yml) utilise l'image `ghcr.io/car-lito/mosaune:0.0.29-preview`. Cette étiquette est une préversion pouvant évoluer ; chaque publication porte aussi `sha-<commit complet>` pour choisir exactement un build. Aucun canal `latest` ou stable n'est publié à ce stade.
 
 Après les préparatifs, copier [.env.example](.env.example) vers `.env` dans ce dossier et adapter les chemins, l'adresse et l'identité du compte. La liaison réseau doit correspondre à une IP réellement attribuée au NAS. Le Compose refuse de créer silencieusement les dossiers manquants. Pour un certificat public reconnu, laisser `MOSAUNE_TLS_CA` vide.
 
@@ -119,6 +119,6 @@ Localement : 21 tests web et 102 tests principaux du serveur réussis ; tests du
 
 Le 20 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-lito/mosaune/actions/runs/39406608344) pour le commit `8682555da5e6dac94dd23fc680465bce98c15c33`. Tests Windows/Linux, exécutables et conteneurs amd64/arm64 (ARM sous émulation). Autorisations isolées par propriétaire, absence d’accord implicite lors des mises à jour, révocation des deux moteurs TMDB, refus des résultats tardifs, migration, redémarrage, comptes non administrateurs et conservation des données testés.
 
-Image publique : `ghcr.io/car-lito/mosaune:0.0.28-preview`. Empreinte de l’index : `sha256:4897698bef10cd427aa377a1a03ac39c8394d3dce5a216546c02750daee4ece3`. Téléchargement anonyme des fichiers des deux architectures avec contrôle SHA-256 ; archive CasaOS publique identique à l’archive locale. Aucun essai sur le NAS réel.
+Image publique : `ghcr.io/car-lito/mosaune:0.0.29-preview`. Empreinte de l’index : `sha256:4897698bef10cd427aa377a1a03ac39c8394d3dce5a216546c02750daee4ece3`. Téléchargement anonyme des fichiers des deux architectures avec contrôle SHA-256 ; archive CasaOS publique identique à l’archive locale. Aucun essai sur le NAS réel.
 
 Localement : 21 tests web et 108 tests principaux du serveur réussis ; tests du kit et analyse Go réussis, Svelte sans erreur ni avertissement, trois exécutables construits. La suite serveur a terminé en 539.981 secondes avec un délai local de 12 minutes ; limites de production et GitHub inchangées. Le formulaire de retrait d’accès et sa persistance après rechargement ont été vérifiés dans le navigateur, avec une installation vide et un compte fictif. L’ajustement final du libellé de la carte a été recompilé et vérifié par Svelte. Guide : [Extensions 0.0.28](../ESSAYER-LES-EXTENSIONS-028.md).
