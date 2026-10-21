@@ -43,17 +43,21 @@ try {
   assert(inspect.Config.User === '65532:65532' && inspect.HostConfig.ReadonlyRootfs, 'Container is not unprivileged/read-only');
   assert(inspect.Mounts.find(m => m.Destination === '/media')?.RW === false, 'Media is writable');
   const ca = readFileSync(join(certDirectory, 'server.crt'));
-  function request(path, { method = 'GET', body, headers = {} } = {}) {
+  function request(path, { method = 'GET', body, headers = {}, timeout = 10000 } = {}) {
+    const started = Date.now();
     return new Promise((resolve, reject) => {
       // Verify the actual TLS destination even when testing a forged HTTP Host.
       // Node otherwise derives the TLS server name from that injected header.
-      const req = https.request(origin + path, { method, ca, headers, timeout: 10000,
+      const req = https.request(origin + path, { method, ca, headers, timeout,
         servername: '', checkServerIdentity: (_, certificate) => checkServerIdentity('127.0.0.1', certificate),
       }, response => {
         const chunks = []; response.on('data', chunk => chunks.push(chunk));
-        response.on('end', () => resolve({ status: response.statusCode, headers: response.headers, text: Buffer.concat(chunks).toString() }));
+        response.on('end', () => {
+          console.log(`${method} ${path}: HTTP ${response.statusCode}, ${Date.now() - started} ms`);
+          resolve({ status: response.statusCode, headers: response.headers, text: Buffer.concat(chunks).toString() });
+        });
       });
-      req.on('error', reject); req.on('timeout', () => req.destroy(new Error('Request timed out')));
+      req.on('error', reject); req.on('timeout', () => req.destroy(new Error(`${method} ${path} exceeded ${timeout} ms`)));
       req.end(body === undefined ? undefined : JSON.stringify(body));
     });
   }
@@ -81,8 +85,11 @@ try {
   const cookie = setup.headers['set-cookie']?.[0];
   assert(cookie?.includes('Secure') && cookie.includes('HttpOnly') && cookie.includes('SameSite=Strict'), 'Unsafe session cookie');
   const auth = { Cookie: cookie.split(';')[0], Origin: origin, 'X-Mosaune-Token': JSON.parse(setup.text).token };
-  const scan = await request('/api/v1/libraries', { method: 'POST', headers: auth, body: { name: 'CI only', kind: 'music', path: '/media' } });
-  assert(scan.status === 201, 'Read-only media scan failed');
+  // Under ARM emulation the initial WASI compilation can exceed the ordinary
+  // HTTP probe budget. This exceeds the host's bounded compilation/call budget
+  // so a real host error remains visible instead of being masked by the probe.
+  const scan = await request('/api/v1/libraries', { method: 'POST', timeout: 30000, headers: auth, body: { name: 'CI only', kind: 'music', path: '/media' } });
+  assert(scan.status === 201, `Read-only media scan failed: HTTP ${scan.status}, ${scan.text}`);
   const library = JSON.parse((await request('/api/v1/library', { headers: auth })).text);
   assert(library.items.length === 1, 'Sample media was not catalogued');
   const streamed = await request(library.items[0].url, { headers: { ...auth, Range: 'bytes=2-5' } });
