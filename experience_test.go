@@ -229,6 +229,7 @@ func TestExperienceMigrationFromV4PreservesLists(t *testing.T) {
 		t.Fatal(err)
 	}
 	dropAccountsForMigration(t, c)
+	removeRecognitionForLegacyFixture(t, c)
 	if _, err = c.db.Exec(`UPDATE works SET favorite=1,watchlist=1 WHERE id=?; INSERT INTO playlists VALUES('old','Avant refonte',3,'[]'); DROP TABLE album_links; DROP TABLE playlist_art; ALTER TABLE media DROP COLUMN added_at; ALTER TABLE media DROP COLUMN last_played; PRAGMA user_version=4;`, id); err != nil {
 		t.Fatal(err)
 	}

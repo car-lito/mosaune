@@ -1,3 +1,7 @@
+## Cycle des paquets officiels — 0.0.30
+
+Le serveur résout désormais le programme installé et son état dans le registre partagé. Le scan ne charge jamais directement la copie de distribution. Installation/réinstallation officielle, activation, désactivation et retrait sont disponibles dans les paramètres ; les sessions annulées ne peuvent plus enregistrer de résultats. [Parcours et limites](../../../../ESSAYER-LES-EXTENSIONS-030.md). L’import externe et la sélection entre implémentations restent à généraliser.
+
 # Reconnaissance locale v1
 
 Capacité `media.recognition.v1`, indépendante des fournisseurs de métadonnées et des lecteurs. Les trois programmes officiels sont dans `extension-kit/modules/films`, `series` et `music`. Le serveur importe leurs exécutables Wasm et leurs descripteurs, jamais le paquet Go qui interprète les noms.

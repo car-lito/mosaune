@@ -175,12 +175,12 @@ func (c *catalog) mediaMetadata(ctx context.Context, id string) (media, error) {
 	}
 	_ = json.Unmarshal([]byte(data), &m.Metadata)
 	if m.Metadata == nil || m.Metadata.Title == "" {
-		reader, e := newMediaRecognizer(ctx, m.Kind)
+		call, reader, finish, e := c.openRecognizer(ctx, m.Kind)
 		if e != nil {
 			return m, e
 		}
-		defer reader.close()
-		items, e := reader.recognize(ctx, []string{m.Filename})
+		defer finish()
+		items, e := reader.recognize(call, []string{m.Filename})
 		if e != nil {
 			return m, e
 		}

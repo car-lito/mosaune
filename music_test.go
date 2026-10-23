@@ -141,6 +141,7 @@ func TestMusicModuleAndPlaylistAccess(t *testing.T) {
 func TestMusicMigrationPreservesExistingCatalog(t *testing.T) {
 	c, dir := testCatalog(t)
 	dropAccountsForMigration(t, c)
+	removeRecognitionForLegacyFixture(t, c)
 	if _, err := c.db.Exec(`DROP TABLE album_links; DROP TABLE playlist_art; ALTER TABLE media DROP COLUMN added_at; ALTER TABLE media DROP COLUMN last_played; DROP TABLE works; DROP TABLE playlists; PRAGMA user_version=2; INSERT INTO provider_settings(id,secret) VALUES('example','test-value');`); err != nil {
 		t.Fatal(err)
 	}

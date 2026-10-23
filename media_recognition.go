@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	recognition "mosaune/extensionkit/capabilities/recognition/v1"
-	"mosaune/extensionkit/modules"
 	"mosaune/extensionkit/protocol"
 	runtime "mosaune/extensionkit/runtime"
 )
@@ -19,12 +18,17 @@ type mediaRecognizer struct {
 	formats recognition.Formats
 }
 
-func newMediaRecognizer(ctx context.Context, kind string) (*mediaRecognizer, error) {
-	descriptor, code, err := modules.Lookup(kind)
+func (c *catalog) openRecognizer(ctx context.Context, kind string) (context.Context, *mediaRecognizer, func(), error) {
+	call, done, descriptor, code, err := c.beginRecognition(ctx, kind)
 	if err != nil {
-		return nil, errors.New("Aucun module de reconnaissance pour ce type de média.")
+		return call, nil, func() {}, err
 	}
-	return loadMediaRecognizer(ctx, descriptor, code)
+	reader, err := loadMediaRecognizer(call, descriptor, code)
+	if err != nil {
+		done()
+		return call, nil, func() {}, err
+	}
+	return call, reader, func() { reader.close(); done() }, nil
 }
 func loadMediaRecognizer(ctx context.Context, descriptor protocol.Descriptor, code []byte) (*mediaRecognizer, error) {
 	// No filesystem, environment, credentials or services are exposed. Future

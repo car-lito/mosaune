@@ -255,6 +255,7 @@ func TestExtensionsMigrationAndRestart(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
+	removeRecognitionForLegacyFixture(t, c)
 	if _, e = c.db.Exec(`DROP TABLE extension_preferences; DROP TABLE extension_grants; DROP TABLE extensions; PRAGMA user_version=9;`); e != nil {
 		t.Fatal(e)
 	}

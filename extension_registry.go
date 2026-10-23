@@ -9,9 +9,9 @@ import (
 	"mosaune/extensionkit/registry"
 )
 
-const catalogSchemaVersion = 17
+const catalogSchemaVersion = 18
 
-// The current bridge registers only verified installed TMDB packages. Bundled
+// TMDB packages and recognition packages share this registry. Other built-in
 // functions/themes still have their existing lifecycles until extracted.
 func migrateExtensionRegistry(db *sql.DB) error {
 	var v int

@@ -384,6 +384,7 @@ func TestServiceAuthorizationMigrationKeepsDisabledProvider(t *testing.T) {
 	if err := c.provider("tmdb").(*tmdbProvider).setProviderEnabled(context.Background(), false); err != nil {
 		t.Fatal(err)
 	}
+	removeRecognitionForLegacyFixture(t, c)
 	if _, err := c.db.Exec(`DROP TABLE extension_authorizations; PRAGMA user_version=16`); err != nil {
 		t.Fatal(err)
 	}

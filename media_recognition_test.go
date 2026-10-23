@@ -10,6 +10,16 @@ import (
 	"time"
 )
 
+// Raw factory execution is available only to contract tests; production scans
+// always resolve installed, enabled packages through the persistent registry.
+func newMediaRecognizer(ctx context.Context, kind string) (*mediaRecognizer, error) {
+	d, code, err := modules.Lookup(kind)
+	if err != nil {
+		return nil, err
+	}
+	return loadMediaRecognizer(ctx, d, code)
+}
+
 func TestRecognitionModulesUseIndependentContracts(t *testing.T) {
 	for _, kind := range []string{"films", "series", "music"} {
 		t.Run(kind, func(t *testing.T) {

@@ -47,6 +47,7 @@ type media struct {
 	Metadata   *Metadata `json:"metadata,omitempty"`
 }
 type catalog struct {
+	recognition         recognitionLifecycle
 	repositoryMu        sync.Mutex
 	repositoryTransport http.RoundTripper // nil in production; deterministic HTTP fixtures in tests
 	extensionMu         sync.Mutex
@@ -169,6 +170,10 @@ func openCatalog(dir string) (*catalog, error) {
 		return nil, err
 	}
 	if err = migrateExtensionAuthorizations(db); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if err = migrateRecognitionPackages(db); err != nil {
 		db.Close()
 		return nil, err
 	}
@@ -351,11 +356,11 @@ func (c *catalog) scan(ctx context.Context, l library, add bool) (result library
 		return l, errors.New("Dossier inaccessible. Le catalogue précédent est conservé.")
 	}
 	defer root.Close()
-	reader, err := newMediaRecognizer(ctx, l.Kind)
+	ctx, reader, finishRecognition, err := c.openRecognizer(ctx, l.Kind)
 	if err != nil {
 		return l, err
 	}
-	defer reader.close()
+	defer finishRecognition()
 	// Discover before opening the transaction: the total is honest, and remote
 	// directory traversal does not keep the catalog locked. No media bytes are kept.
 	type discovered struct {
@@ -407,6 +412,11 @@ func (c *catalog) scan(ctx context.Context, l library, add bool) (result library
 		c.setScanProgress(scanProgress{LibraryID: l.ID, Name: l.Name, Kind: l.Kind, State: "recognizing", Found: len(files), Total: len(files), Processed: end})
 	}
 	c.setScanProgress(scanProgress{LibraryID: l.ID, Name: l.Name, Kind: l.Kind, State: "indexing", Found: len(files), Total: len(files)})
+	unlockRecognition, err := c.recognitionCommit(ctx)
+	if err != nil {
+		return l, err
+	}
+	defer unlockRecognition()
 	tx, err := c.db.BeginTx(ctx, nil)
 	if err != nil {
 		return l, err
@@ -490,6 +500,11 @@ func (c *catalog) openMedia(ctx context.Context, id string) (*os.File, string, e
 }
 
 func (c *catalog) close() error {
+	c.recognition.mu.Lock()
+	for _, call := range c.recognition.calls {
+		call.cancel(context.Canceled)
+	}
+	c.recognition.mu.Unlock()
 	for _, provider := range c.providers {
 		if p, ok := provider.(*tmdbProvider); ok {
 			p.closeExtension()

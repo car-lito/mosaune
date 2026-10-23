@@ -269,6 +269,7 @@ func TestRepositoryMigrationAndReopen(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	removeRecognitionForLegacyFixture(t, c)
 	_, err = c.db.Exec(`DROP TABLE extension_repositories;PRAGMA user_version=12`)
 	if err != nil {
 		t.Fatal(err)

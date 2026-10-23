@@ -1,3 +1,10 @@
+## 0.0.30 — 22 octobre 2026
+
+- Modules de reconnaissance enregistrés dans le registre commun, programmes installés dans un stockage privé et installation/réinstallation hors ligne depuis les versions officielles fournies. Migration au schéma 18 avec sauvegarde ; installation initiale unique.
+- Activation, désactivation et retrait persistants, annulation des scans non enregistrés et refus des résultats annulés après réactivation. Écritures du catalogue et changements d’état ordonnés ; retrait atomique du registre et du programme, sans effacement des médias et métadonnées communes.
+- Trois cartes administrateur, fiches détaillées et confirmation de retrait ; réinstallation depuis la rubrique disponible, activation explicite. Mode de secours appliqué aux reconnaisseurs.
+- Ce cycle porte sur la reconnaissance uniquement : paquets communautaires, choix entre implémentations, tags, écrans et autres fonctions des familles médias restent à extraire. Aucun déploiement NAS.
+
 ## 0.0.29 — 21 octobre 2026
 
 - Reconnaissance des fichiers extraite dans trois programmes WASI : Films, Séries et Musique. Formats et règles des noms retirés du serveur ; contrat versionné commun et réponses validées.

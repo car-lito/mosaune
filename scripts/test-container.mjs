@@ -108,6 +108,9 @@ try {
   assert(movie?.metadata?.year === 2008 && episode?.metadata?.season === 1 && episode?.metadata?.episode === 2 && music, 'Media recognizers did not return expected metadata');
   const streamed = await request(music.url, { headers: { ...auth, Range: 'bytes=2-5' } });
   assert(streamed.status === 206 && streamed.text === '2345', 'HTTPS range streaming failed');
+  const packages = JSON.parse((await request('/api/v1/recognition-packages', { headers: auth })).text);
+  const removal = await request('/api/v1/recognition-packages/films', { method: 'POST', headers: auth, body: { operation: 'remove', revision: packages.revision } });
+  assert(removal.status === 200, 'Recognition package removal failed');
   docker(['stop', '--time', '15', id]);
   assert(JSON.parse(docker(['inspect', id]))[0].State.ExitCode === 0, 'SIGTERM did not stop cleanly');
   docker(['start', id]); await ready();
@@ -117,6 +120,15 @@ try {
   assert(login.status === 200, 'Login after restart failed');
   const persisted = JSON.parse((await request('/api/v1/library', { headers: { Cookie: login.headers['set-cookie'][0].split(';')[0] } })).text);
   assert(persisted.items.length === fixtures.length, 'Catalogue lost after restart');
+  const restartedAuth = { Cookie: login.headers['set-cookie'][0].split(';')[0], Origin: origin, 'X-Mosaune-Token': JSON.parse(login.text).token };
+  const removed = JSON.parse((await request('/api/v1/recognition-packages', { headers: restartedAuth })).text);
+  assert(!removed.packages.find(p => p.kind === 'films')?.installed, 'Restart restored removed package');
+  const install = await request('/api/v1/recognition-packages/films', { method: 'POST', headers: restartedAuth, body: { operation: 'install', revision: removed.revision } });
+  assert(install.status === 200, 'Recognition package reinstall failed');
+  const installed = JSON.parse((await request('/api/v1/recognition-packages', { headers: restartedAuth })).text);
+  assert(installed.packages.find(p => p.kind === 'films')?.installed && !installed.packages.find(p => p.kind === 'films')?.enabled, 'Installation activated package implicitly');
+  const enable = await request('/api/v1/recognition-packages/films', { method: 'POST', headers: restartedAuth, body: { operation: 'enable', revision: installed.revision } });
+  assert(enable.status === 200, 'Recognition reactivation failed');
   for (const fixture of fixtures) assert(readFileSync(join(mediaDirectory, fixture.kind, fixture.name), 'utf8') === '0123456789', 'Source media modified');
   docker(['exec', id, '/mosaune', '-healthcheck']);
   docker(['stop', '--time', '15', id]);

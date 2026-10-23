@@ -30,6 +30,7 @@ func readExtensionUpload(w http.ResponseWriter, r *http.Request) (extensionPacka
 	return p, true
 }
 func (c *catalog) extensionRoutes(mux *secureMux) {
+	c.recognitionPackageRoutes(mux)
 	c.extensionRepositoryRoutes(mux)
 	c.extensionConfigurationRoutes(mux)
 	c.providerPackageRoutes(mux)

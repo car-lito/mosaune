@@ -384,6 +384,7 @@ func TestAcquisitionSchemaFiveUpgrade(t *testing.T) {
 		t.Fatal(err)
 	}
 	dropAccountsForMigration(t, c)
+	removeRecognitionForLegacyFixture(t, c)
 	_, err = c.db.Exec(`DROP TABLE acquisition_requests; DROP TABLE acquisition_settings; PRAGMA user_version=5;`)
 	if err != nil {
 		t.Fatal(err)

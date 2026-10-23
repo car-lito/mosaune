@@ -133,6 +133,7 @@ func TestTMDBRuntimeMigrationManualChoiceAndRestart(t *testing.T) {
 	if _, err := c.scan(ctx, library{Path: mediaDir, Kind: "films"}, true); err != nil {
 		t.Fatal(err)
 	}
+	removeRecognitionForLegacyFixture(t, c)
 	if _, err := c.db.Exec(`DROP TABLE provider_runtime; PRAGMA user_version=10`); err != nil {
 		t.Fatal(err)
 	}

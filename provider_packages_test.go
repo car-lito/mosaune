@@ -192,6 +192,7 @@ func TestProviderPackageMigrationBackup(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
+	removeRecognitionForLegacyFixture(t, c)
 	_, e = c.db.Exec(`DROP TABLE provider_packages;PRAGMA user_version=11`)
 	if e != nil {
 		t.Fatal(e)

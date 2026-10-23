@@ -13,22 +13,32 @@ import (
 var assets embed.FS
 
 func Lookup(kind string) (protocol.Descriptor, []byte, error) {
-	var d protocol.Descriptor
-	switch kind {
-	case "films", "series", "music":
-	default:
-		return d, nil, fmt.Errorf("unknown recognition module")
-	}
-	raw, err := assets.ReadFile(kind + "/module.json")
+	d, err := Descriptor(kind)
 	if err != nil {
-		return d, nil, err
-	}
-	if err = json.Unmarshal(raw, &d); err != nil {
-		return d, nil, err
-	}
-	if err = d.Validate(); err != nil {
 		return d, nil, err
 	}
 	code, err := assets.ReadFile(kind + "/recognizer.wasm")
 	return d, code, err
+}
+
+// Descriptor reads only the tiny manifest. Listing or toggling installed
+// modules must not allocate a copy of each multi-megabyte factory executable.
+func Descriptor(kind string) (protocol.Descriptor, error) {
+	var d protocol.Descriptor
+	switch kind {
+	case "films", "series", "music":
+	default:
+		return d, fmt.Errorf("unknown recognition module")
+	}
+	raw, err := assets.ReadFile(kind + "/module.json")
+	if err != nil {
+		return d, err
+	}
+	if err = json.Unmarshal(raw, &d); err != nil {
+		return d, err
+	}
+	if err = d.Validate(); err != nil {
+		return d, err
+	}
+	return d, nil
 }

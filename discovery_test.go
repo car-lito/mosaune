@@ -249,6 +249,7 @@ func TestTMDBDiscoveryPaginationAndCache(t *testing.T) {
 func TestDiscoveryMigrationPreservesV3(t *testing.T) {
 	c, dir := testCatalog(t)
 	dropAccountsForMigration(t, c)
+	removeRecognitionForLegacyFixture(t, c)
 	if _, err := c.db.Exec(`DROP TABLE album_links; DROP TABLE playlist_art; ALTER TABLE media DROP COLUMN added_at; ALTER TABLE media DROP COLUMN last_played; DROP TABLE works; PRAGMA user_version=3; INSERT INTO playlists VALUES('saved','Ma playlist',7,'[]'); INSERT INTO provider_settings VALUES('example','fixture-secret');`); err != nil {
 		t.Fatal(err)
 	}

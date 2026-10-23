@@ -233,6 +233,7 @@ func TestMetadataMigrationPreservesProgress(t *testing.T) {
 	}
 	id := getItems(t, c)[0].ID
 	dropAccountsForMigration(t, c)
+	removeRecognitionForLegacyFixture(t, c)
 	_, err = c.db.Exec(`UPDATE media SET position=42,duration=100 WHERE id=?; DROP TABLE album_links; DROP TABLE playlist_art; ALTER TABLE media DROP COLUMN added_at; ALTER TABLE media DROP COLUMN last_played; DROP TABLE works; DROP TABLE playlists; DROP TABLE metadata; DROP TABLE artwork; DROP TABLE provider_cache; DROP TABLE provider_settings; PRAGMA user_version=1;`, id)
 	if err != nil {
 		t.Fatal(err)

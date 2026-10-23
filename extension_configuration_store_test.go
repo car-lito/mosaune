@@ -197,6 +197,7 @@ func TestConfigurationMigrationAndSharedOwner(t *testing.T) {
 		t.Fatal(err)
 	}
 	const key = "fixture-migrated-token-12345678"
+	removeRecognitionForLegacyFixture(t, c)
 	if _, err = c.db.Exec(`DROP TABLE extension_configuration;INSERT INTO provider_settings VALUES('tmdb',?);PRAGMA user_version=15;`, key); err != nil {
 		t.Fatal(err)
 	}
@@ -342,6 +343,7 @@ func TestConfigurationMigrationFailurePreservesLegacyData(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer c.close()
+	removeRecognitionForLegacyFixture(t, c)
 	if _, err = c.db.Exec(`DROP TABLE extension_configuration; INSERT INTO provider_settings VALUES('tmdb','invalid-old-key');PRAGMA user_version=15;`); err != nil {
 		t.Fatal(err)
 	}

@@ -201,6 +201,7 @@ func TestPosterSchemaSevenMigration(t *testing.T) {
 		t.Fatal(e)
 	}
 	dropAccountsForMigration(t, c)
+	removeRecognitionForLegacyFixture(t, c)
 	if _, e = c.db.Exec(`UPDATE metadata_queue_state SET paused=1;DROP TABLE poster_choices;DROP TABLE custom_artwork;PRAGMA user_version=7`); e != nil {
 		t.Fatal(e)
 	}

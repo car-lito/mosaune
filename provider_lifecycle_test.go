@@ -271,6 +271,7 @@ func TestTMDBDisablePermissionsMigrationAndRestart(t *testing.T) {
 		t.Fatal("API did not disable")
 	}
 	old, dir := testCatalog(t)
+	removeRecognitionForLegacyFixture(t, old)
 	if _, e := old.db.Exec(`DROP TABLE provider_states; PRAGMA user_version=13`); e != nil {
 		t.Fatal(e)
 	}
