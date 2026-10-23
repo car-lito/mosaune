@@ -130,3 +130,13 @@ Le 22 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-li
 Image publique : `ghcr.io/car-lito/mosaune:0.0.29-preview`. Empreinte de l’index : `sha256:379941b62aa4b43ad6c53038c7441f38b2ea6b5f36024c1cd66ada152b658559`. Téléchargement anonyme des fichiers des deux architectures avec contrôle SHA-256 ; archive CasaOS publique identique à l’archive locale. Aucun essai sur le NAS réel.
 
 Localement : 21 tests web et 111 tests principaux du serveur réussis ; tests du kit et analyse Go réussis, Svelte sans erreur ni avertissement, trois exécutables construits. Suite serveur complète relancée avec le mode interprété : 124.8 secondes, sans échec. Limites de production inchangées ; la sonde HTTP du scan en CI attend désormais jusqu’à 30 secondes pour laisser le serveur restituer ses erreurs. Le texte de progression a été compilé et vérifié par Svelte ; aucun essai visuel dans le navigateur pour cette étape. Guide : [Extensions 0.0.29](../ESSAYER-LES-EXTENSIONS-029.md).
+
+## Validation de la préversion 0.0.30
+
+Le 23 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-lito/mosaune/actions/runs/39936296316) pour le commit `523fa2d44e3cc4e4f2e57d1aa79c7fa02f268f6b`. Tests Windows/Linux, exécutables et conteneurs amd64/arm64 (ARM sous émulation). Le test du conteneur vérifie aussi le retrait d’un reconnaisseur, son absence après redémarrage, sa réinstallation désactivée et sa réactivation explicite. Aucun essai sur le NAS réel.
+
+Image publique : `ghcr.io/car-lito/mosaune:0.0.30-preview`. Empreinte de l’index : `sha256:eb440fa0ef66db9310f949842b15312b76513e2b5eaa448aac649f9e4e3c2159`. Téléchargement anonyme des fichiers des deux architectures avec contrôle SHA-256 ; archive CasaOS publique identique à l’archive locale.
+
+Localement : 21 tests web et 116 tests principaux du serveur réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement, trois exécutables construits. La suite serveur a terminé en 628.902 secondes (délai local de 12 minutes, limites CI inchangées). Après l’optimisation de lecture des manifestes et le raccordement du bouton Actualiser, les tests de reconnaissance, les vérifications web et les trois constructions ont été repassés ; GitHub vérifie ensuite toutes les sources finales.
+
+Parcours navigateur testé sur une installation vide et un compte fictif : cartes, désactivation, fiche, confirmation et retrait, réinstallation depuis les modules disponibles puis activation explicite. Le dernier raccordement du bouton Actualiser est compilé et vérifié par Svelte. Guide : [Extensions 0.0.30](../ESSAYER-LES-EXTENSIONS-030.md).

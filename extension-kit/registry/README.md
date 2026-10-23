@@ -4,6 +4,8 @@ Le registre conserve les modules, leurs descripteurs, l’empreinte du code vér
 
 ## Intégration actuelle
 
+Depuis 0.0.30, les trois reconnaisseurs officiels rejoignent ce registre. Leur programme installé est stocké dans `recognition_packages` et modifié dans la même transaction que l’intention d’activation. Leur source initiale est la distribution officielle embarquée, sans import externe. Ils démarrent à la demande pendant le scan, vérifient l’empreinte du programme installé et respectent la désactivation, le retrait et le mode de secours. La migration au schéma 18 les installe une seule fois pour préserver les scans existants. [Parcours et limites](../../ESSAYER-LES-EXTENSIONS-030.md).
+
 Le paquet TMDB installé est le premier utilisateur réel du registre. Installation, mise à jour, restauration, choix de moteur et désinstallation mettent à jour l’archive et le registre dans la même transaction SQLite. Le démarrage à la demande vérifie la correspondance avec le paquet authentifié et utilise les choix enregistrés. La fiche du paquet affiche « Dépendances et démarrage ».
 
 La migration du catalogue vers le schéma 15 est précédée de la sauvegarde habituelle. Elle reprend les paquets TMDB existants dont la signature est vérifiée et leur choix de moteur, sans lancer de code. Un paquet illisible/non authentifiable n’est pas exécuté ni enregistré comme valide ; il reste visible via son installateur pour réparation. Les thèmes et fonctions intégrées n’utilisent pas encore ce registre. Le pilote TMDB refuse toujours les dépendances externes : l’intégration de plusieurs fournisseurs, des gros modules média et du choix interactif des alternatives reste à faire.

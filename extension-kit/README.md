@@ -1,4 +1,8 @@
-## Reconnaissance des fichiers — 0.0.29
+## Cycle des reconnaisseurs officiels — 0.0.30
+
+Les trois reconnaisseurs utilisent désormais le registre partagé et un stockage de programmes installés. Ils peuvent être désactivés, retirés puis réinstallés depuis la distribution officielle, avec conservation du catalogue et arrêt des analyses non enregistrées. [Contrat et limites](capabilities/recognition/v1/README.md). L’import externe, les alternatives et les familles médias complètes restent à généraliser.
+
+## Première extraction des fichiers — 0.0.29
 
 Le [contrat media.recognition.v1](capabilities/recognition/v1/README.md) est utilisé par les programmes Films, Séries et Musique pendant le scan réel. Ils sont compilés séparément, sans accès aux fichiers ni au réseau. Livraison embarquée uniquement pour cette étape ; installation des familles média et extraction de leurs écrans encore à réaliser.
 

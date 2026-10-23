@@ -21,8 +21,8 @@ Un moteur temporaire par scan, un module chargé, appels par lots. L'hôte chois
 
 Les réponses sont validées avant la transaction d'indexation. Une erreur conserve la bibliothèque précédente. Le serveur continue à ouvrir les dossiers et à appliquer les permissions, les limites de lecture et les transactions. Les tags audio sont encore extraits par le serveur ; ils enrichissent le titre initial fourni par Musique.
 
-Ces programmes sont **livrés avec le serveur**, compilés séparément par `scripts/project.mjs` et Docker. Ils ne sont pas encore des paquets installables ou supprimables dans la boutique. Le mode de secours des paquets externes ne les désactive pas. Aucune nouvelle permission utilisateur et aucune migration de catalogue dans cette étape.
+Ces programmes sont **distribués avec le serveur**, compilés séparément par `scripts/project.mjs` et Docker. Depuis 0.0.30, leur copie installée et leur état sont gérés dans le registre commun et le stockage privé `recognition_packages` (schéma 18). Le retrait efface cette copie installée ; la copie de distribution permet une réinstallation hors ligne, désactivée par défaut. Le mode de secours suspend leur exécution. Leur gestion est réservée aux administrateurs. L’import de versions communautaires n’est pas encore proposé.
 
 ## Prochaines extractions
 
-Raccorder ces capacités aux paquets média, à leur cycle d'installation et à leurs dépendances ; extraire les tags et les comportements propres aux médias ; sortir leurs écrans du routage central. Les lecteurs viendront ensuite. Ne pas présenter la reconnaissance extraite comme un module Films/Séries/Musique entièrement extrait.
+Généraliser les sources de paquets et la sélection entre implémentations ; extraire les tags et les comportements propres aux médias ; sortir leurs écrans du routage central. Les lecteurs viendront ensuite. Ne pas présenter la reconnaissance extraite comme un module Films/Séries/Musique entièrement extrait.
