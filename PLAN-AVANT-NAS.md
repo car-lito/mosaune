@@ -4,6 +4,7 @@ Avant le NAS, le noyau conserve les services communs (comptes, permissions, char
 
 - [x] C-MEDIA-01 — 0.0.29 : reconnaissance locale Films/Séries/Musique exécutée dans trois modules WASI indépendants ; scan réel raccordé, lots, validation et conservation du catalogue.
 - [x] C-MEDIA-02a — 0.0.30 : cycle persistant des trois reconnaisseurs officiels (installer, activer, désactiver, retirer), annulation effective, migration, cartes UI et catalogue conservé. [Guide](ESSAYER-LES-EXTENSIONS-030.md). Import externe et familles médias complètes non couverts.
+- [x] C-MEDIA-02b — 0.0.31 : import local de reconnaisseurs externes, manifeste commun, sélection explicite, mise à jour/restauration, exemple contributeur et tests de scan réel. [Guide](ESSAYER-LES-EXTENSIONS-031.md). Les dépôts pour ce format et les rôles média complets restent ouverts.
 - [ ] C-MEDIA-02 — Installer, choisir, désactiver et retirer les paquets média et leurs capacités, avec dépendances et conservation des données communes. Les programmes de reconnaissance livrés ne remplissent pas encore ce critère.
 - [ ] C-MEDIA-03 — Extraire les tags audio, les règles des catalogues spécialisés et leurs comportements ; supprimer les replis métier dans le noyau.
 - [ ] C-MEDIA-04 — Contributions UI des modules (navigation, pages, réglages, recherche), thèmes et traductions, sans route centrale par type de média.

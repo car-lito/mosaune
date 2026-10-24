@@ -1,0 +1,14 @@
+{
+  "schema": 2,
+  "name": "Reconnaisseur de démonstration",
+  "publisher": "Exemple contributeur",
+  "description": "Ajoute le préfixe Exemple aux titres MKV et MP4. À utiliser avec une bibliothèque de test.",
+  "minCore": "0.0.31",
+  "module": {
+    "id": "example.film-names",
+    "version": "1.0.0",
+    "capabilities": ["media.recognition.v1"]
+  },
+  "contributions": [{"role": "media.recognition.v1", "target": "films"}],
+  "codeSha256": ""
+}

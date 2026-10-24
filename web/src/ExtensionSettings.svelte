@@ -2,6 +2,7 @@
  import {onMount,tick} from 'svelte';
  import ExtensionCard from './ExtensionCard.svelte';
  import RecognitionPackages from './RecognitionPackages.svelte';
+ import RecognitionImport from './RecognitionImport.svelte';
  const recognitionNames:Record<string,string>={films:'Reconnaissance des films',series:'Reconnaissance des séries',music:'Reconnaissance musicale'};
  import ExtensionConfiguration from './ExtensionConfiguration.svelte';
  import ProviderPackageImport from './ProviderPackageImport.svelte';
@@ -73,7 +74,7 @@
   <ProviderPackagePanel {token} state={providerPackage} changed={load} browse={()=>{tab='available';void show('')}}/>
   {#key providerPackage?.package?.checksum}<ExtensionConfiguration id="mosaune.tmdb-search" {token} refresh={async()=>{await load();await refresh();}}/>{/key}
  {:else if selected.startsWith('recognition.') && user.admin}
-  <RecognitionPackages {token} refreshKey={recognitionRefresh} detail={selected.slice(12)} select={kind=>show('recognition.'+kind)}/>
+  <RecognitionPackages {token} refreshKey={recognitionRefresh} detail={selected.slice(12)} select={id=>show(id?'recognition.'+id:'')}/>
  {:else if selectedNative}
   <span class="extension-tag">{selectedNative.family} · intégré</span><p>{selectedNative.description}</p>
   <p>Cette fonction fait encore partie du programme. Elle sera séparée en extension lors d’une prochaine étape ; elle ne peut pas encore être désactivée ou désinstallée ici.</p>
@@ -83,7 +84,7 @@
   {#if tab==='available'}
    {#if user.admin}<RecognitionPackages {token} refreshKey={recognitionRefresh} {tab} select={kind=>show('recognition.'+kind)}/>{/if}
    {#if user.admin}<ExtensionRepositoryStore {token} safeMode={appearance.safeMode} installed={repositoryInstalled}/>{/if}
-   {#if user.admin}<details class="extension-import"><summary>Importer un fichier depuis cet appareil</summary><ProviderPackageImport {token} installed={providerInstalled}/>
+   {#if user.admin}<details class="extension-import"><summary>Importer un fichier depuis cet appareil</summary><RecognitionImport {token} installed={()=>{recognitionRefresh++;}}/><ProviderPackageImport {token} installed={providerInstalled}/>
    <section class="extension-import"><div><span class="eyebrow">UN PAQUET, UNE NOUVELLE POSSIBILITÉ</span><h3>Installer un thème</h3><p>Importez un fichier <strong>.mosaune.zip</strong>. Mosaune vérifie son format et sa compatibilité avant de proposer l’installation.</p></div>
  <label class="extension-file">Paquet à vérifier<input bind:this={input} type="file" accept=".zip,application/zip" disabled={busy} onchange={inspect}/></label>
  <a class="text-action" href="/api/v1/extensions/example" download>Télécharger Ambre 2</a>

@@ -1,3 +1,7 @@
+## Imports externes — 0.0.31
+
+Le même contrat peut être fourni par un paquet local externe, installé et choisi explicitement pour un type de média. Mise à jour, restauration et retrait passent par le registre partagé. [Exemple contributeur](../../../examples/recognition/README.md) et [guide](../../../../ESSAYER-LES-EXTENSIONS-031.md). Les reconnaisseurs externes ne peuvent demander ni service ni dépendance dans cette version. Le catalogue de familles reste fixe ; les écrans ne sont pas encore extraits.
+
 ## Cycle des paquets officiels — 0.0.30
 
 Le serveur résout désormais le programme installé et son état dans le registre partagé. Le scan ne charge jamais directement la copie de distribution. Installation/réinstallation officielle, activation, désactivation et retrait sont disponibles dans les paramètres ; les sessions annulées ne peuvent plus enregistrer de résultats. [Parcours et limites](../../../../ESSAYER-LES-EXTENSIONS-030.md). L’import externe et la sélection entre implémentations restent à généraliser.

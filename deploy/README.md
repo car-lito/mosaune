@@ -1,6 +1,6 @@
 # Préparer Mosaune pour Docker et CasaOS
 
-Version 0.0.30 : cycle de gestion des modules de reconnaissance, sur la base réseau et conteneur introduite en 0.0.23. **Préversion de développement ; le premier déploiement sur le NAS attend encore les autres points du [plan avant NAS](../PLAN-AVANT-NAS.md).** Aucun certificat, secret, média ou catalogue personnel n'est inclus dans l'image.
+Version 0.0.31 : import et choix de modules de reconnaissance externes, sur la base réseau et conteneur introduite en 0.0.23. **Préversion de développement ; le premier déploiement sur le NAS attend encore les autres points du [plan avant NAS](../PLAN-AVANT-NAS.md).** Aucun certificat, secret, média ou catalogue personnel n'est inclus dans l'image.
 
 ## Ce que cette version apporte
 
@@ -43,7 +43,7 @@ Exemple de lancement technique, après préparation d'un certificat valide :
 
 ## Docker Compose
 
-Le fichier [compose.yml](compose.yml) utilise l'image `ghcr.io/car-lito/mosaune:0.0.30-preview`. Cette étiquette est une préversion pouvant évoluer ; chaque publication porte aussi `sha-<commit complet>` pour choisir exactement un build. Aucun canal `latest` ou stable n'est publié à ce stade.
+Le fichier [compose.yml](compose.yml) utilise l'image `ghcr.io/car-lito/mosaune:0.0.31-preview`. Cette étiquette est une préversion pouvant évoluer ; chaque publication porte aussi `sha-<commit complet>` pour choisir exactement un build. Aucun canal `latest` ou stable n'est publié à ce stade.
 
 Après les préparatifs, copier [.env.example](.env.example) vers `.env` dans ce dossier et adapter les chemins, l'adresse et l'identité du compte. La liaison réseau doit correspondre à une IP réellement attribuée au NAS. Le Compose refuse de créer silencieusement les dossiers manquants. Pour un certificat public reconnu, laisser `MOSAUNE_TLS_CA` vide.
 

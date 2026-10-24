@@ -42,6 +42,8 @@ try {
     mkdirSync(join(mediaDirectory, fixture.kind));
     writeFileSync(join(mediaDirectory, fixture.kind, fixture.name), '0123456789');
   }
+  mkdirSync(join(mediaDirectory,'external'));
+  writeFileSync(join(mediaDirectory,'external','Contributor.2026.mkv'),'external-fixture');
   docker(['volume', 'create', id]); volumeCreated = true;
   docker(['create', '--name', id, '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges:true', '--pids-limit=256', '--tmpfs', '/tmp:size=64m,mode=1777', '-p', `127.0.0.1:${port}:47831`,
     '-e', `MOSAUNE_PUBLIC_URL=${origin}`, '-e', 'MOSAUNE_TLS_CERT=/tls/server.crt', '-e', 'MOSAUNE_TLS_KEY=/tls/server.key', '-e', 'MOSAUNE_TLS_CA=/tls/server.crt',
@@ -66,7 +68,7 @@ try {
         });
       });
       req.on('error', reject); req.on('timeout', () => req.destroy(new Error(`${method} ${path} exceeded ${timeout} ms`)));
-      req.end(body === undefined ? undefined : JSON.stringify(body));
+      req.end(body === undefined ? undefined : Buffer.isBuffer(body) ? body : JSON.stringify(body));
     });
   }
   async function ready() {
@@ -129,7 +131,30 @@ try {
   assert(installed.packages.find(p => p.kind === 'films')?.installed && !installed.packages.find(p => p.kind === 'films')?.enabled, 'Installation activated package implicitly');
   const enable = await request('/api/v1/recognition-packages/films', { method: 'POST', headers: restartedAuth, body: { operation: 'enable', revision: installed.revision } });
   assert(enable.status === 200, 'Recognition reactivation failed');
+  const external = readFileSync('build/example-recognition.mosaune.zip');
+  const preview = await request('/api/v1/recognition-packages/preview', { method:'POST',headers:{...restartedAuth,'Content-Type':'application/zip'},body:external });
+  assert(preview.status===200,'External package preview failed');
+  const candidate=JSON.parse(preview.text);
+  const imported=await request('/api/v1/recognition-packages/import',{method:'POST',timeout:30000,headers:{...restartedAuth,'Content-Type':'application/zip','X-Mosaune-Package-Checksum':candidate.package.checksum,'X-Mosaune-Registry-Revision':String(candidate.revision)},body:external});
+  assert(imported.status===201,'External package import failed: '+imported.text);
+  const externalID=candidate.package.manifest.module.id;
+  async function externalAction(operation) {
+    const state=JSON.parse((await request('/api/v1/recognition-packages',{headers:restartedAuth})).text);
+    const result=await request('/api/v1/recognition-packages/'+externalID,{method:'POST',headers:restartedAuth,body:{operation,revision:state.revision}});
+    assert(result.status===200,'External action failed: '+operation);
+  }
+  await externalAction('enable');await externalAction('select');
+  // A new library uses the imported program. Previously enriched metadata is
+  // intentionally not overwritten simply because the recognizer changed.
+  const externalScan=await request('/api/v1/libraries',{method:'POST',timeout:30000,headers:restartedAuth,body:{name:'External recognition',kind:'films',path:'/media/external'}});
+  assert(externalScan.status===201,'External scan failed: '+externalScan.text);
+  const recognized=JSON.parse((await request('/api/v1/library',{headers:restartedAuth})).text);
+  assert(recognized.items.some(item=>item.metadata?.title?.startsWith('Exemple — ')),'Scan did not execute imported program');
+  await externalAction('remove');
+  const unavailableScan=await request('/api/v1/libraries',{method:'POST',timeout:30000,headers:restartedAuth,body:{name:'Unavailable recognition',kind:'films',path:'/media/external'}});
+  assert(unavailableScan.status!==201,'Removed selection silently fell back to factory module');
   for (const fixture of fixtures) assert(readFileSync(join(mediaDirectory, fixture.kind, fixture.name), 'utf8') === '0123456789', 'Source media modified');
+  assert(readFileSync(join(mediaDirectory,'external','Contributor.2026.mkv'),'utf8')==='external-fixture','External source media modified');
   docker(['exec', id, '/mosaune', '-healthcheck']);
   docker(['stop', '--time', '15', id]);
   console.log(JSON.stringify({ image, https: 'verified', cookies: 'secure', media: 'read-only + range verified', restart: 'account and catalogue preserved', sigterm: 'exit 0' }));

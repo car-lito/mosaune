@@ -1,3 +1,7 @@
+## Paquets externes de reconnaissance (0.0.31)
+
+Un [exemple contributeur](examples/recognition/README.md) peut être construit, importé et choisi sans modifier le serveur. Le format local de paquet (schéma 2) sépare les déclarations du manifeste de la politique d’exécution de l’hôte. Installation, activation, sélection, mise à jour, restauration et retrait sont disponibles ; les familles complètes restent à extraire.
+
 ## Cycle des reconnaisseurs officiels — 0.0.30
 
 Les trois reconnaisseurs utilisent désormais le registre partagé et un stockage de programmes installés. Ils peuvent être désactivés, retirés puis réinstallés depuis la distribution officielle, avec conservation du catalogue et arrêt des analyses non enregistrées. [Contrat et limites](capabilities/recognition/v1/README.md). L’import externe, les alternatives et les familles médias complètes restent à généraliser.

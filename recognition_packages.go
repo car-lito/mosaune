@@ -5,8 +5,10 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"mosaune/extensionkit/modules"
+	"mosaune/extensionkit/packageformat"
 	"mosaune/extensionkit/protocol"
 	"mosaune/extensionkit/registry"
 	"net/http"
@@ -15,9 +17,23 @@ import (
 
 var errRecognitionUnavailable = errors.New("Reconnaissance désactivée ou désinstallée. Réactivez son extension dans les paramètres pour analyser ce type de média. Votre catalogue est conservé.")
 
-// Intent and executable bytes commit together. Only the trusted factory source
-// is accepted here; this is not an arbitrary code upload endpoint.
+// Factory offers share the lifecycle with administrator-imported packages.
 var recognitionKinds = []string{"films", "series", "music"}
+
+// Legacy kind paths still address their factory package; all other operations
+// use the stable module ID, never a publisher label supplied by an archive.
+func recognitionID(id string) (string, error) {
+	for _, kind := range recognitionKinds {
+		if id == kind {
+			d, err := modules.Descriptor(kind)
+			return d.ID, err
+		}
+	}
+	if (protocol.Descriptor{ID: id, Version: "1.0.0", Capabilities: []string{"media.recognition.v1"}}).Validate() != nil {
+		return "", errors.New("Identifiant de module invalide.")
+	}
+	return id, nil
+}
 
 func recognitionHash(code []byte) string { h := sha256.Sum256(code); return hex.EncodeToString(h[:]) }
 
@@ -82,23 +98,51 @@ type recognitionLifecycle struct {
 }
 type recognitionCall struct {
 	kind   string
+	id     string
 	cancel context.CancelCauseFunc
 }
 
 type recognitionPackageView struct {
-	Kind      string `json:"kind"`
-	ID        string `json:"id"`
-	Version   string `json:"version"`
-	Installed bool   `json:"installed"`
-	Enabled   bool   `json:"enabled"`
+	Kind            string `json:"kind"`
+	ID              string `json:"id"`
+	Version         string `json:"version"`
+	Installed       bool   `json:"installed"`
+	Enabled         bool   `json:"enabled"`
+	Name            string `json:"name"`
+	Publisher       string `json:"publisher"`
+	Selected        bool   `json:"selected"`
+	Factory         bool   `json:"factory"`
+	PreviousVersion string `json:"previousVersion"`
 }
 
 func (c *catalog) recognitionPackages(ctx context.Context) ([]recognitionPackageView, int64, error) {
+	c.recognition.mu.Lock()
+	defer c.recognition.mu.Unlock()
 	s, err := (registry.SQLStore{DB: c.db}).Load(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 	list := []recognitionPackageView{}
+	selected := map[string]string{}
+	rows, err := c.db.QueryContext(ctx, `SELECT kind,id FROM recognition_selection`)
+	if err != nil {
+		return nil, 0, err
+	}
+	for rows.Next() {
+		var kind, id string
+		if err = rows.Scan(&kind, &id); err != nil {
+			rows.Close()
+			return nil, 0, err
+		}
+		selected[kind] = id
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return nil, 0, err
+	}
+	seen := map[string]bool{}
+	names := map[string]string{"films": "Reconnaissance des films", "series": "Reconnaissance des séries", "music": "Reconnaissance musicale"}
 	for _, kind := range recognitionKinds {
 		d, err := modules.Descriptor(kind)
 		if err != nil {
@@ -109,7 +153,38 @@ func (c *catalog) recognitionPackages(ctx context.Context) ([]recognitionPackage
 		if installed {
 			v = entry.Descriptor.Version
 		}
-		list = append(list, recognitionPackageView{Kind: kind, ID: d.ID, Version: v, Installed: installed, Enabled: installed && entry.Enabled})
+		list = append(list, recognitionPackageView{Kind: kind, ID: d.ID, Version: v, Installed: installed, Enabled: installed && entry.Enabled, Name: names[kind], Publisher: "Mosaune", Factory: true, Selected: selected[kind] == d.ID})
+		seen[d.ID] = true
+	}
+	rows, err = c.db.QueryContext(ctx, `SELECT id,kind,manifest,previous_version FROM recognition_packages ORDER BY id`)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id, kind string
+		var raw []byte
+		var previousVersion string
+		if err = rows.Scan(&id, &kind, &raw, &previousVersion); err != nil {
+			return nil, 0, err
+		}
+		if seen[id] {
+			continue
+		}
+		var m packageformat.ExecutableManifest
+		if json.Unmarshal(raw, &m) != nil {
+			return nil, 0, errors.New("Manifeste installé illisible.")
+		}
+		e, ok := registryEntryFor(s, id)
+		if !ok {
+			return nil, 0, errors.New("Module absent du registre.")
+		}
+		v := recognitionPackageView{Kind: kind, ID: id, Name: m.Name, Publisher: m.Publisher, Version: e.Descriptor.Version, Installed: true, Enabled: e.Enabled, Selected: selected[kind] == id}
+		v.PreviousVersion = previousVersion
+		list = append(list, v)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, 0, err
 	}
 	return list, s.Revision, nil
 }
@@ -124,21 +199,21 @@ func (c *catalog) beginRecognition(ctx context.Context, kind string) (context.Co
 	if err := ctx.Err(); err != nil {
 		return ctx, func() {}, empty, nil, err
 	}
-	d, err := modules.Descriptor(kind)
-	if err != nil {
+	var selected string
+	if err := c.db.QueryRowContext(ctx, `SELECT id FROM recognition_selection WHERE kind=?`, kind).Scan(&selected); err != nil {
 		return ctx, func() {}, empty, nil, errRecognitionUnavailable
 	}
 	s, err := (registry.SQLStore{DB: c.db}).Load(ctx)
 	if err != nil {
 		return ctx, func() {}, empty, nil, err
 	}
-	entry, ok := registryEntryFor(s, d.ID)
+	entry, ok := registryEntryFor(s, selected)
 	if !ok || !entry.Enabled {
 		return ctx, func() {}, empty, nil, errRecognitionUnavailable
 	}
 	var id string
 	var code []byte
-	err = c.db.QueryRowContext(ctx, `SELECT id,code FROM recognition_packages WHERE kind=?`, kind).Scan(&id, &code)
+	err = c.db.QueryRowContext(ctx, `SELECT id,code FROM recognition_packages WHERE id=? AND kind=?`, selected, kind).Scan(&id, &code)
 	if err != nil || id != entry.Descriptor.ID || recognitionHash(code) != entry.CodeSHA256 {
 		return ctx, func() {}, empty, nil, errors.New("Paquet de reconnaissance absent ou endommagé. Réinstallez-le ; le catalogue est conservé.")
 	}
@@ -148,7 +223,7 @@ func (c *catalog) beginRecognition(ctx context.Context, kind string) (context.Co
 	if c.recognition.calls == nil {
 		c.recognition.calls = map[uint64]recognitionCall{}
 	}
-	c.recognition.calls[key] = recognitionCall{kind: kind, cancel: cancel}
+	c.recognition.calls[key] = recognitionCall{kind: kind, id: id, cancel: cancel}
 	done := func() {
 		c.recognition.mu.Lock()
 		delete(c.recognition.calls, key)
@@ -168,14 +243,17 @@ func (c *catalog) recognitionCommit(ctx context.Context) (func(), error) {
 }
 
 func (c *catalog) changeRecognition(ctx context.Context, kind, operation string, expected int64) error {
-	d, err := modules.Descriptor(kind)
+	id, err := recognitionID(kind)
 	if err != nil {
 		return errors.New("Module de reconnaissance inconnu.")
 	}
-	if operation != "install" && operation != "enable" && operation != "disable" && operation != "remove" {
+	if operation == "restore" {
+		return c.restoreRecognition(ctx, id, expected)
+	}
+	if operation != "install" && operation != "enable" && operation != "disable" && operation != "remove" && operation != "select" {
 		return errors.New("Action inconnue.")
 	}
-	if c.extensionSafeMode && (operation == "enable" || operation == "install") {
+	if c.extensionSafeMode && (operation == "enable" || operation == "install" || operation == "select") {
 		return errors.New("Quittez le mode de secours pour installer ou activer un module.")
 	}
 	c.recognition.mu.Lock()
@@ -187,11 +265,44 @@ func (c *catalog) changeRecognition(ctx context.Context, kind, operation string,
 	defer tx.Rollback()
 	store := registry.SQLStore{DB: tx}
 	if operation == "install" {
-		_, err = installRecognition(ctx, tx, kind, expected)
+		factoryKind := ""
+		for _, k := range recognitionKinds {
+			d, _ := modules.Descriptor(k)
+			if d.ID == id {
+				factoryKind = k
+			}
+		}
+		if factoryKind == "" {
+			return errors.New("Réimportez le fichier pour réinstaller ce module externe.")
+		}
+		_, err = installRecognition(ctx, tx, factoryKind, expected)
 	} else {
-		_, err = store.Commit(ctx, expected, registry.Change{Operation: operation, ID: d.ID})
+		if err = tx.QueryRowContext(ctx, `SELECT kind FROM recognition_packages WHERE id=?`, id).Scan(&kind); err != nil {
+			return err
+		}
+		if operation == "select" {
+			s, e := store.Load(ctx)
+			if e != nil {
+				return e
+			}
+			if s.Revision != expected {
+				return registry.ErrConflict
+			}
+			entry, ok := registryEntryFor(s, id)
+			if !ok || !entry.Enabled {
+				return errors.New("Activez le module avant de le choisir pour les scans.")
+			}
+			// Advance the shared revision for a choice change too: an old tab
+			// cannot subsequently overwrite this decision with a stale revision.
+			_, err = store.Commit(ctx, expected, registry.Change{Operation: "enable", ID: id})
+			if err == nil {
+				_, err = tx.ExecContext(ctx, `INSERT INTO recognition_selection(kind,id) VALUES(?,?) ON CONFLICT(kind) DO UPDATE SET id=excluded.id`, kind, id)
+			}
+		} else {
+			_, err = store.Commit(ctx, expected, registry.Change{Operation: operation, ID: id})
+		}
 		if err == nil && operation == "remove" {
-			_, err = tx.ExecContext(ctx, `DELETE FROM recognition_packages WHERE kind=?`, kind)
+			_, err = tx.ExecContext(ctx, `DELETE FROM recognition_packages WHERE id=?`, id)
 		}
 	}
 	if err != nil {
@@ -203,6 +314,9 @@ func (c *catalog) changeRecognition(ctx context.Context, kind, operation string,
 	// A failed/stale mutation never cancels a session. Old sessions remain
 	// cancelled even if this module is immediately installed or enabled again.
 	if operation == "disable" || operation == "remove" {
+		c.cancelRecognitionID(id)
+	}
+	if operation == "select" {
 		for _, call := range c.recognition.calls {
 			if call.kind == kind {
 				call.cancel(errRecognitionUnavailable)
@@ -212,7 +326,16 @@ func (c *catalog) changeRecognition(ctx context.Context, kind, operation string,
 	return nil
 }
 
+func (c *catalog) cancelRecognitionID(id string) {
+	for _, call := range c.recognition.calls {
+		if call.id == id {
+			call.cancel(errRecognitionUnavailable)
+		}
+	}
+}
+
 func (c *catalog) recognitionPackageRoutes(mux *secureMux) {
+	c.recognitionImportRoutes(mux)
 	mux.HandleFunc("GET /api/v1/recognition-packages", func(w http.ResponseWriter, r *http.Request) {
 		list, revision, err := c.recognitionPackages(r.Context())
 		if err != nil {

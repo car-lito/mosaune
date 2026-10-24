@@ -1,3 +1,11 @@
+## 0.0.31 — 23 octobre 2026
+
+- Enveloppe de paquet exécutable locale (schéma 2), capacités et contributions versionnées, version minimale du noyau et empreinte. Lecture statique bornée, sans extraction ; source et éditeur non authentifiés clairement signalés. Le pilote TMDB signé reste distinct et inchangé.
+- Import administrateur avec prévisualisation et confirmation liée aux octets et à la révision du registre. Validation du programme dans le moteur isolé avant installation ; mise à jour et historique précédent atomiques avec le registre, restauration disponible.
+- Plusieurs reconnaisseurs installables pour un média, choix explicite persistant indépendant de l’activation. Aucun remplacement automatique après retrait ou désactivation ; changement de programme annule les résultats non enregistrés. Schéma 19, sauvegarde et conservation des états antérieurs.
+- Cartes des modules externes, activation, sélection, restauration et retrait ; exemple contributeur indépendant et commande de fabrication de paquet. Tests du véritable scan avec un module importé.
+- Reste à faire : téléchargement de ces paquets depuis les dépôts, contributions UI, familles médias complètes et dispatch des dépendances des futurs rôles. Les reconnaisseurs acceptés actuellement n’ont ni service ni dépendance. Aucun déploiement NAS.
+
 ## 0.0.30 — 22 octobre 2026
 
 - Modules de reconnaissance enregistrés dans le registre commun, programmes installés dans un stockage privé et installation/réinstallation hors ligne depuis les versions officielles fournies. Migration au schéma 18 avec sauvegarde ; installation initiale unique.

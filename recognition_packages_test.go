@@ -165,7 +165,7 @@ func removeRecognitionForLegacyFixture(t *testing.T, c *catalog) {
 	for _, kind := range recognitionKinds {
 		recognitionChange(t, c, kind, "remove")
 	}
-	if _, err := c.db.Exec(`DROP TABLE recognition_packages`); err != nil {
+	if _, err := c.db.Exec(`DROP TABLE recognition_packages; DROP TABLE recognition_selection`); err != nil {
 		t.Fatal(err)
 	}
 }

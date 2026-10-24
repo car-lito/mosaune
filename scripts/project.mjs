@@ -28,6 +28,9 @@ function wasm(output, source) {
 try {
   wasm('providers/tmdb/provider.wasm', './providers/tmdb/source');
   for (const kind of ['films', 'series', 'music']) wasm(`modules/${kind}/recognizer.wasm`, `./modules/${kind}/source`);
+  wasm('examples/recognition/module.wasm', './examples/recognition/source');
+  mkdirSync(join(root, 'build'), { recursive: true });
+  run(go, ['run', './cmd/package-module', 'examples/recognition/extension.json', 'examples/recognition/module.wasm', '../build/example-recognition.mosaune.zip'], kit);
   // Le serveur embarque l'interface : elle est nécessaire même pour les tests Go.
   run(process.execPath, ['node_modules/vite/bin/vite.js', 'build']);
   if (mode !== 'build') {

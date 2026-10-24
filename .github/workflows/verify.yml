@@ -57,6 +57,7 @@ jobs:
             build/mosaune-*-linux-arm64
             build/mosaune-*-SHA256SUMS.txt
             build/THIRD-PARTY-NOTICES.txt
+            build/example-recognition.mosaune.zip
           if-no-files-found: error
           retention-days: 14
 
@@ -72,6 +73,16 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '24'
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: extension-kit/go.sum
+      - name: Préparer le paquet externe de test
+        run: |
+          mkdir -p build
+          cd extension-kit
+          CGO_ENABLED=0 GOOS=wasip1 GOARCH=wasm go build -trimpath -ldflags="-s -w" -o examples/recognition/module.wasm ./examples/recognition/source
+          go run ./cmd/package-module examples/recognition/extension.json examples/recognition/module.wasm ../build/example-recognition.mosaune.zip
       - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
         with:
           platforms: arm64
