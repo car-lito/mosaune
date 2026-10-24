@@ -27,7 +27,7 @@
   <article class="extension-detail"><div class="extension-card-body">
    <h3>{current.name}</h3>
    <span class="extension-tag">Reconnaissance · {current.version} · {current.installed?status(current):'Non installé'}</span>
-   <p>{current.factory?'Fourni avec Mosaune':'Import local · éditeur déclaré : '+current.publisher+' (non vérifié)'}</p>
+   <p>{current.factory?'Fourni avec Mosaune':'Module externe · éditeur déclaré : '+current.publisher+' (non vérifié)'}</p>
    <p>Un seul reconnaisseur est choisi par type de média. En désactivant ou retirant le module choisi, les scans sont suspendus jusqu’à sa réactivation ou au choix d’un remplaçant.</p>
    <p>Reconnaît les formats, les titres et les numéros d’épisodes à partir des noms de fichiers. Ce module s’exécute uniquement pendant les analyses, sans accès au réseau.</p>
    <p>La désactivation arrête les analyses non enregistrées de ce type de média. Une sauvegarde déjà commencée se termine avant le changement d’état. Les médias, affiches et progressions déjà enregistrés restent disponibles.</p>
@@ -44,7 +44,8 @@
   </div></article>
  {:else}<p role="status">Chargement du module…</p>{/if}
 {:else if tab==='installed'}
- {#each visible as p (p.id)}<ExtensionCard id={'recognition.'+p.id} name={p.name} family="Médias · reconnaissance" description={p.factory?'Identification locale des noms et formats pendant les scans.':'Import local · '+p.publisher+' (éditeur non vérifié)'} status={status(p)} enabled={p.enabled&&!safeMode} disabled={busy||safeMode&&!p.enabled} toggle={()=>change(p,p.enabled?'disable':'enable')} open={()=>select(p.id)}/>{/each}
+ {#each visible as p (p.id)}<ExtensionCard id={'recognition.'+p.id} name={p.name} family="Médias · reconnaissance" description={p.factory?'Identification locale des noms et formats pendant les scans.':'Module externe · '+p.publisher+' (éditeur non vérifié)'} status={status(p)} enabled={p.enabled&&!safeMode} disabled={busy||safeMode&&!p.enabled} toggle={()=>change(p,p.enabled?'disable':'enable')} open={()=>select(p.id)}/>{/each}
 {:else if visible.length}
  <section><h3>Modules fournis avec Mosaune</h3><p>Ces modules sont disponibles ici sans téléchargement. L’installation ne les active pas automatiquement.</p><div class="extension-grid">{#each visible as p (p.id)}<ExtensionCard id={'recognition.'+p.kind} name={names[p.kind]} family="Médias · reconnaissance" description="Reconnaissance locale des noms et formats. Aucun accès au réseau." status="À installer" open={()=>select(p.kind)}/>{/each}</div></section>
 {/if}
+
