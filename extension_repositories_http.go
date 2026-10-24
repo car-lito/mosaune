@@ -95,6 +95,16 @@ func (c *catalog) extensionRepositoryRoutes(mux *secureMux) {
 				return
 			}
 		}
+		modules, _, err := c.recognitionPackages(r.Context())
+		if err != nil {
+			problem(w, 500, "Modules de reconnaissance illisibles.")
+			return
+		}
+		for _, module := range modules {
+			if module.Installed {
+				installed = append(installed, installedVersion{module.ID, module.Version, "recognition"})
+			}
+		}
 		sendJSON(w, 200, map[string]any{"repositories": repos, "installed": installed, "coreVersion": version})
 	})
 	mux.HandleFunc("POST /api/v1/extension-repositories", func(w http.ResponseWriter, r *http.Request) {

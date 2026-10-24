@@ -6,6 +6,7 @@ import { resolve, dirname, relative, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { buildNotices } from './build-notices.mjs';
+import { buildRecognitionRepository } from './build-recognition-repository.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const go = process.env.MOSAUNE_GO || 'go';
@@ -31,6 +32,7 @@ try {
   wasm('examples/recognition/module.wasm', './examples/recognition/source');
   mkdirSync(join(root, 'build'), { recursive: true });
   run(go, ['run', './cmd/package-module', 'examples/recognition/extension.json', 'examples/recognition/module.wasm', '../build/example-recognition.mosaune.zip'], kit);
+  buildRecognitionRepository(root, go, env);
   // Le serveur embarque l'interface : elle est nécessaire même pour les tests Go.
   run(process.execPath, ['node_modules/vite/bin/vite.js', 'build']);
   if (mode !== 'build') {

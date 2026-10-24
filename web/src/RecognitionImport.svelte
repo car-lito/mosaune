@@ -13,7 +13,7 @@
   const data=await response.json();if(!response.ok)throw Error(data.error||'Import indisponible.');return data;
  }
  async function inspect(event:Event) {
-  file=(event.target as HTMLInputElement).files?.[0];preview=null;bytes=undefined;error='';notice='';if(!file)return;
+  const input=event.target as HTMLInputElement;file=input.files?.[0];input.value='';preview=null;bytes=undefined;error='';notice='';if(!file)return;
   busy=true;
   try{if(file.size>9*1024*1024)throw Error('Le fichier dépasse 9 Mio.');bytes=await file.arrayBuffer();preview=await upload('preview');}
   catch(e){error=e instanceof Error?e.message:'Fichier illisible.';}finally{busy=false;}

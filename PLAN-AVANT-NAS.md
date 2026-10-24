@@ -5,6 +5,7 @@ Avant le NAS, le noyau conserve les services communs (comptes, permissions, char
 - [x] C-MEDIA-01 — 0.0.29 : reconnaissance locale Films/Séries/Musique exécutée dans trois modules WASI indépendants ; scan réel raccordé, lots, validation et conservation du catalogue.
 - [x] C-MEDIA-02a — 0.0.30 : cycle persistant des trois reconnaisseurs officiels (installer, activer, désactiver, retirer), annulation effective, migration, cartes UI et catalogue conservé. [Guide](ESSAYER-LES-EXTENSIONS-030.md). Import externe et familles médias complètes non couverts.
 - [x] C-MEDIA-02b — 0.0.31 : import local de reconnaisseurs externes, manifeste commun, sélection explicite, mise à jour/restauration, exemple contributeur et tests de scan réel. [Guide](ESSAYER-LES-EXTENSIONS-031.md). Les dépôts pour ce format et les rôles média complets restent ouverts.
+- [x] C-MEDIA-02c — 0.0.32 : reconnaisseurs externes distribués par dépôts GitHub, aperçu et confirmation, versions installées/mises à jour, exemple public et restauration hors ligne après retrait du dépôt. [Guide](ESSAYER-LES-EXTENSIONS-032.md).
 - [ ] C-MEDIA-02 — Installer, choisir, désactiver et retirer les paquets média et leurs capacités, avec dépendances et conservation des données communes. Les programmes de reconnaissance livrés ne remplissent pas encore ce critère.
 - [ ] C-MEDIA-03 — Extraire les tags audio, les règles des catalogues spécialisés et leurs comportements ; supprimer les replis métier dans le noyau.
 - [ ] C-MEDIA-04 — Contributions UI des modules (navigation, pages, réglages, recherche), thèmes et traductions, sans route centrale par type de média.
@@ -77,7 +78,7 @@ Guide : [Présentation v1](extension-kit/presentation/v1/README.md).
 - [x] C-STORE-05 — Publication du vrai dépôt officiel et ajout de son adresse au catalogue par défaut (0.0.21).
 - [ ] C-TRUST-01 — Clés/éditeurs communautaires exécutables et budgets globaux avant ouverture au code non fiable.
 
-Les thèmes tiers sont acceptés ; les fournisseurs exécutables restent les paquets TMDB signés reconnus. Aucun dépôt privé, autre hébergeur ou mise à jour automatique. Voir ESSAYER-LE-CATALOGUE-020.md.
+Les thèmes tiers sont acceptés ; les fournisseurs exécutables restent les paquets TMDB signés reconnus. Depuis 0.0.32, les dépôts acceptent aussi les reconnaisseurs externes sans services ni dépendances, avec confirmation explicite et éditeur non authentifié. Aucun dépôt privé, autre hébergeur ou mise à jour automatique. Voir ESSAYER-LE-CATALOGUE-020.md.
 
 ## Avancement 0.0.19 — fournisseur installable signé
 

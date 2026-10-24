@@ -1,3 +1,11 @@
+## 0.0.32 — 24 octobre 2026
+
+- Paquets de reconnaissance raccordés aux dépôts GitHub : cartes, filtre, versions installées, aperçu et installation/mise à jour via le même contrôle transactionnel que l’import local. Ouverture directe de leur fiche après installation.
+- Téléchargement borné, concordance du manifeste, empreinte et politique hôte avant aperçu ; identité déclarative clairement signalée, signature du pilote TMDB inchangée. Aperçu invalidé après échec d’installation, nouvelle vérification requise.
+- Catalogue contributeur reproductible avec deux versions, disponible dans les fichiers de construction et sur la branche publique `recognition-preview` du dépôt d’extensions. La branche principale reste compatible avec les anciens clients.
+- Tests du cycle dépôt → installation → mise à jour → restauration hors ligne et des erreurs ; 122 tests serveur et 22 tests interface validés localement, compilations Windows/Linux/ARM64 réussies.
+- Le système média complet, les contributions UI et les lecteurs restent à extraire. Aucun déploiement NAS. [Guide](ESSAYER-LES-EXTENSIONS-032.md).
+
 ## 0.0.31 — 23 octobre 2026
 
 - Enveloppe de paquet exécutable locale (schéma 2), capacités et contributions versionnées, version minimale du noyau et empreinte. Lecture statique bornée, sans extraction ; source et éditeur non authentifiés clairement signalés. Le pilote TMDB signé reste distinct et inchangé.

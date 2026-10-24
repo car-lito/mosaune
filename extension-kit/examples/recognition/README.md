@@ -34,3 +34,7 @@ Le format d’enveloppe est dans `packageformat/executable.go`. Les champs `modu
 Le contrat de reconnaissance est décrit dans [recognition/v1](../../capabilities/recognition/v1/README.md). L’application teste les formats à l’installation dans le moteur borné ; la prévisualisation ne lance pas de code. Chaque résultat de scan est ensuite validé. Le choix reste explicite et persistant, même si le paquet choisi est désinstallé. Les résultats d’une session annulée ne peuvent plus être enregistrés après changement de programme.
 
 Ce mécanisme remplace uniquement la reconnaissance, pas encore les catalogues, interfaces ou lecteurs. Les prochains rôles auront leurs propres contrats versionnés plutôt qu’un accès libre aux tables de Mosaune.
+
+## Distribution par dépôt (0.0.32)
+
+Les reconnaisseurs utilisent `kind: "recognition"` dans `mosaune-repository.json`. La construction du projet produit un dépôt autonome dans `build/recognition-repository/`, avec les versions 1.0.0 et 1.1.0 du même exemple. Voir [le guide de distribution](REPOSITORY.md) et [le parcours complet](../../../ESSAYER-LES-EXTENSIONS-032.md). Les empreintes et les champs de catalogue sont générés depuis les archives et manifestes utilisés. Un dépôt ne confère aucune confiance supplémentaire au programme.

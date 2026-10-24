@@ -16,7 +16,7 @@
  let runtime:{serviceAccess?:boolean;providerEnabled:boolean;enabled:boolean;effective:boolean;loaded:boolean;safeMode:boolean}|null=null;
  let providerPackage:ProviderPackageState|null=null;
  async function providerInstalled(){await load();tab='installed';await show('tmdb');notice='Paquet fournisseur installé. Vos fiches et votre connexion sont conservées.';}
- async function repositoryInstalled(kind:string,id:string){await load();tab='installed';await show(kind==='provider'?'tmdb':id);notice='Paquet installé. Retrouvez ses réglages ci-dessous.';}
+ async function repositoryInstalled(kind:string,id:string){await load();tab='installed';await show(kind==='provider'?'tmdb':kind==='recognition'?'recognition.'+id:id);notice='Paquet installé. Retrouvez ses réglages ci-dessous.';}
  $: selectedPackage=packages.find(p=>p.manifest.id===selected);
  $: selectedNative=native.find(p=>p.id===selected);
  $: visiblePackages=packages.filter(p=>(p.manifest.name+' '+p.manifest.description).toLocaleLowerCase().includes(filter.toLocaleLowerCase()));

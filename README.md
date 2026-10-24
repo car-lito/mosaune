@@ -4,7 +4,7 @@
 
 Un espace pour vos films, séries et musiques, hébergé chez vous. Mosaune réunit une bibliothèque locale, des fiches enrichies et la découverte de contenus dans une interface commune. Le projet privilégie un serveur léger en Go et une architecture extensible.
 
-**Prototype 0.0.31 — développement actif.** Le mode local reste le démarrage par défaut. Cette version permet d’[importer et choisir des reconnaisseurs externes](ESSAYER-LES-EXTENSIONS-031.md), avec prévisualisation, mise à jour et restauration. Un exemple contributeur est fourni. Les familles médias complètes restent à extraire. Les modules média et les lecteurs restent à extraire/construire avant le premier essai NAS. Elle conserve HTTPS direct, les images Docker amd64/arm64 et un catalogue CasaOS 0.4.15 ; ce n’est pas encore la bêta ni le premier déploiement validé sur NAS. [Préparation réseau et conteneurs](deploy/README.md).
+**Prototype 0.0.32 — développement actif.** Le mode local reste le démarrage par défaut. Les [reconnaisseurs externes sont désormais installables depuis les dépôts GitHub](ESSAYER-LES-EXTENSIONS-032.md), avec aperçu, choix explicite, mise à jour et restauration. Un catalogue d’exemple public permet de tester ce parcours. Les familles médias complètes et les lecteurs restent à extraire/construire avant le premier essai NAS. HTTPS direct, images Docker amd64/arm64 et catalogue CasaOS 0.4.15 sont disponibles pour les essais ; ce n’est pas encore la bêta ni un déploiement NAS validé. [Préparation réseau et conteneurs](deploy/README.md).
 
 ## Déjà disponible
 
@@ -14,7 +14,7 @@ Un espace pour vos films, séries et musiques, hébergé chez vous. Mosaune réu
 - Demandes Radarr/Sonarr et suivi des arrivées après configuration.
 - Thèmes déclaratifs, catalogue de dépôts GitHub et pilote TMDB installable en Wasm signé.
 
-Les modules média sont encore intégrés au serveur. Les fournisseurs communautaires exécutables ne sont pas encore ouverts ; seuls les paquets pilotes reconnus sont exécutés. L'interrupteur du pilote TMDB revient actuellement au moteur intégré : la désactivation complète du fournisseur figure dans les travaux obligatoires avant NAS. Les métadonnées et images sont fournies par les services configurés ; leur disponibilité dépend de ces services.
+Les fonctions des familles médias restent partiellement intégrées au serveur. La reconnaissance des noms fonctionne déjà en modules indépendants installables ; leurs programmes externes restent limités à ce contrat. Les fournisseurs exécutables restent les paquets TMDB signés reconnus. Désactiver TMDB arrête effectivement ses accès, sans effacer les fiches et affiches conservées. Les métadonnées et images dépendent des services configurés.
 
 ## Commencer
 

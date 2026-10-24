@@ -62,7 +62,8 @@ func (m ExecutableManifest) Validate(core string) error {
 	return nil
 }
 
-// ParseExecutable is for administrator-imported, UNVERIFIED local packages.
+// ParseExecutable is for administrator-imported, UNVERIFIED executable packages.
+// A local file and a repository download follow the same validation policy.
 // Hashes bind preview to installation and detect damage, not publisher identity.
 // No archive entry is ever extracted onto the filesystem or executed here.
 func ParseExecutable(raw []byte, core string) (Executable, error) {
