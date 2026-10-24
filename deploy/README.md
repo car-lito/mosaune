@@ -140,3 +140,13 @@ Image publique : `ghcr.io/car-lito/mosaune:0.0.30-preview`. Empreinte de l’ind
 Localement : 21 tests web et 116 tests principaux du serveur réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement, trois exécutables construits. La suite serveur a terminé en 628.902 secondes (délai local de 12 minutes, limites CI inchangées). Après l’optimisation de lecture des manifestes et le raccordement du bouton Actualiser, les tests de reconnaissance, les vérifications web et les trois constructions ont été repassés ; GitHub vérifie ensuite toutes les sources finales.
 
 Parcours navigateur testé sur une installation vide et un compte fictif : cartes, désactivation, fiche, confirmation et retrait, réinstallation depuis les modules disponibles puis activation explicite. Le dernier raccordement du bouton Actualiser est compilé et vérifié par Svelte. Guide : [Extensions 0.0.30](../ESSAYER-LES-EXTENSIONS-030.md).
+
+## Validation de la préversion 0.0.31
+
+Le 24 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-lito/mosaune/actions/runs/40083863540) pour le commit `ff7b17913df9fb7c65d4f342048bbac66e335185`. Tests Windows/Linux, trois exécutables et conteneurs amd64/arm64 (ARM sous émulation). Les conteneurs importent le paquet contributeur, l’activent et le choisissent, puis vérifient ses titres sur un véritable scan et l’absence de remplacement automatique après retrait. Aucun essai sur le NAS réel.
+
+Image publique : `ghcr.io/car-lito/mosaune:0.0.31-preview`. Empreinte de l’index : `sha256:80934360424329e5f5bc28afb8315d2aa8e21d9e74a95c0dd04faa497d0773bb`. Téléchargement anonyme des fichiers des deux architectures avec contrôle SHA-256 ; archive CasaOS publique identique à l’archive locale.
+
+Localement : 21 tests web et 120 tests principaux du serveur réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement, trois exécutables construits. Suite serveur : 169.754 secondes. Après un premier blocage des connexions par le bac à sable, la suite complète a été repassée avec l’autorisation réseau, sans échec.
+
+Parcours navigateur vérifié sur une installation isolée et un compte fictif : carte externe, activation, sélection explicite et restauration 1.1.0 vers 1.0.0. L’import et les erreurs sont couverts par les tests HTTP et conteneurs. Le sélecteur de fichiers de l’outil navigateur n’a pas pu être utilisé de bout en bout ; le parcours d’import complet n’est donc pas déclaré validé visuellement. Guide : [Extensions 0.0.31](../ESSAYER-LES-EXTENSIONS-031.md).
