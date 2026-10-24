@@ -1,6 +1,6 @@
 # Préparer Mosaune pour Docker et CasaOS
 
-Version 0.0.31 : import et choix de modules de reconnaissance externes, sur la base réseau et conteneur introduite en 0.0.23. **Préversion de développement ; le premier déploiement sur le NAS attend encore les autres points du [plan avant NAS](../PLAN-AVANT-NAS.md).** Aucun certificat, secret, média ou catalogue personnel n'est inclus dans l'image.
+Version 0.0.32 : installation et mise à jour des modules de reconnaissance depuis les dépôts GitHub, sur la base réseau et conteneur introduite en 0.0.23. **Préversion de développement ; le premier déploiement sur le NAS attend encore les autres points du [plan avant NAS](../PLAN-AVANT-NAS.md).** Aucun certificat, secret, média ou catalogue personnel n'est inclus dans l'image.
 
 ## Ce que cette version apporte
 
@@ -150,3 +150,15 @@ Image publique : `ghcr.io/car-lito/mosaune:0.0.31-preview`. Empreinte de l’ind
 Localement : 21 tests web et 120 tests principaux du serveur réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement, trois exécutables construits. Suite serveur : 169.754 secondes. Après un premier blocage des connexions par le bac à sable, la suite complète a été repassée avec l’autorisation réseau, sans échec.
 
 Parcours navigateur vérifié sur une installation isolée et un compte fictif : carte externe, activation, sélection explicite et restauration 1.1.0 vers 1.0.0. L’import et les erreurs sont couverts par les tests HTTP et conteneurs. Le sélecteur de fichiers de l’outil navigateur n’a pas pu être utilisé de bout en bout ; le parcours d’import complet n’est donc pas déclaré validé visuellement. Guide : [Extensions 0.0.31](../ESSAYER-LES-EXTENSIONS-031.md).
+
+## Validation de la préversion 0.0.32
+
+Le 24 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-lito/mosaune/actions/runs/40111611668) sur le commit `fe792912a8f5672c0f8eca7fc1fad0e9428d6583`. Tests Windows/Linux et conteneurs HTTPS amd64/arm64 (ARM sous émulation), puis publication. Aucun déploiement sur le NAS personnel.
+
+Image publique : `ghcr.io/car-lito/mosaune:0.0.32-preview`. Index : `sha256:a2fe213d157cd58f3749070488cff264efc80cb422b94b414b2378836547fee4`. Téléchargement anonyme des fichiers des deux architectures et contrôles SHA-256 réussis ; archive CasaOS publique identique à la copie locale.
+
+Localement : 122 tests du serveur et 22 tests de l’interface réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Suite serveur : 126.553 secondes. Exécutables Windows/Linux amd64/Linux arm64 reconstruits après la correction finale de libellé.
+
+Parcours navigateur exécuté sur une installation temporaire et un compte fictif, avec le véritable dépôt public et sa branche `recognition-preview` : téléchargement/vérification de la version 1.0.0, installation et ouverture de sa fiche, activation, sélection, filtre du catalogue, mise à jour 1.1.0 et restauration 1.0.0 avec choix conservé. Le test a révélé le libellé « Import local », corrigé en « Module externe » dans le dernier commit. Le sélecteur de fichiers local n’est pas nécessaire à ce parcours ; il n’est pas déclaré validé visuellement par cette étape.
+
+Guide : [Extensions 0.0.32](../ESSAYER-LES-EXTENSIONS-032.md). Catalogue d’exemple : [branche publique](https://github.com/car-lito/mosaune-extensions/tree/recognition-preview), commit `cd0bfbbc0de6479b2358450f60fdd411d1c022b2`. La branche principale du catalogue d’extensions n’a pas été modifiée.

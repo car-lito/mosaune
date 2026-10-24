@@ -1,3 +1,7 @@
+## Reconnaisseurs dans les dépôts (0.0.32)
+
+Les paquets externes sont installables depuis le catalogue GitHub, avec les mêmes contrôles que les fichiers locaux. Le [dépôt d’exemple](examples/recognition/REPOSITORY.md) est produit par la construction et publié sur une branche séparée. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-032.md). Les autres rôles et familles médias restent à extraire.
+
 ## Paquets externes de reconnaissance (0.0.31)
 
 Un [exemple contributeur](examples/recognition/README.md) peut être construit, importé et choisi sans modifier le serveur. Le format local de paquet (schéma 2) sépare les déclarations du manifeste de la politique d’exécution de l’hôte. Installation, activation, sélection, mise à jour, restauration et retrait sont disponibles ; les familles complètes restent à extraire.

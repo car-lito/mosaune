@@ -41,3 +41,5 @@ Les reconnaisseurs acceptés n’ont ni services ni dépendances et reçoivent s
 Localement : 122 tests du serveur, 22 tests de l’interface, vérifications du kit, analyse statique et compilations Windows/Linux amd64/Linux arm64 réussies. Les tests du catalogue couvrent téléchargement, aperçu, installation, mise à jour, révision périmée, conservation de l’activation et du choix, retrait du dépôt, restauration hors ligne, suppression du module, fausse fiche, mauvaise famille, limites de taille et refus des accès non autorisés par le contrat.
 
 Les résultats de publication et du parcours navigateur sont consignés après leur vérification dans l’historique et la documentation de déploiement. Aucun test sur le NAS personnel n’est inclus.
+
+Publication finale vérifiée : [tests Windows/Linux et conteneurs réussis](https://github.com/car-lito/mosaune/actions/runs/40111611668), image publique `ghcr.io/car-lito/mosaune:0.0.32-preview` téléchargée et vérifiée. Le parcours navigateur a couvert le téléchargement depuis le dépôt public, l’installation, le choix, la mise à jour et la restauration sur une installation de test.
