@@ -42,10 +42,6 @@ func testMP3() []byte {
 	return append(header, frames.Bytes()...)
 }
 func TestLocalMetadataAndArtwork(t *testing.T) {
-	md, picture := localMusic(bytes.NewReader(testMP3()), Metadata{Title: "file", Provider: "filename", MatchState: "local", Origins: map[string]string{"title": "filename"}})
-	if md.Title != "Titre de test" || md.Artist != "Artiste" || md.Album != "Album" || md.Track != 2 || len(picture) == 0 {
-		t.Fatalf("tags: %+v picture %d", md, len(picture))
-	}
 	c, _ := testCatalog(t)
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "file.mp3"), testMP3(), 0600); err != nil {
@@ -56,7 +52,7 @@ func TestLocalMetadataAndArtwork(t *testing.T) {
 		t.Fatal(err)
 	}
 	item := getItems(t, c)[0]
-	if item.Metadata == nil || item.Metadata.ImageID == "" {
+	if item.Metadata == nil || item.Metadata.ImageID == "" || item.Metadata.Title != "Titre de test" || item.Metadata.Artist != "Artiste" || item.Metadata.Album != "Album" || item.Metadata.Track != 2 {
 		t.Fatal("missing artwork")
 	}
 	h, _ := handlerFor(t, c, "music")
@@ -71,10 +67,7 @@ func TestLocalMetadataAndArtwork(t *testing.T) {
 	if err != nil || id != "" {
 		t.Fatal("active image accepted")
 	}
-	md, _ = localMusic(bytes.NewReader([]byte("bad")), Metadata{Title: "broken", Provider: "filename", MatchState: "local", Origins: map[string]string{"title": "filename"}})
-	if md.Title != "broken" {
-		t.Fatal("missing filename fallback")
-	}
+
 }
 func TestFilenameIdentification(t *testing.T) {
 	for _, tc := range []struct {

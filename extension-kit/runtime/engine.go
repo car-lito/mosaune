@@ -49,7 +49,7 @@ func (l Limits) validate() error {
 	if l.CompileTimeout < time.Second || l.CompileTimeout > 30*time.Second {
 		return errors.New("invalid compilation timeout")
 	}
-	if l.MemoryMiB < 16 || l.MemoryMiB > 256 || l.Timeout < 10*time.Millisecond || l.Timeout > 30*time.Second || l.CodeBytes < 8 || l.CodeBytes > 16<<20 || l.InputBytes < 128 || l.InputBytes > 64<<10 || l.OutputBytes < 128 || l.OutputBytes > 1<<20 || l.LogBytes < 1 || l.LogBytes > 64<<10 || l.Modules < 1 || l.Modules > 16 {
+	if l.MemoryMiB < 16 || l.MemoryMiB > 256 || l.Timeout < 10*time.Millisecond || l.Timeout > 30*time.Second || l.CodeBytes < 8 || l.CodeBytes > 16<<20 || l.InputBytes < 128 || l.InputBytes > 64<<10 || l.OutputBytes < 128 || l.OutputBytes > 12<<20 || l.LogBytes < 1 || l.LogBytes > 64<<10 || l.Modules < 1 || l.Modules > 16 {
 		return errors.New("invalid host limits")
 	}
 	return nil

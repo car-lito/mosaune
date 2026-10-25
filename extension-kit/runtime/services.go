@@ -44,7 +44,7 @@ func restrictServices(ctx context.Context, declared []protocol.ServiceRequiremen
 			return service(call, op, raw)
 		}
 	}
-	return context.WithValue(ctx, serviceContextKey{}, &serviceSession{grants: allowed, remaining: 4})
+	return context.WithValue(ctx, serviceContextKey{}, &serviceSession{grants: allowed, remaining: original.remaining})
 }
 
 func (e *Engine) installServices(ctx context.Context) error {
@@ -97,9 +97,17 @@ func hostRead(ctx context.Context, module api.Module, input, size, output, capac
 // CallWithServices grants services only to this invocation. Neither a manifest
 // nor a guest can grant itself a service. The grants map is copied on entry.
 func (e *Engine) CallWithServices(ctx context.Context, id string, request protocol.Request, grants ServiceGrants) (Result, error) {
+	return e.CallWithServiceBudget(ctx, id, request, grants, 4)
+}
+
+// CallWithServiceBudget is a trusted host policy; guests cannot increase it.
+func (e *Engine) CallWithServiceBudget(ctx context.Context, id string, request protocol.Request, grants ServiceGrants, budget int) (Result, error) {
+	if budget < 1 || budget > 512 {
+		return Result{}, errors.New("invalid service budget")
+	}
 	copyGrants := make(ServiceGrants, len(grants))
 	for name, service := range grants {
 		copyGrants[name] = service
 	}
-	return e.Call(context.WithValue(ctx, serviceContextKey{}, &serviceSession{grants: copyGrants, remaining: 4}), id, request)
+	return e.Call(context.WithValue(ctx, serviceContextKey{}, &serviceSession{grants: copyGrants, remaining: budget}), id, request)
 }

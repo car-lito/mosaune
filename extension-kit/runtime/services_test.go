@@ -123,3 +123,22 @@ func TestDisableCancelsHostService(t *testing.T) {
 		t.Fatal("service not canceled")
 	}
 }
+
+func TestHostSelectedServiceBudgetSurvivesDeclarationIntersection(t *testing.T) {
+	e := engine(t, DefaultLimits())
+	probe(t, e)
+	count := 0
+	grants := ServiceGrants{"test.api.v1": func(context.Context, string, json.RawMessage) (json.RawMessage, error) {
+		count++
+		return json.RawMessage(`{"ok":true}`), nil
+	}}
+	req := request("test.probe.v1", "service", `{"service":"test.api.v1","operation":"get","params":{},"count":8}`)
+	if _, err := e.CallWithServiceBudget(context.Background(), "test.probe", req, grants, 6); err != nil || count != 6 {
+		t.Fatal(count, err)
+	}
+	for _, budget := range []int{0, 513} {
+		if _, err := e.CallWithServiceBudget(context.Background(), "test.probe", req, grants, budget); err == nil {
+			t.Fatal("unbounded budget")
+		}
+	}
+}

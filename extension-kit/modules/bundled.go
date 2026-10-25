@@ -9,7 +9,7 @@ import (
 	"mosaune/extensionkit/protocol"
 )
 
-//go:embed films/recognizer.wasm series/recognizer.wasm music/recognizer.wasm films/module.json series/module.json music/module.json
+//go:embed audiotags/tags.wasm audiotags/module.json films/recognizer.wasm series/recognizer.wasm music/recognizer.wasm films/module.json series/module.json music/module.json
 var assets embed.FS
 
 func Lookup(kind string) (protocol.Descriptor, []byte, error) {
@@ -17,7 +17,11 @@ func Lookup(kind string) (protocol.Descriptor, []byte, error) {
 	if err != nil {
 		return d, nil, err
 	}
-	code, err := assets.ReadFile(kind + "/recognizer.wasm")
+	file := "/recognizer.wasm"
+	if kind == "audiotags" {
+		file = "/tags.wasm"
+	}
+	code, err := assets.ReadFile(kind + file)
 	return d, code, err
 }
 
@@ -26,7 +30,7 @@ func Lookup(kind string) (protocol.Descriptor, []byte, error) {
 func Descriptor(kind string) (protocol.Descriptor, error) {
 	var d protocol.Descriptor
 	switch kind {
-	case "films", "series", "music":
+	case "films", "series", "music", "audiotags":
 	default:
 		return d, fmt.Errorf("unknown recognition module")
 	}

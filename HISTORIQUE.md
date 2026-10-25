@@ -1,3 +1,11 @@
+## 0.0.33 — 25 octobre 2026
+
+- Lecture des informations musicales et pochettes déplacée dans un module WASI indépendant ; suppression du parseur natif du noyau.
+- Nouvelle carte Informations des fichiers musicaux : activation, désactivation, désinstallation et réinstallation hors ligne. État persistant, catalogue et pochettes conservés.
+- Service limité aux blocs du fichier en cours ; aucune ouverture de chemin ou connexion réseau par l’extension. Fichiers inchangés ignorés, analyse avant transaction et annulation des sessions après désactivation.
+- Étape distincte de progression pour les informations musicales. Préparation temporaire des pochettes sur disque avec plafond.
+- Migration du catalogue vers le schéma 20, contrats et guide contributeur. Import de lecteurs de tags tiers encore à ajouter.
+
 ## 0.0.32 — 24 octobre 2026
 
 - Paquets de reconnaissance raccordés aux dépôts GitHub : cartes, filtre, versions installées, aperçu et installation/mise à jour via le même contrôle transactionnel que l’import local. Ouverture directe de leur fiche après installation.

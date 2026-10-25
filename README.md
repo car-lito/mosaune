@@ -4,7 +4,7 @@
 
 Un espace pour vos films, séries et musiques, hébergé chez vous. Mosaune réunit une bibliothèque locale, des fiches enrichies et la découverte de contenus dans une interface commune. Le projet privilégie un serveur léger en Go et une architecture extensible.
 
-**Prototype 0.0.32 — développement actif.** Le mode local reste le démarrage par défaut. Les [reconnaisseurs externes sont désormais installables depuis les dépôts GitHub](ESSAYER-LES-EXTENSIONS-032.md), avec aperçu, choix explicite, mise à jour et restauration. Un catalogue d’exemple public permet de tester ce parcours. Les familles médias complètes et les lecteurs restent à extraire/construire avant le premier essai NAS. HTTPS direct, images Docker amd64/arm64 et catalogue CasaOS 0.4.15 sont disponibles pour les essais ; ce n’est pas encore la bêta ni un déploiement NAS validé. [Préparation réseau et conteneurs](deploy/README.md).
+**Prototype 0.0.33 — développement actif.** La [lecture des informations musicales est désormais une extension indépendante](ESSAYER-LES-EXTENSIONS-033.md), avec activation et retrait sans perte du catalogue. Les reconnaisseurs externes restent installables depuis les dépôts GitHub. Les familles médias complètes et les lecteurs restent à extraire/construire avant le premier essai NAS. HTTPS direct, images Docker amd64/arm64 et catalogue CasaOS 0.4.15 sont préparés pour les essais ; ce n’est pas encore la bêta ni un déploiement NAS validé. [Préparation réseau et conteneurs](deploy/README.md).
 
 ## Déjà disponible
 

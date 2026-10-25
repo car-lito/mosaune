@@ -28,6 +28,7 @@ function wasm(output, source) {
 }
 try {
   wasm('providers/tmdb/provider.wasm', './providers/tmdb/source');
+  wasm('modules/audiotags/tags.wasm', './modules/audiotags/source');
   for (const kind of ['films', 'series', 'music']) wasm(`modules/${kind}/recognizer.wasm`, `./modules/${kind}/source`);
   wasm('examples/recognition/module.wasm', './examples/recognition/source');
   mkdirSync(join(root, 'build'), { recursive: true });

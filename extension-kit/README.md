@@ -1,3 +1,7 @@
+## Informations musicales (0.0.33)
+
+Le [contrat audio-tags](capabilities/audiotags/v1/README.md) et son programme WASI séparent la lecture des tags du noyau. Accès par plages bornées, cycle de vie propre et données conservées. L’import externe de ce rôle reste fermé.
+
 ## Reconnaisseurs dans les dépôts (0.0.32)
 
 Les paquets externes sont installables depuis le catalogue GitHub, avec les mêmes contrôles que les fichiers locaux. Le [dépôt d’exemple](examples/recognition/REPOSITORY.md) est produit par la construction et publié sur une branche séparée. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-032.md). Les autres rôles et familles médias restent à extraire.

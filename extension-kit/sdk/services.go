@@ -10,6 +10,14 @@ import (
 // ReadService cannot choose a URL, method, header or credential. The host must
 // grant the named service and validate its operations and parameters separately.
 func ReadService(service, operation string, params any) (json.RawMessage, error) {
+	return ReadServiceSized(service, operation, params, services.MaxResponse)
+}
+
+// ReadServiceSized avoids a large response allocation for small range replies.
+func ReadServiceSized(service, operation string, params any, capacity int) (json.RawMessage, error) {
+	if capacity < 128 || capacity > services.MaxResponse {
+		return nil, errors.New("invalid response capacity")
+	}
 	raw, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
@@ -22,7 +30,7 @@ func ReadService(service, operation string, params any) (json.RawMessage, error)
 	if err != nil || len(input) > services.MaxRequest {
 		return nil, errors.New("service request too large")
 	}
-	output := make([]byte, services.MaxResponse)
+	output := make([]byte, capacity)
 	n := readService(input, output)
 	if n <= 0 || int(n) > len(output) {
 		return nil, errors.New("service unavailable")

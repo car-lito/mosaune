@@ -47,6 +47,7 @@ type media struct {
 	Metadata   *Metadata `json:"metadata,omitempty"`
 }
 type catalog struct {
+	dataDir             string
 	recognition         recognitionLifecycle
 	repositoryMu        sync.Mutex
 	repositoryTransport http.RoundTripper // nil in production; deterministic HTTP fixtures in tests
@@ -181,6 +182,10 @@ func openCatalog(dir string) (*catalog, error) {
 		db.Close()
 		return nil, err
 	}
+	if err = migrateAudioTags(db); err != nil {
+		db.Close()
+		return nil, err
+	}
 	reader, e := sql.Open("sqlite", filepath.Join(dir, "mosaune.db"))
 	if e != nil {
 		db.Close()
@@ -192,7 +197,7 @@ func openCatalog(dir string) (*catalog, error) {
 		db.Close()
 		return nil, e
 	}
-	c := &catalog{db: db, authRead: reader}
+	c := &catalog{db: db, authRead: reader, dataDir: dir}
 	if c.accountCount() == 0 {
 		c.auth.code = rand.Text()
 	}
@@ -365,14 +370,18 @@ func (c *catalog) scan(ctx context.Context, l library, add bool) (result library
 		return l, err
 	}
 	defer finishRecognition()
+	var tagsReader *audioTagReader
+	if l.Kind == "music" {
+		var finish func()
+		ctx, tagsReader, finish, err = c.openAudioTags(ctx)
+		if err != nil {
+			return l, err
+		}
+		defer finish()
+	}
 	// Discover before opening the transaction: the total is honest, and remote
 	// directory traversal does not keep the catalog locked. No media bytes are kept.
-	type discovered struct {
-		rel      string
-		info     fs.FileInfo
-		metadata Metadata
-	}
-	files := []discovered{}
+	files := []discoveredMedia{}
 	err = fs.WalkDir(root.FS(), ".", func(rel string, d fs.DirEntry, walkErr error) error {
 		if ctx.Err() != nil {
 			return ctx.Err()
@@ -390,7 +399,7 @@ func (c *catalog) scan(ctx context.Context, l library, add bool) (result library
 		if !info.Mode().IsRegular() {
 			return nil
 		}
-		files = append(files, discovered{rel: rel, info: info})
+		files = append(files, discoveredMedia{rel: rel, info: info})
 		c.setScanProgress(scanProgress{LibraryID: l.ID, Name: l.Name, Kind: l.Kind, State: "discovering", Found: len(files)})
 		return nil
 	})
@@ -414,6 +423,11 @@ func (c *catalog) scan(ctx context.Context, l library, add bool) (result library
 			files[start+i].metadata = filenameMetadata(item)
 		}
 		c.setScanProgress(scanProgress{LibraryID: l.ID, Name: l.Name, Kind: l.Kind, State: "recognizing", Found: len(files), Total: len(files), Processed: end})
+	}
+	spool := &artworkSpool{dir: c.dataDir}
+	defer spool.close()
+	if err = c.stageAudioTags(ctx, tagsReader, root, l, files, spool); err != nil {
+		return l, err
 	}
 	c.setScanProgress(scanProgress{LibraryID: l.ID, Name: l.Name, Kind: l.Kind, State: "indexing", Found: len(files), Total: len(files)})
 	unlockRecognition, err := c.recognitionCommit(ctx)
@@ -453,7 +467,11 @@ func (c *catalog) scan(ctx context.Context, l library, add bool) (result library
 		rel, info := file.rel, file.info
 		_, err = stmt.ExecContext(ctx, rand.Text(), l.ID, rel, strings.TrimSuffix(info.Name(), path.Ext(info.Name())), info.Size(), info.ModTime().UnixNano(), rand.Text(), time.Now().Unix())
 		if err == nil {
-			err = indexLocalMetadata(ctx, tx, root, l, rel, file.metadata)
+			var picture []byte
+			picture, err = spool.read(file.pictureOffset, file.pictureLength)
+			if err == nil {
+				err = indexLocalMetadata(ctx, tx, l, rel, file.metadata, picture)
+			}
 		}
 		if err == nil {
 			l.Count++

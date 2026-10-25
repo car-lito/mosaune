@@ -2,6 +2,7 @@
  import {onMount,tick} from 'svelte';
  import ExtensionCard from './ExtensionCard.svelte';
  import RecognitionPackages from './RecognitionPackages.svelte';
+ import AudioTagsPackage from './AudioTagsPackage.svelte';
  import RecognitionImport from './RecognitionImport.svelte';
  const recognitionNames:Record<string,string>={films:'Reconnaissance des films',series:'Reconnaissance des séries',music:'Reconnaissance musicale'};
  import ExtensionConfiguration from './ExtensionConfiguration.svelte';
@@ -38,7 +39,7 @@
  {id:'builtin.musicbrainz',name:'MusicBrainz',family:'Métadonnées',description:'Identification des albums, artistes et morceaux.',settings:'metadata'},
  {id:'builtin.radarr',name:'Radarr',family:'Connecteurs',description:'Demandes et suivi de vos films.',settings:'downloads'},
  {id:'builtin.sonarr',name:'Sonarr',family:'Connecteurs',description:'Demandes et suivi de vos séries.',settings:'downloads'}];
- async function load(){try{const [list,a]=await Promise.all([accountRequest(token,'extensions'),accountRequest(token,'extensions/appearance')]);packages=list.packages;appearance=a;if(user.admin){const result=await Promise.all([accountRequest(token,'accounts'),accountRequest(token,'metadata/tmdb-runtime'),accountRequest(token,'provider-packages/tmdb')]);users=result[0];runtime=result[1];providerPackage=result[2];}if(selected&&!selected.startsWith('builtin.')&&!selected.startsWith('recognition.')&&selected!=='tmdb'&&!packages.some(p=>p.manifest.id===selected))selected='';}catch(e){error=e instanceof Error?e.message:'Extensions indisponibles.'}finally{loading=false;recognitionRefresh++}}
+ async function load(){try{const [list,a]=await Promise.all([accountRequest(token,'extensions'),accountRequest(token,'extensions/appearance')]);packages=list.packages;appearance=a;if(user.admin){const result=await Promise.all([accountRequest(token,'accounts'),accountRequest(token,'metadata/tmdb-runtime'),accountRequest(token,'provider-packages/tmdb')]);users=result[0];runtime=result[1];providerPackage=result[2];}if(selected&&!selected.startsWith('builtin.')&&!selected.startsWith('recognition.')&&selected!=='tmdb'&&selected!=='audio-tags'&&!packages.some(p=>p.manifest.id===selected))selected='';}catch(e){error=e instanceof Error?e.message:'Extensions indisponibles.'}finally{loading=false;recognitionRefresh++}}
  onMount(()=>{void load();const focus=()=>{if(!busy)void load()};window.addEventListener('focus',focus);return()=>window.removeEventListener('focus',focus)});
  async function perform(action:()=>Promise<void>){if(busy)return;busy=true;error='';notice='';try{await action();await load();extensionsChanged()}catch(e){error=e instanceof Error?e.message:'Opération indisponible.'}finally{busy=false}}
  async function upload(path:string){if(!file)throw Error('Choisissez un paquet.');const r=await fetch('/api/v1/extensions/'+path,{method:'POST',headers:{'Content-Type':'application/zip','X-Mosaune-Token':token,'X-Mosaune-Package-Checksum':preview?.package.checksum??'','X-Mosaune-Previous-Checksum':preview?.previousChecksum??''},body:file});const result=await r.json();if(!r.ok)throw Error(result.error||'Paquet non accepté.');return result;}
@@ -54,7 +55,7 @@
 <section class="extension-settings" aria-busy={busy}>
  {#if selected}<button class="back-link" onclick={back}>← Toutes les extensions</button>{/if}
  <span class="eyebrow">VOTRE MOSAUNE</span>
- <h2 bind:this={heading} tabindex="-1">{selectedPackage?.manifest.name ?? selectedNative?.name ?? recognitionNames[selected.replace('recognition.','')] ?? (selected==='tmdb'?'TMDB':'Les extensions')}</h2>
+ <h2 bind:this={heading} tabindex="-1">{selectedPackage?.manifest.name ?? selectedNative?.name ?? recognitionNames[selected.replace('recognition.','')] ?? (selected==='audio-tags'?'Informations musicales':selected==='tmdb'?'TMDB':'Les extensions')}</h2>
  {#if !selected}<p>Vos médias, vos services et votre apparence. Ouvrez une carte pour retrouver tous ses réglages.</p>{/if}
  {#if appearance.safeMode}<div class="extension-warning" role="status"><strong>Mode de secours</strong><p>Les thèmes externes, les modules de reconnaissance et le moteur extension de TMDB sont suspendus. Le fournisseur TMDB reste désactivé si vous l’avez coupé.</p></div>{/if}
  {#if error}<p class="form-error" role="alert">{error}</p>{/if}{#if notice}<p class="extension-notice" role="status">{notice}</p>{/if}
@@ -73,6 +74,8 @@
   <details class="extension-import"><summary>Moteur de traitement · avancé</summary><p>{runtime.enabled?'Moteur extension choisi':'Moteur intégré choisi'}. {runtime.safeMode?'Le mode de secours utilise le moteur intégré si TMDB est actif.':''} Changer de moteur ne réactive jamais un fournisseur désactivé.</p><button class="secondary" disabled={busy||runtime.safeMode&&!runtime.enabled} onclick={toggleRuntime}>{runtime.enabled?'Utiliser le moteur intégré':'Utiliser le moteur extension'}</button></details>
   <ProviderPackagePanel {token} state={providerPackage} changed={load} browse={()=>{tab='available';void show('')}}/>
   {#key providerPackage?.package?.checksum}<ExtensionConfiguration id="mosaune.tmdb-search" {token} refresh={async()=>{await load();await refresh();}}/>{/key}
+ {:else if selected==='audio-tags' && user.admin}
+  <AudioTagsPackage {token} detail={true} refreshKey={recognitionRefresh} select={show}/>
  {:else if selected.startsWith('recognition.') && user.admin}
   <RecognitionPackages {token} refreshKey={recognitionRefresh} detail={selected.slice(12)} select={id=>show(id?'recognition.'+id:'')}/>
  {:else if selectedNative}
@@ -82,6 +85,7 @@
  {:else}
   <div class="extension-tabs" aria-label="Catalogue des extensions"><button class:selected={tab==='installed'} aria-pressed={tab==='installed'} onclick={()=>tab='installed'}>Sur le serveur</button><button class:selected={tab==='available'} aria-pressed={tab==='available'} onclick={()=>tab='available'}>À télécharger</button></div>
   {#if tab==='available'}
+   {#if user.admin}<AudioTagsPackage {token} {tab} refreshKey={recognitionRefresh} select={show}/>{/if}
    {#if user.admin}<RecognitionPackages {token} refreshKey={recognitionRefresh} {tab} select={kind=>show('recognition.'+kind)}/>{/if}
    {#if user.admin}<ExtensionRepositoryStore {token} safeMode={appearance.safeMode} installed={repositoryInstalled}/>{/if}
    {#if user.admin}<details class="extension-import"><summary>Importer un fichier depuis cet appareil</summary><RecognitionImport {token} installed={()=>{recognitionRefresh++;}}/><ProviderPackageImport {token} installed={providerInstalled}/>
@@ -98,6 +102,7 @@
    <div class="extension-toolbar"><label>Rechercher une extension<input type="search" bind:value={filter} placeholder="Nom ou description…"/></label><button class="text-action" disabled={busy} onclick={()=>void load()}>Actualiser</button></div>
    {#if loading}<p role="status">Chargement des extensions…</p>{/if}
    <div class="extension-grid">
+    {#if user.admin}<AudioTagsPackage {token} {filter} refreshKey={recognitionRefresh} select={show}/>{/if}
     {#if user.admin}<RecognitionPackages {token} refreshKey={recognitionRefresh} {filter} select={kind=>show('recognition.'+kind)}/>{/if}
     {#if user.admin&&runtime&&matches('TMDB métadonnées films séries',filter)}<ExtensionCard id="tmdb" name="TMDB" family="Métadonnées · expérimental" description="Recherche et fiches de films et séries, avec le moteur d’extensions." status={runtime.providerEnabled?(runtime.serviceAccess===false?'Accès en ligne retiré':'Actif'):'Désactivé'} enabled={runtime.providerEnabled} disabled={busy} toggle={toggleProvider} open={()=>show('tmdb')}/>{/if}
     {#each visiblePackages as p (p.manifest.id)}<ExtensionCard id={p.manifest.id} name={p.manifest.name} family="Interface · thème" description={p.manifest.description} status={appearance.safeMode?'Suspendu':p.enabled?'Actif':'Désactivé'} enabled={p.enabled} disabled={busy||appearance.safeMode&&!p.enabled} toggle={user.admin?()=>toggle(p):undefined} open={()=>show(p.manifest.id)}/>{/each}

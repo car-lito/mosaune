@@ -12,8 +12,6 @@ import (
 	"image/jpeg"
 	_ "image/png"
 	"io"
-	"os"
-	"path/filepath"
 )
 
 type databaseAccess interface {
@@ -113,7 +111,7 @@ func storeArtwork(ctx context.Context, db databaseAccess, data []byte) (string, 
 	return id, nil
 }
 
-func indexLocalMetadata(ctx context.Context, tx *sql.Tx, root *os.Root, l library, rel string, md Metadata) error {
+func indexLocalMetadata(ctx context.Context, tx *sql.Tx, l library, rel string, md Metadata, picture []byte) error {
 	var id, revision, oldRevision string
 	err := tx.QueryRowContext(ctx, `SELECT m.id,m.revision,COALESCE(d.revision,'') FROM media m LEFT JOIN metadata d ON d.media_id=m.id WHERE m.library_id=? AND m.relative_path=?`, l.ID, rel).Scan(&id, &revision, &oldRevision)
 	if err != nil {
@@ -121,15 +119,6 @@ func indexLocalMetadata(ctx context.Context, tx *sql.Tx, root *os.Root, l librar
 	}
 	if revision == oldRevision {
 		return nil
-	}
-	var picture []byte
-	if l.Kind == "music" {
-		f, err := root.Open(filepath.FromSlash(rel))
-		if err != nil {
-			return err
-		}
-		md, picture = localMusic(f, md)
-		f.Close()
 	}
 	md.ImageID, err = storeArtwork(ctx, tx, picture)
 	if err != nil {

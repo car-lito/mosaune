@@ -162,6 +162,7 @@ func TestRecognitionSafeModeAndNoInstalledModules(t *testing.T) {
 // version number changed. Old migrations must not see tables from the future.
 func removeRecognitionForLegacyFixture(t *testing.T, c *catalog) {
 	t.Helper()
+	removeAudioTagsForLegacyFixture(t, c)
 	for _, kind := range recognitionKinds {
 		recognitionChange(t, c, kind, "remove")
 	}
@@ -225,5 +226,21 @@ func TestRecognitionPackageHTTPPermissions(t *testing.T) {
 		if w := user.request(method, p, map[string]any{"operation": "disable", "revision": revision}); w.Code != 403 {
 			t.Fatal("viewer changed/accessed packages", w.Code)
 		}
+	}
+}
+
+func removeAudioTagsForLegacyFixture(t *testing.T, c *catalog) {
+	t.Helper()
+	s, e := c.audioTagsState(context.Background())
+	if e != nil {
+		t.Fatal(e)
+	}
+	if s.Installed {
+		if e = c.changeAudioTags(context.Background(), "remove", s.Revision); e != nil {
+			t.Fatal(e)
+		}
+	}
+	if _, e = c.db.Exec("DROP TABLE local_metadata_packages"); e != nil {
+		t.Fatal(e)
 	}
 }

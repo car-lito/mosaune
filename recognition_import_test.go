@@ -252,6 +252,7 @@ func TestExternalRecognitionImportHTTPPermissions(t *testing.T) {
 
 func TestRecognitionMigration18PreservesAbsentAndDisabled(t *testing.T) {
 	c, dir := testCatalog(t)
+	removeAudioTagsForLegacyFixture(t, c)
 	recognitionChange(t, c, "films", "remove")
 	recognitionChange(t, c, "series", "disable")
 	_, err := c.db.Exec(`DROP TABLE recognition_selection; ALTER TABLE recognition_packages RENAME TO recognition_new;

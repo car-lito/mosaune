@@ -1,0 +1,15 @@
+{
+  "id": "mosaune.music.tags",
+  "version": "0.1.0",
+  "capabilities": [
+    "media.audio-tags.v1"
+  ],
+  "services": [
+    {
+      "name": "media.file.read.v1",
+      "operations": [
+        "range"
+      ]
+    }
+  ]
+}

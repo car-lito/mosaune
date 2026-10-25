@@ -7,7 +7,8 @@ Avant le NAS, le noyau conserve les services communs (comptes, permissions, char
 - [x] C-MEDIA-02b — 0.0.31 : import local de reconnaisseurs externes, manifeste commun, sélection explicite, mise à jour/restauration, exemple contributeur et tests de scan réel. [Guide](ESSAYER-LES-EXTENSIONS-031.md). Les dépôts pour ce format et les rôles média complets restent ouverts.
 - [x] C-MEDIA-02c — 0.0.32 : reconnaisseurs externes distribués par dépôts GitHub, aperçu et confirmation, versions installées/mises à jour, exemple public et restauration hors ligne après retrait du dépôt. [Guide](ESSAYER-LES-EXTENSIONS-032.md).
 - [ ] C-MEDIA-02 — Installer, choisir, désactiver et retirer les paquets média et leurs capacités, avec dépendances et conservation des données communes. Les programmes de reconnaissance livrés ne remplissent pas encore ce critère.
-- [ ] C-MEDIA-03 — Extraire les tags audio, les règles des catalogues spécialisés et leurs comportements ; supprimer les replis métier dans le noyau.
+- [x] C-MEDIA-03a — 0.0.33 : tags audio et pochettes embarquées dans un module WASI avec accès borné au seul fichier ouvert, cycle de vie persistant, conservation des données et tests MP3/FLAC. [Guide](ESSAYER-LES-EXTENSIONS-033.md). Import de lecteurs tiers à ajouter.
+- [ ] C-MEDIA-03 — Extraire les règles des catalogues spécialisés et leurs comportements ; supprimer les replis métier restants dans le noyau.
 - [ ] C-MEDIA-04 — Contributions UI des modules (navigation, pages, réglages, recherche), thèmes et traductions, sans route centrale par type de média.
 - [ ] C-MEDIA-05 — Extraire les fournisseurs/connecteurs restants et vérifier le démarrage sans extension média, puis l’ajout et le retrait de chacune.
 

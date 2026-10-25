@@ -3,3 +3,4 @@
 /providers/tmdb/provider.wasm
 /modules/*/recognizer.wasm
 /examples/recognition/module.wasm
+/modules/audiotags/tags.wasm

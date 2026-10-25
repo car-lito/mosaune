@@ -336,6 +336,7 @@ func (c *catalog) cancelRecognitionID(id string) {
 
 func (c *catalog) recognitionPackageRoutes(mux *secureMux) {
 	c.recognitionImportRoutes(mux)
+	c.audioTagsRoutes(mux)
 	mux.HandleFunc("GET /api/v1/recognition-packages", func(w http.ResponseWriter, r *http.Request) {
 		list, revision, err := c.recognitionPackages(r.Context())
 		if err != nil {
