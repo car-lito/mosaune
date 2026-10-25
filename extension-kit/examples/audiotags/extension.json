@@ -1,0 +1,28 @@
+{
+  "schema": 2,
+  "name": "Lecteur ID3v1 — exemple",
+  "publisher": "Exemple contributeur",
+  "description": "Exemple pédagogique : lit les titres, artistes et albums ID3v1 en fin de fichier MP3. Pas de pochette ni de FLAC.",
+  "minCore": "0.0.34",
+  "module": {
+    "id": "example.music.id3v1",
+    "version": "1.0.0",
+    "capabilities": [
+      "media.audio-tags.v1"
+    ],
+    "services": [
+      {
+        "name": "media.file.read.v1",
+        "operations": [
+          "range"
+        ]
+      }
+    ]
+  },
+  "contributions": [
+    {
+      "role": "media.audio-tags.v1",
+      "target": "music"
+    }
+  ]
+}

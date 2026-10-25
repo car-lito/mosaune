@@ -139,7 +139,7 @@ func TestRecognitionSafeModeAndNoInstalledModules(t *testing.T) {
 		t.Fatal("safe mode enabled module")
 	}
 	c.extensionSafeMode = false
-	for _, kind := range recognitionKinds {
+	for _, kind := range extractionKinds {
 		recognitionChange(t, c, kind, "remove")
 	}
 	next, err := openCatalog(dir)
@@ -184,7 +184,7 @@ func TestRecognitionMigrationSeedsOnceWithBackup(t *testing.T) {
 	}
 	defer next.close()
 	list, _, err := next.recognitionPackages(context.Background())
-	if err != nil || len(list) != 3 {
+	if err != nil || len(list) != 4 {
 		t.Fatal(list, err)
 	}
 	for _, p := range list {
@@ -240,7 +240,7 @@ func removeAudioTagsForLegacyFixture(t *testing.T, c *catalog) {
 			t.Fatal(e)
 		}
 	}
-	if _, e = c.db.Exec("DROP TABLE local_metadata_packages"); e != nil {
+	if _, e = c.db.Exec("DELETE FROM recognition_selection WHERE kind='audiotags'"); e != nil {
 		t.Fatal(e)
 	}
 }

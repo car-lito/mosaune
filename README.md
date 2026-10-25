@@ -39,3 +39,5 @@ Les médias et données personnelles restent hors du dépôt. Les tests ne néce
 ## Licence
 
 La licence du code Mosaune reste à choisir. L'accès public aux sources ne vaut pas encore licence open source. Les dépendances gardent leurs propres licences ; voir leurs manifestes et les notices présentes dans licenses/ et [NOTICES-METADONNEES.md](NOTICES-METADONNEES.md).
+
+Dernière étape du découpage : [lecteurs de métadonnées musicaux tiers — 0.0.34](ESSAYER-LES-EXTENSIONS-034.md).

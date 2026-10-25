@@ -31,6 +31,7 @@ function taggedAudioFixture() {
   const h=Buffer.from([73,68,51,3,0,0,0,0,0,0]);for(let i=0;i<4;i++)h[9-i]=(payload.length>>>(i*7))&127;return Buffer.concat([h,payload]);
 }
 const taggedAudio=taggedAudioFixture();
+const id3v1=Buffer.alloc(128);id3v1.write('TAG');id3v1.write('Lecteur externe conteneur',3);id3v1.write('Artiste externe',33);
 const fixtures = [
   { kind: 'music', name: 'sample.mp3' },
   { kind: 'films', name: 'Iron.Man.2008.mkv' },
@@ -60,6 +61,7 @@ try {
   }
   mkdirSync(join(mediaDirectory,'external'));
   writeFileSync(join(mediaDirectory,'external','Contributor.2026.mkv'),'external-fixture');
+  mkdirSync(join(mediaDirectory,'external-tags'));writeFileSync(join(mediaDirectory,'external-tags','example.mp3'),id3v1);
   docker(['volume', 'create', id]); volumeCreated = true;
   docker(['create', '--name', id, '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges:true', '--pids-limit=256', '--tmpfs', '/tmp:size=64m,mode=1777', '-p', `127.0.0.1:${port}:47831`,
     '-e', `MOSAUNE_PUBLIC_URL=${origin}`, '-e', 'MOSAUNE_TLS_CERT=/tls/server.crt', '-e', 'MOSAUNE_TLS_KEY=/tls/server.key', '-e', 'MOSAUNE_TLS_CA=/tls/server.crt',
@@ -176,6 +178,17 @@ try {
   await externalAction('remove');
   const unavailableScan=await request('/api/v1/libraries',{method:'POST',timeout:30000,headers:restartedAuth,body:{name:'Unavailable recognition',kind:'films',path:'/media/external'}});
   assert(unavailableScan.status!==201,'Removed selection silently fell back to factory module');
+  const externalTags=readFileSync('build/example-audiotags.mosaune.zip');
+  const tagPreview=await request('/api/v1/recognition-packages/preview',{method:'POST',headers:{...restartedAuth,'Content-Type':'application/zip'},body:externalTags});
+  assert(tagPreview.status===200,'Tag reader preview failed');const tp=JSON.parse(tagPreview.text);
+  const tagImport=await request('/api/v1/recognition-packages/import',{method:'POST',timeout:30000,headers:{...restartedAuth,'Content-Type':'application/zip','X-Mosaune-Package-Checksum':tp.package.checksum,'X-Mosaune-Registry-Revision':String(tp.revision)},body:externalTags});
+  assert(tagImport.status===201,'Tag reader import failed: '+tagImport.text);
+  for(const operation of ['enable','select']){const state=JSON.parse((await request('/api/v1/recognition-packages',{headers:restartedAuth})).text);const action=await request('/api/v1/recognition-packages/'+tp.package.manifest.module.id,{method:'POST',headers:restartedAuth,body:{operation,revision:state.revision}});assert(action.status===200,'Tag reader selection failed');}
+  const tagsScan=await request('/api/v1/libraries',{method:'POST',timeout:30000,headers:restartedAuth,body:{name:'External tags',kind:'music',path:'/media/external-tags'}});
+  assert(tagsScan.status===201,'External tag scan failed: '+tagsScan.text);
+  const withTags=JSON.parse((await request('/api/v1/library',{headers:restartedAuth})).text);
+  assert(withTags.items.some(item=>item.metadata?.title==='Lecteur externe conteneur'&&item.metadata?.artist==='Artiste externe'),'External tag reader not executed');
+  assert(readFileSync(join(mediaDirectory,'external-tags','example.mp3')).equals(id3v1),'External tags file modified');
   for (const fixture of fixtures) assert(readFileSync(join(mediaDirectory, fixture.kind, fixture.name)).equals(fixture.kind==='music'?taggedAudio:Buffer.from('0123456789')), 'Source media modified');
   assert(readFileSync(join(mediaDirectory,'external','Contributor.2026.mkv'),'utf8')==='external-fixture','External source media modified');
   docker(['exec', id, '/mosaune', '-healthcheck']);

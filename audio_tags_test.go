@@ -218,7 +218,7 @@ func TestAudioTagsLifecycleScanAndCancellation(t *testing.T) {
 		t.Fatal("unchanged file parsed", err)
 	}
 	// A corrupt active package must fail before changing the existing catalogue.
-	next.db.Exec("UPDATE local_metadata_packages SET code=?", []byte("invalid"))
+	next.db.Exec("UPDATE recognition_packages SET code=? WHERE kind='audiotags'", []byte("invalid"))
 	if _, err = next.scan(ctx, l, false); err == nil {
 		t.Fatal("corrupt package accepted")
 	}

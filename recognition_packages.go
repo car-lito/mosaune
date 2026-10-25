@@ -20,10 +20,13 @@ var errRecognitionUnavailable = errors.New("Reconnaissance désactivée ou dési
 // Factory offers share the lifecycle with administrator-imported packages.
 var recognitionKinds = []string{"films", "series", "music"}
 
+// Shared executable-package lifecycle; the legacy table/API names stay compatible.
+var extractionKinds = []string{"films", "series", "music", "audiotags"}
+
 // Legacy kind paths still address their factory package; all other operations
 // use the stable module ID, never a publisher label supplied by an archive.
 func recognitionID(id string) (string, error) {
-	for _, kind := range recognitionKinds {
+	for _, kind := range extractionKinds {
 		if id == kind {
 			d, err := modules.Descriptor(kind)
 			return d.ID, err
@@ -142,8 +145,8 @@ func (c *catalog) recognitionPackages(ctx context.Context) ([]recognitionPackage
 		return nil, 0, err
 	}
 	seen := map[string]bool{}
-	names := map[string]string{"films": "Reconnaissance des films", "series": "Reconnaissance des séries", "music": "Reconnaissance musicale"}
-	for _, kind := range recognitionKinds {
+	names := map[string]string{"films": "Reconnaissance des films", "series": "Reconnaissance des séries", "music": "Reconnaissance musicale", "audiotags": "Informations des fichiers musicaux"}
+	for _, kind := range extractionKinds {
 		d, err := modules.Descriptor(kind)
 		if err != nil {
 			return nil, 0, err
@@ -266,7 +269,7 @@ func (c *catalog) changeRecognition(ctx context.Context, kind, operation string,
 	store := registry.SQLStore{DB: tx}
 	if operation == "install" {
 		factoryKind := ""
-		for _, k := range recognitionKinds {
+		for _, k := range extractionKinds {
 			d, _ := modules.Descriptor(k)
 			if d.ID == id {
 				factoryKind = k

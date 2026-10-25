@@ -18,6 +18,6 @@ Les images normalisées sont préparées dans un fichier temporaire privé du do
 
 ## Cycle de vie et compatibilité
 
-Schéma catalogue 20. Installation initiale ou migration : paquet officiel activé une seule fois. Les choix ultérieurs sont persistants. Désactivation/retrait annulent les sessions ; réinstallation hors ligne désactivée par défaut. Les données déjà intégrées au catalogue sont partagées et conservées.
+Schéma catalogue 21 (20 pour la première extraction). Installation initiale ou migration : paquet officiel activé une seule fois. Les choix ultérieurs sont persistants. Désactivation/retrait annulent les sessions ; réinstallation hors ligne désactivée par défaut. Les données déjà intégrées au catalogue sont partagées et conservées.
 
-Cette étape ne permet pas encore l’import externe de cette capacité : le contrôleur d’import des reconnaisseurs refuse les services et capacités autres que son contrat. Ajouter un fournisseur tiers devra passer par un contrat de paquet, une sélection explicite et les mêmes limites, sans élargir l’accès disque.
+Depuis 0.0.34, import local et dépôts GitHub sont disponibles via le paquet exécutable commun (schéma 2), contribution media.audio-tags.v1 ciblant music et type de catalogue audio-tags. Le service range ci-dessus est le seul accepté, sans dépendance supplémentaire. Installation confirmée, activation et sélection sont distinctes. Les archives peuvent être mises à jour ou restaurées avec les mêmes contrôles que les reconnaisseurs. Exemple : examples/audiotags.

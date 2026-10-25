@@ -16,14 +16,24 @@ import (
 
 func recognitionRepositoryEntry(p packageformat.Executable) repositoryEntry {
 	m := p.Manifest
-	return repositoryEntry{ID: m.Module.ID, Name: m.Name, Publisher: m.Publisher, Description: m.Description, Version: m.Module.Version, Kind: "recognition", MinCore: m.MinCore, Path: "packages/module-" + m.Module.Version + ".zip", SHA256: p.Checksum}
+	kind := "recognition"
+	if m.Contributions[0].Role == "media.audio-tags.v1" {
+		kind = "audio-tags"
+	}
+	return repositoryEntry{ID: m.Module.ID, Name: m.Name, Publisher: m.Publisher, Description: m.Description, Version: m.Module.Version, Kind: kind, MinCore: m.MinCore, Path: "packages/module-" + m.Module.Version + ".zip", SHA256: p.Checksum}
 }
 
 func TestRepositoryRecognitionLifecycle(t *testing.T) {
+	testRepositoryExtractionLifecycle(t, recognitionExample)
+}
+func TestRepositoryAudioTagsLifecycle(t *testing.T) {
+	testRepositoryExtractionLifecycle(t, audioTagsExample)
+}
+func testRepositoryExtractionLifecycle(t *testing.T, example func(*testing.T, string) ([]byte, packageformat.Executable)) {
 	c, h, admin := accountFixture(t)
 	admin.enter("setup", map[string]string{"name": "Admin", "password": accountTestPassword, "code": c.auth.code})
-	raw, p := recognitionExample(t, "1.0.0")
-	newer, p2 := recognitionExample(t, "1.1.0")
+	raw, p := example(t, "1.0.0")
+	newer, p2 := example(t, "1.1.0")
 	e, e2 := recognitionRepositoryEntry(p), recognitionRepositoryEntry(p2)
 	index := repositoryIndex{Schema: 1, Name: "Recognition fixture", Packages: []repositoryEntry{e}}
 	files := map[string][]byte{e.Path: raw, e2.Path: newer}
@@ -85,7 +95,7 @@ func TestRepositoryRecognitionLifecycle(t *testing.T) {
 		got := ""
 		for _, v := range state.Installed {
 			if v.ID == e.ID {
-				if v.Kind != "recognition" {
+				if v.Kind != e.Kind {
 					t.Fatal(v)
 				}
 				got = v.Version

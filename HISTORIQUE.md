@@ -1,3 +1,10 @@
+## 0.0.34 — 25 octobre 2026
+
+- Lecteurs de métadonnées musicales tiers : import local, dépôts GitHub et choix explicite, sans substitution silencieuse.
+- Cycle commun avec les reconnaisseurs : activation, retrait, mises à jour et restauration ; état et données conservés. Migration sauvegardée vers le schéma 21.
+- Accès au seul fichier analysé affiché avant confirmation, contrat borné et refus des changements de rôle ou des accès supplémentaires.
+- Exemple contributeur ID3v1 indépendant, deux versions et catalogue reproductible. Les modules média complets et leurs interfaces restent à extraire.
+
 ## 0.0.33 — 25 octobre 2026
 
 - Lecture des informations musicales et pochettes déplacée dans un module WASI indépendant ; suppression du parseur natif du noyau.

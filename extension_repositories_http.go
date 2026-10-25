@@ -102,7 +102,11 @@ func (c *catalog) extensionRepositoryRoutes(mux *secureMux) {
 		}
 		for _, module := range modules {
 			if module.Installed {
-				installed = append(installed, installedVersion{module.ID, module.Version, "recognition"})
+				kind := "recognition"
+				if module.Kind == "audiotags" {
+					kind = "audio-tags"
+				}
+				installed = append(installed, installedVersion{module.ID, module.Version, kind})
 			}
 		}
 		sendJSON(w, 200, map[string]any{"repositories": repos, "installed": installed, "coreVersion": version})

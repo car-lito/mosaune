@@ -25,10 +25,10 @@
  }
 </script>
 <section class="extension-import">
- <h3>Importer un module de reconnaissance</h3>
- <p>Un créateur peut fournir son propre module pour reconnaître les films, les séries ou la musique à partir des noms de fichiers.</p>
+ <h3>Importer un module d’analyse</h3>
+ <p>Installez un reconnaisseur de noms ou un lecteur des informations intégrées aux fichiers musicaux.</p>
  <label class="extension-file">Paquet à vérifier<input type="file" accept=".zip,application/zip" disabled={busy} onchange={inspect}/></label>
- <p>Import local : l’identité de l’éditeur n’est pas vérifiée. Le module ne reçoit ni vos fichiers, ni vos clés, ni un accès au réseau ; il reçoit les noms relatifs pendant les scans.</p>
+ <p>Import local : l’identité de l’éditeur n’est pas vérifiée. Les accès nécessaires sont affichés après vérification, avant votre confirmation.</p>
  {#if error}<p class="form-error" role="alert">{error} Sélectionnez de nouveau le fichier pour refaire la vérification.</p>{/if}
  {#if notice}<p class="extension-notice" role="status">{notice}</p>{/if}
  {#if busy}<p role="status">Vérification en cours…</p>{/if}
@@ -37,7 +37,10 @@
    <h4>{preview.package.manifest.name} · {preview.package.manifest.module.version}</h4>
    <p>{preview.package.manifest.description}</p>
    <p>Éditeur déclaré : {preview.package.manifest.publisher} · Source locale non vérifiée</p>
-   <p>Reconnaissance : {kinds[preview.package.manifest.contributions[0].target]} · Mosaune {preview.package.manifest.minCore} minimum</p>
+   {#if preview.package.manifest.contributions[0].role==='media.audio-tags.v1'}
+   <p>Informations musicales · Accès demandé : lecture de blocs limités du seul fichier analysé. Aucun accès aux autres fichiers, au réseau ou aux clés.</p>
+   {:else}<p>Accès demandé : noms relatifs uniquement, aucun accès au contenu des fichiers, au réseau ou aux clés.</p>
+   <p>Reconnaissance : {kinds[preview.package.manifest.contributions[0].target]} · Mosaune {preview.package.manifest.minCore} minimum</p>{/if}
    <p>Une nouvelle installation est désactivée. Une mise à jour conserve votre activation et votre choix ; la version précédente reste restaurable.</p>
    <button class="primary" disabled={busy} onclick={install}>Confirmer l’installation de ce fichier</button>
   </div></article>

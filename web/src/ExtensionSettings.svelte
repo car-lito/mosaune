@@ -2,7 +2,6 @@
  import {onMount,tick} from 'svelte';
  import ExtensionCard from './ExtensionCard.svelte';
  import RecognitionPackages from './RecognitionPackages.svelte';
- import AudioTagsPackage from './AudioTagsPackage.svelte';
  import RecognitionImport from './RecognitionImport.svelte';
  const recognitionNames:Record<string,string>={films:'Reconnaissance des films',series:'Reconnaissance des séries',music:'Reconnaissance musicale'};
  import ExtensionConfiguration from './ExtensionConfiguration.svelte';
@@ -17,7 +16,7 @@
  let runtime:{serviceAccess?:boolean;providerEnabled:boolean;enabled:boolean;effective:boolean;loaded:boolean;safeMode:boolean}|null=null;
  let providerPackage:ProviderPackageState|null=null;
  async function providerInstalled(){await load();tab='installed';await show('tmdb');notice='Paquet fournisseur installé. Vos fiches et votre connexion sont conservées.';}
- async function repositoryInstalled(kind:string,id:string){await load();tab='installed';await show(kind==='provider'?'tmdb':kind==='recognition'?'recognition.'+id:id);notice='Paquet installé. Retrouvez ses réglages ci-dessous.';}
+ async function repositoryInstalled(kind:string,id:string){await load();tab='installed';await show(kind==='provider'?'tmdb':(kind==='recognition'||kind==='audio-tags')?'recognition.'+id:id);notice='Paquet installé. Retrouvez ses réglages ci-dessous.';}
  $: selectedPackage=packages.find(p=>p.manifest.id===selected);
  $: selectedNative=native.find(p=>p.id===selected);
  $: visiblePackages=packages.filter(p=>(p.manifest.name+' '+p.manifest.description).toLocaleLowerCase().includes(filter.toLocaleLowerCase()));
@@ -75,7 +74,7 @@
   <ProviderPackagePanel {token} state={providerPackage} changed={load} browse={()=>{tab='available';void show('')}}/>
   {#key providerPackage?.package?.checksum}<ExtensionConfiguration id="mosaune.tmdb-search" {token} refresh={async()=>{await load();await refresh();}}/>{/key}
  {:else if selected==='audio-tags' && user.admin}
-  <AudioTagsPackage {token} detail={true} refreshKey={recognitionRefresh} select={show}/>
+  <RecognitionPackages {token} detail="audiotags" refreshKey={recognitionRefresh} select={id=>show(id?'recognition.'+id:'')}/>
  {:else if selected.startsWith('recognition.') && user.admin}
   <RecognitionPackages {token} refreshKey={recognitionRefresh} detail={selected.slice(12)} select={id=>show(id?'recognition.'+id:'')}/>
  {:else if selectedNative}
@@ -85,7 +84,6 @@
  {:else}
   <div class="extension-tabs" aria-label="Catalogue des extensions"><button class:selected={tab==='installed'} aria-pressed={tab==='installed'} onclick={()=>tab='installed'}>Sur le serveur</button><button class:selected={tab==='available'} aria-pressed={tab==='available'} onclick={()=>tab='available'}>À télécharger</button></div>
   {#if tab==='available'}
-   {#if user.admin}<AudioTagsPackage {token} {tab} refreshKey={recognitionRefresh} select={show}/>{/if}
    {#if user.admin}<RecognitionPackages {token} refreshKey={recognitionRefresh} {tab} select={kind=>show('recognition.'+kind)}/>{/if}
    {#if user.admin}<ExtensionRepositoryStore {token} safeMode={appearance.safeMode} installed={repositoryInstalled}/>{/if}
    {#if user.admin}<details class="extension-import"><summary>Importer un fichier depuis cet appareil</summary><RecognitionImport {token} installed={()=>{recognitionRefresh++;}}/><ProviderPackageImport {token} installed={providerInstalled}/>
@@ -102,7 +100,6 @@
    <div class="extension-toolbar"><label>Rechercher une extension<input type="search" bind:value={filter} placeholder="Nom ou description…"/></label><button class="text-action" disabled={busy} onclick={()=>void load()}>Actualiser</button></div>
    {#if loading}<p role="status">Chargement des extensions…</p>{/if}
    <div class="extension-grid">
-    {#if user.admin}<AudioTagsPackage {token} {filter} refreshKey={recognitionRefresh} select={show}/>{/if}
     {#if user.admin}<RecognitionPackages {token} refreshKey={recognitionRefresh} {filter} select={kind=>show('recognition.'+kind)}/>{/if}
     {#if user.admin&&runtime&&matches('TMDB métadonnées films séries',filter)}<ExtensionCard id="tmdb" name="TMDB" family="Métadonnées · expérimental" description="Recherche et fiches de films et séries, avec le moteur d’extensions." status={runtime.providerEnabled?(runtime.serviceAccess===false?'Accès en ligne retiré':'Actif'):'Désactivé'} enabled={runtime.providerEnabled} disabled={busy} toggle={toggleProvider} open={()=>show('tmdb')}/>{/if}
     {#each visiblePackages as p (p.manifest.id)}<ExtensionCard id={p.manifest.id} name={p.manifest.name} family="Interface · thème" description={p.manifest.description} status={appearance.safeMode?'Suspendu':p.enabled?'Actif':'Désactivé'} enabled={p.enabled} disabled={busy||appearance.safeMode&&!p.enabled} toggle={user.admin?()=>toggle(p):undefined} open={()=>show(p.manifest.id)}/>{/each}

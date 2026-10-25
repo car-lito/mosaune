@@ -75,81 +75,27 @@ func (c *catalog) audioTagsState(ctx context.Context) (audioTagsState, error) {
 	d, _ := modules.Descriptor("audiotags")
 	return audioTagsState{Installed: ok, Enabled: ok && e.Enabled, SafeMode: c.extensionSafeMode, Revision: s.Revision, Version: d.Version}, err
 }
+
+// Compatibility endpoint for 0.0.33 clients; all changes use the shared lifecycle.
 func (c *catalog) changeAudioTags(ctx context.Context, op string, revision int64) error {
-	if op != "install" && op != "enable" && op != "disable" && op != "remove" {
-		return errors.New("Action inconnue.")
-	}
-	if c.extensionSafeMode && (op == "install" || op == "enable") {
-		return errors.New("Quittez le mode de secours pour activer cette extension.")
-	}
-	c.recognition.mu.Lock()
-	defer c.recognition.mu.Unlock()
-	tx, err := c.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-	if op == "install" {
-		_, err = installAudioTags(ctx, tx, revision)
-	} else {
-		_, err = (registry.SQLStore{DB: tx}).Commit(ctx, revision, registry.Change{Operation: op, ID: audioTagsID})
-	}
-	if err != nil {
-		return err
-	}
-	if op == "remove" {
-		if _, err = tx.ExecContext(ctx, "DELETE FROM local_metadata_packages WHERE id=?", audioTagsID); err != nil {
-			return err
-		}
-	}
-	if err = tx.Commit(); err != nil {
-		return err
-	}
-	if op == "disable" || op == "remove" {
-		c.cancelRecognitionID(audioTagsID)
-	}
-	return nil
+	return c.changeRecognition(ctx, audioTagsID, op, revision)
 }
 func (c *catalog) openAudioTags(ctx context.Context) (context.Context, *audioTagReader, func(), error) {
-	c.recognition.mu.Lock()
-	finish := func() { c.recognition.mu.Unlock() }
-	s, err := (registry.SQLStore{DB: c.db}).Load(ctx)
-	if err != nil {
-		finish()
-		return ctx, nil, func() {}, err
-	}
-	entry, ok := registryEntryFor(s, audioTagsID)
-	if c.extensionSafeMode || !ok || !entry.Enabled {
-		finish()
+	call, done, descriptor, code, err := c.beginRecognition(ctx, "audiotags")
+	if errors.Is(err, errRecognitionUnavailable) {
 		return ctx, nil, func() {}, nil
 	}
-	var code []byte
-	err = c.db.QueryRowContext(ctx, "SELECT code FROM local_metadata_packages WHERE id=?", audioTagsID).Scan(&code)
-	if err != nil || recognitionHash(code) != entry.CodeSHA256 {
-		finish()
-		return ctx, nil, func() {}, errors.New("Extension musicale absente ou endommagée. Réinstallez-la ou désactivez-la ; votre catalogue est conservé.")
+	if err != nil {
+		return call, nil, done, err
 	}
-	call, cancel := context.WithCancelCause(ctx)
-	c.recognition.next++
-	key := c.recognition.next
-	if c.recognition.calls == nil {
-		c.recognition.calls = map[uint64]recognitionCall{}
-	}
-	c.recognition.calls[key] = recognitionCall{kind: "music", id: audioTagsID, cancel: cancel}
-	finish()
-	done := func() {
-		c.recognition.mu.Lock()
-		delete(c.recognition.calls, key)
-		c.recognition.mu.Unlock()
-		cancel(context.Canceled)
-	}
-	reader, err := loadAudioTags(call, entry.Descriptor, code)
+	reader, err := loadAudioTags(call, descriptor, code)
 	if err != nil {
 		done()
 		return call, nil, func() {}, err
 	}
 	return call, reader, func() { reader.engine.Close(); done() }, nil
 }
+
 func (c *catalog) audioTagsRoutes(mux *secureMux) {
 	mux.HandleFunc("GET /api/v1/audio-tags", func(w http.ResponseWriter, r *http.Request) {
 		s, err := c.audioTagsState(r.Context())

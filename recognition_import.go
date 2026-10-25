@@ -58,6 +58,12 @@ func validateRecognitionImport(p packageformat.Executable) (string, error) {
 	m := p.Manifest
 	d := m.Module
 	// Reserve factory identities. A local author's label is not an endorsement.
+	if strings.HasPrefix(d.ID, "mosaune.") {
+		return "", errors.New("Les identifiants mosaune.* sont réservés.")
+	}
+	if len(m.Contributions) == 1 && m.Contributions[0].Role == "media.audio-tags.v1" {
+		return audioTagsImport(p)
+	}
 	if strings.HasPrefix(d.ID, "mosaune.") || len(m.Contributions) != 1 || m.Contributions[0].Role != recognition.Capability || !slices.Contains(recognitionKinds, m.Contributions[0].Target) || len(d.Capabilities) != 1 || d.Capabilities[0] != recognition.Capability || len(d.Services) != 0 || len(d.Dependencies) != 0 {
 		return "", errors.New("Ce serveur accepte ici les reconnaisseurs films, séries ou musique, sans service ni dépendance. Les identifiants mosaune.* sont réservés.")
 	}
@@ -111,11 +117,9 @@ func (c *catalog) importRecognition(ctx context.Context, raw []byte, checksum st
 	if plan.BeforeRevision != expected {
 		return registry.ErrConflict
 	}
-	reader, err := loadMediaRecognizer(ctx, p.Manifest.Module, p.Code)
-	if err != nil {
+	if err := validateExtractionCode(ctx, p); err != nil {
 		return err
 	}
-	reader.close()
 	return c.commitRecognitionImport(ctx, p, raw, expected, false)
 }
 
@@ -191,11 +195,9 @@ func (c *catalog) restoreRecognition(ctx context.Context, id string, expected in
 	if p.Manifest.Module.ID != id {
 		return errors.New("Version précédente incohérente.")
 	}
-	reader, err := loadMediaRecognizer(ctx, p.Manifest.Module, p.Code)
-	if err != nil {
+	if err := validateExtractionCode(ctx, p); err != nil {
 		return err
 	}
-	reader.close()
 	return c.commitRecognitionImport(ctx, p, raw, expected, true)
 }
 
