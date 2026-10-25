@@ -43,7 +43,9 @@ try {
     const tests = readdirSync(join(root, 'web/src')).filter(name => name.endsWith('.test.mjs')).sort().map(name => `web/src/${name}`);
     run(process.execPath, ['--test', ...tests]);
     for (const directory of [kit, root]) {
-      run(go, ['test', '-timeout', '5m', './...'], directory);
+      // The server suite creates many durable SQLite catalogues; Windows disk flushes vary.
+      // This is a suite allowance, not an extension execution-time limit.
+      run(go, ['test', '-timeout', directory === root ? '12m' : '5m', './...'], directory);
       run(go, ['vet', './...'], directory);
     }
   }
