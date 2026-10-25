@@ -25,3 +25,5 @@ La lecture est limitée à un fichier ouvert par Mosaune, par blocs de 64 Kio, a
 Le paquet officiel possède un vrai cycle installer/activer/désactiver/retirer. L’import de lecteurs de tags tiers et leur sélection ne sont pas encore ouverts : les dépôts acceptent toujours les rôles déjà pris en charge, notamment les reconnaisseurs de noms. Les interfaces spécialisées, règles de catalogue et connecteurs restants doivent encore être extraits avant les lecteurs et le premier essai NAS.
 
 Aucun serveur personnel n’est modifié par les tests de développement. Pour essayer cette version, utilisez votre démarrage habituel après récupération de la mise à jour.
+
+Validation finale : [tests Windows/Linux et conteneurs réussis](https://github.com/car-lito/mosaune/actions/runs/40196649971). Image ghcr.io/car-lito/mosaune:0.0.33-preview publique et vérifiée. Parcours de gestion de l’extension testé dans le navigateur sur une installation isolée.

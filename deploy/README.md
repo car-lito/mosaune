@@ -162,3 +162,13 @@ Localement : 122 tests du serveur et 22 tests de l’interface réussis, kit et 
 Parcours navigateur exécuté sur une installation temporaire et un compte fictif, avec le véritable dépôt public et sa branche `recognition-preview` : téléchargement/vérification de la version 1.0.0, installation et ouverture de sa fiche, activation, sélection, filtre du catalogue, mise à jour 1.1.0 et restauration 1.0.0 avec choix conservé. Le test a révélé le libellé « Import local », corrigé en « Module externe » dans le dernier commit. Le sélecteur de fichiers local n’est pas nécessaire à ce parcours ; il n’est pas déclaré validé visuellement par cette étape.
 
 Guide : [Extensions 0.0.32](../ESSAYER-LES-EXTENSIONS-032.md). Catalogue d’exemple : [branche publique](https://github.com/car-lito/mosaune-extensions/tree/recognition-preview), commit `cd0bfbbc0de6479b2358450f60fdd411d1c022b2`. La branche principale du catalogue d’extensions n’a pas été modifiée.
+
+## Validation de la préversion 0.0.33
+
+Le 25 octobre 2026 : [tests GitHub réussis](https://github.com/car-lito/mosaune/actions/runs/40196649971) sur le commit a8a2019386a1f56912b3ed1cd05c8e2bff3e3703. Windows/Linux, puis conteneurs HTTPS amd64/arm64 (ARM sous émulation), puis publication. Le test de conteneur lit un MP3 synthétique contenant des tags et une vraie image PNG, sert sa pochette normalisée et vérifie sa conservation après désactivation du module et redémarrage. Aucun déploiement sur le NAS personnel.
+
+Image publique : ghcr.io/car-lito/mosaune:0.0.33-preview. Index : sha256:a0181b3bfed34435a4031520580e0c0f6322c30f33d4bb20de2d0aae4eaf658c. Téléchargement anonyme et SHA-256 des deux architectures vérifiés, archive CasaOS publique identique à la copie locale.
+
+Localement : 127 tests du serveur et 22 tests de l’interface réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Suite serveur : 128.183 secondes. Exécutables Windows/Linux amd64/Linux arm64 construits.
+
+Parcours navigateur sur une installation temporaire : carte installée active, désactivation, ouverture de la fiche, retrait, disparition de la liste installée, présence dans À télécharger, réinstallation désactivée puis activation. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-033.md).
