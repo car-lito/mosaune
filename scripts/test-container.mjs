@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import https from 'node:https';
 import net from 'node:net';
+import { deflateSync } from 'node:zlib';
 import { checkServerIdentity } from 'node:tls';
 
 const image = process.argv[2];
@@ -15,6 +16,21 @@ const id = 'mosaune-ci-' + randomUUID();
 const directory = mkdtempSync(join(tmpdir(), id));
 const certDirectory = join(directory, 'tls');
 const mediaDirectory = join(directory, 'media');
+// Synthetic ID3/PNG fixture: exercises the WASI reader and disk artwork staging
+// inside the read-only, unprivileged ARM64 container as well as amd64.
+function taggedAudioFixture() {
+  function chunk(type,data) {
+    const body=Buffer.concat([Buffer.from(type),data]);let crc=0xffffffff;
+    for(const byte of body){crc^=byte;for(let i=0;i<8;i++)crc=(crc>>>1)^((crc&1)?0xedb88320:0)}
+    const head=Buffer.alloc(4),tail=Buffer.alloc(4);head.writeUInt32BE(data.length);tail.writeUInt32BE((crc^0xffffffff)>>>0);return Buffer.concat([head,body,tail]);
+  }
+  const ihdr=Buffer.alloc(13);ihdr.writeUInt32BE(1,0);ihdr.writeUInt32BE(1,4);ihdr[8]=8;ihdr[9]=2;
+  const png=Buffer.concat([Buffer.from('89504e470d0a1a0a','hex'),chunk('IHDR',ihdr),chunk('IDAT',deflateSync(Buffer.from([0,200,80,40]))),chunk('IEND',Buffer.alloc(0))]);
+  function frame(id,data){const h=Buffer.alloc(10);h.write(id);h.writeUInt32BE(data.length,4);return Buffer.concat([h,data])}
+  const payload=Buffer.concat([frame('TIT2',Buffer.from('\x03Morceau conteneur')),frame('TPE1',Buffer.from('\x03Artiste test')),frame('TALB',Buffer.from('\x03Album test')),frame('APIC',Buffer.concat([Buffer.from('\x00image/png\x00\x03\x00'),png]))]);
+  const h=Buffer.from([73,68,51,3,0,0,0,0,0,0]);for(let i=0;i<4;i++)h[9-i]=(payload.length>>>(i*7))&127;return Buffer.concat([h,payload]);
+}
+const taggedAudio=taggedAudioFixture();
 const fixtures = [
   { kind: 'music', name: 'sample.mp3' },
   { kind: 'films', name: 'Iron.Man.2008.mkv' },
@@ -40,7 +56,7 @@ try {
   chmodSync(certDirectory, 0o755); chmodSync(join(certDirectory, 'server.key'), 0o644);
   for (const fixture of fixtures) {
     mkdirSync(join(mediaDirectory, fixture.kind));
-    writeFileSync(join(mediaDirectory, fixture.kind, fixture.name), '0123456789');
+    writeFileSync(join(mediaDirectory, fixture.kind, fixture.name), fixture.kind==='music'?taggedAudio:'0123456789');
   }
   mkdirSync(join(mediaDirectory,'external'));
   writeFileSync(join(mediaDirectory,'external','Contributor.2026.mkv'),'external-fixture');
@@ -109,7 +125,12 @@ try {
   const music = library.items.find(item => item.kind === 'music');
   assert(movie?.metadata?.year === 2008 && episode?.metadata?.season === 1 && episode?.metadata?.episode === 2 && music, 'Media recognizers did not return expected metadata');
   const streamed = await request(music.url, { headers: { ...auth, Range: 'bytes=2-5' } });
-  assert(streamed.status === 206 && streamed.text === '2345', 'HTTPS range streaming failed');
+  assert(streamed.status === 206 && streamed.text === taggedAudio.subarray(2,6).toString(), 'HTTPS range streaming failed');
+  assert(music.metadata?.title==='Morceau conteneur'&&music.metadata.artist==='Artiste test'&&music.metadata.album==='Album test'&&music.metadata.imageId,'Audio tag module or artwork staging failed');
+  const cover=await request('/api/v1/artwork/'+music.metadata.imageId,{headers:auth});assert(cover.status===200&&cover.headers['content-type']==='image/jpeg','Embedded picture unavailable');
+  const tagsState=JSON.parse((await request('/api/v1/audio-tags',{headers:auth})).text);
+  assert(tagsState.installed&&tagsState.enabled,'Audio tag extension missing');
+  assert((await request('/api/v1/audio-tags',{method:'POST',headers:auth,body:{operation:'disable',revision:tagsState.revision}})).status===200,'Audio tag disable failed');
   const packages = JSON.parse((await request('/api/v1/recognition-packages', { headers: auth })).text);
   const removal = await request('/api/v1/recognition-packages/films', { method: 'POST', headers: auth, body: { operation: 'remove', revision: packages.revision } });
   assert(removal.status === 200, 'Recognition package removal failed');
@@ -123,6 +144,8 @@ try {
   const persisted = JSON.parse((await request('/api/v1/library', { headers: { Cookie: login.headers['set-cookie'][0].split(';')[0] } })).text);
   assert(persisted.items.length === fixtures.length, 'Catalogue lost after restart');
   const restartedAuth = { Cookie: login.headers['set-cookie'][0].split(';')[0], Origin: origin, 'X-Mosaune-Token': JSON.parse(login.text).token };
+  const tagsAfter=JSON.parse((await request('/api/v1/audio-tags',{headers:restartedAuth})).text);assert(tagsAfter.installed&&!tagsAfter.enabled,'Audio tags disabled state lost');
+  const cachedCover=await request('/api/v1/artwork/'+music.metadata.imageId,{headers:restartedAuth});assert(cachedCover.status===200,'Cached artwork lost after disabling and restart');
   const removed = JSON.parse((await request('/api/v1/recognition-packages', { headers: restartedAuth })).text);
   assert(!removed.packages.find(p => p.kind === 'films')?.installed, 'Restart restored removed package');
   const install = await request('/api/v1/recognition-packages/films', { method: 'POST', headers: restartedAuth, body: { operation: 'install', revision: removed.revision } });
