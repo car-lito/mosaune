@@ -176,7 +176,7 @@ try {
   await externalAction('remove');
   const unavailableScan=await request('/api/v1/libraries',{method:'POST',timeout:30000,headers:restartedAuth,body:{name:'Unavailable recognition',kind:'films',path:'/media/external'}});
   assert(unavailableScan.status!==201,'Removed selection silently fell back to factory module');
-  for (const fixture of fixtures) assert(readFileSync(join(mediaDirectory, fixture.kind, fixture.name), 'utf8') === '0123456789', 'Source media modified');
+  for (const fixture of fixtures) assert(readFileSync(join(mediaDirectory, fixture.kind, fixture.name)).equals(fixture.kind==='music'?taggedAudio:Buffer.from('0123456789')), 'Source media modified');
   assert(readFileSync(join(mediaDirectory,'external','Contributor.2026.mkv'),'utf8')==='external-fixture','External source media modified');
   docker(['exec', id, '/mosaune', '-healthcheck']);
   docker(['stop', '--time', '15', id]);
