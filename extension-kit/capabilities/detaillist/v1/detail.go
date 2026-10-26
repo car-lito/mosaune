@@ -80,7 +80,7 @@ func (q Query) Validate() error {
 }
 func (r Result) Validate(q Query) error {
 	bad := errors.New("invalid detail result")
-	if q.Validate() != nil || len(r.Groups) > 128 || len(r.Rows) != len(q.Entries) || !bounded(r) {
+	if r.Groups == nil || r.Rows == nil || q.Validate() != nil || len(r.Groups) > 128 || len(r.Rows) != len(q.Entries) || !bounded(r) {
 		return bad
 	}
 	for _, s := range []string{r.Title, r.All, r.Files, r.Help, r.Empty} {
