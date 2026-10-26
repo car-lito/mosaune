@@ -22,3 +22,5 @@ Les créateurs peuvent distribuer ces modules via les dépôts GitHub déjà pri
 ## Ce que cette version ne termine pas
 
 Les pages médias, la présentation des saisons, les associations aux œuvres des fournisseurs et les connecteurs restent à extraire. Les lecteurs audio/vidéo personnalisés viennent ensuite. Aucun déploiement sur le NAS à cette étape.
+
+Validation finale : [tests Windows/Linux et conteneurs réussis](https://github.com/car-lito/mosaune/actions/runs/40347498282). Image ghcr.io/car-lito/mosaune:0.0.35-preview publique et vérifiée. Désactivation et réactivation testées dans le navigateur sur une installation isolée.

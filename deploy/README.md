@@ -182,3 +182,13 @@ Image publique : ghcr.io/car-lito/mosaune:0.0.34-preview. Index : sha256:0217382
 Localement : 131 tests serveur et 22 tests interface réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Exécutables Windows/Linux amd64/Linux arm64 construits. Les tests couvrent notamment migration, sélection explicite, annulation, refus des accès excessifs, mise à jour, restauration et conservation des métadonnées.
 
 Parcours navigateur sur une installation temporaire : dépôt public audiotags-preview, installation 1.0.0, activation sans sélection implicite, sélection, mise à jour 1.1.0 et restauration 1.0.0 en conservant le choix. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-034.md).
+
+## Validation de la préversion 0.0.35
+
+Vérification finale le 26 octobre 2026 : [tests GitHub réussis](https://github.com/car-lito/mosaune/actions/runs/40347498282) sur le commit 8884c4cf28fabcfe88e895576e4a5820a6509c07. Tests Windows/Linux, conteneurs HTTPS amd64/arm64 (ARM sous émulation), puis publication. Les tests conteneurs vérifient les trois projections de catalogue officielles, le retrait du catalogue musical et son retour sans nouveau scan, avec conservation des métadonnées. Aucun déploiement sur le NAS personnel.
+
+Image publique : ghcr.io/car-lito/mosaune:0.0.35-preview. Index : sha256:d913a53a926faa79b6e14224bcdec1d3b40d72f89dbf139a123fc08d9270ac56. Téléchargement anonyme et SHA-256 des deux architectures vérifiés ; archive CasaOS publique identique à la copie locale.
+
+Localement : 136 tests serveur et 23 tests interface réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Exécutables Windows/Linux amd64/Linux arm64 construits. Les tests couvrent migration, permissions, sélection explicite d'un module indépendant, annulation, mises à jour, restauration, panne, mode secours et conservation des données.
+
+Parcours navigateur sur une installation temporaire : les deux morceaux se séparent après désactivation du catalogue musical et se regroupent en album après réactivation sans scan. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-035.md).
