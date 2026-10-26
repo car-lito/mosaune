@@ -172,3 +172,13 @@ Image publique : ghcr.io/car-lito/mosaune:0.0.33-preview. Index : sha256:a0181b3
 Localement : 127 tests du serveur et 22 tests de l’interface réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Suite serveur : 128.183 secondes. Exécutables Windows/Linux amd64/Linux arm64 construits.
 
 Parcours navigateur sur une installation temporaire : carte installée active, désactivation, ouverture de la fiche, retrait, disparition de la liste installée, présence dans À télécharger, réinstallation désactivée puis activation. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-033.md).
+
+## Validation de la préversion 0.0.34
+
+Vérification finale le 26 octobre 2026 : [tests GitHub réussis](https://github.com/car-lito/mosaune/actions/runs/40223492293) sur le commit 891b2b8acfa52b797c453123c9d3ea8923d283eb. Tests Windows/Linux, conteneurs HTTPS amd64/arm64 (ARM sous émulation), puis publication. Les conteneurs installent et sélectionnent le lecteur ID3v1 externe, analysent un MP3 synthétique et vérifient ses métadonnées ainsi que la conservation du fichier original. Aucun déploiement sur le NAS personnel.
+
+Image publique : ghcr.io/car-lito/mosaune:0.0.34-preview. Index : sha256:02173825a231ae9e14e390d61119d7df8dba0639f55d451abdd75e3838ff8a91. Téléchargement anonyme et SHA-256 des deux architectures vérifiés ; archive CasaOS publique identique à la copie locale.
+
+Localement : 131 tests serveur et 22 tests interface réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Exécutables Windows/Linux amd64/Linux arm64 construits. Les tests couvrent notamment migration, sélection explicite, annulation, refus des accès excessifs, mise à jour, restauration et conservation des métadonnées.
+
+Parcours navigateur sur une installation temporaire : dépôt public audiotags-preview, installation 1.0.0, activation sans sélection implicite, sélection, mise à jour 1.1.0 et restauration 1.0.0 en conservant le choix. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-034.md).

@@ -32,3 +32,5 @@ La construction habituelle produit build/audiotags-repository avec un index GitH
 ## Ce qui reste à faire
 
 Les grands modules média, leurs pages et les connecteurs ne sont pas encore entièrement extraits. Les lecteurs audio/vidéo personnalisés viennent après. Aucun déploiement NAS à cette étape.
+
+Validation finale : [tests Windows/Linux et conteneurs réussis](https://github.com/car-lito/mosaune/actions/runs/40223492293). Image ghcr.io/car-lito/mosaune:0.0.34-preview publique et vérifiée. Installation, sélection, mise à jour et restauration testées dans le navigateur sur une installation isolée.
