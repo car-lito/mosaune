@@ -17,6 +17,9 @@ import (
 func recognitionRepositoryEntry(p packageformat.Executable) repositoryEntry {
 	m := p.Manifest
 	kind := "recognition"
+	if m.Contributions[0].Role == "media.catalogue.v1" {
+		kind = "catalogue"
+	}
 	if m.Contributions[0].Role == "media.audio-tags.v1" {
 		kind = "audio-tags"
 	}
@@ -25,6 +28,9 @@ func recognitionRepositoryEntry(p packageformat.Executable) repositoryEntry {
 
 func TestRepositoryRecognitionLifecycle(t *testing.T) {
 	testRepositoryExtractionLifecycle(t, recognitionExample)
+}
+func TestRepositoryCatalogueLifecycle(t *testing.T) {
+	testRepositoryExtractionLifecycle(t, catalogueExample)
 }
 func TestRepositoryAudioTagsLifecycle(t *testing.T) {
 	testRepositoryExtractionLifecycle(t, audioTagsExample)

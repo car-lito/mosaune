@@ -29,24 +29,27 @@ type library struct {
 	MetadataMessage string `json:"metadataMessage,omitempty"`
 }
 type media struct {
-	PosterURL  string    `json:"posterUrl,omitempty"`
-	ID         string    `json:"id"`
-	AddedAt    int64     `json:"addedAt"`
-	LastPlayed int64     `json:"lastPlayed"`
-	WorkID     string    `json:"workId,omitempty"`
-	LibraryID  string    `json:"libraryId"`
-	Name       string    `json:"name"`
-	Filename   string    `json:"filename"`
-	Kind       string    `json:"kind"`
-	URL        string    `json:"url"`
-	Size       int64     `json:"size"`
-	Position   float64   `json:"position"`
-	Duration   float64   `json:"duration"`
-	Completed  bool      `json:"completed"`
-	Revision   string    `json:"revision"`
-	Metadata   *Metadata `json:"metadata,omitempty"`
+	Catalogue  *catalogueProjection `json:"catalogue,omitempty"`
+	PosterURL  string               `json:"posterUrl,omitempty"`
+	ID         string               `json:"id"`
+	AddedAt    int64                `json:"addedAt"`
+	LastPlayed int64                `json:"lastPlayed"`
+	WorkID     string               `json:"workId,omitempty"`
+	LibraryID  string               `json:"libraryId"`
+	Name       string               `json:"name"`
+	Filename   string               `json:"filename"`
+	Kind       string               `json:"kind"`
+	URL        string               `json:"url"`
+	Size       int64                `json:"size"`
+	Position   float64              `json:"position"`
+	Duration   float64              `json:"duration"`
+	Completed  bool                 `json:"completed"`
+	Revision   string               `json:"revision"`
+	Metadata   *Metadata            `json:"metadata,omitempty"`
 }
 type catalog struct {
+	catalogueMu         sync.Mutex
+	catalogueCache      map[string]catalogueCacheEntry
 	dataDir             string
 	recognition         recognitionLifecycle
 	repositoryMu        sync.Mutex
@@ -187,6 +190,10 @@ func openCatalog(dir string) (*catalog, error) {
 		return nil, err
 	}
 	if err = migrateExtractionPackages(db); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if err = migrateCataloguePackages(db); err != nil {
 		db.Close()
 		return nil, err
 	}

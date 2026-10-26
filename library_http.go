@@ -86,7 +86,8 @@ func libraryRoutes(mux *secureMux, c *catalog, modules []module) string {
 				filteredItems = append(filteredItems, m)
 			}
 		}
-		sendJSON(w, 200, map[string]any{"libraries": filteredLibs, "items": filteredItems})
+		warnings := c.projectCatalogue(r.Context(), filteredItems)
+		sendJSON(w, 200, map[string]any{"libraries": filteredLibs, "items": filteredItems, "catalogueWarnings": warnings})
 	})
 	mux.HandleFunc("POST /api/v1/libraries", func(w http.ResponseWriter, r *http.Request) {
 		var input struct {

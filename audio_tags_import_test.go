@@ -200,6 +200,7 @@ func TestAudioTagsMigration20PreservesState(t *testing.T) {
 	for _, op := range []string{"enabled", "disable", "remove"} {
 		t.Run(op, func(t *testing.T) {
 			c, dir := testCatalog(t)
+			removeCatalogueForLegacyFixture(t, c)
 			if op != "enabled" {
 				audioTagsChange(t, c, op)
 			}

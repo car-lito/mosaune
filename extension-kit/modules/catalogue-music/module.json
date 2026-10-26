@@ -1,0 +1,7 @@
+{
+  "id": "mosaune.music.catalogue",
+  "version": "0.1.0",
+  "capabilities": [
+    "media.catalogue.v1"
+  ]
+}

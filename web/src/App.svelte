@@ -22,7 +22,7 @@
  import Dashboard from './Dashboard.svelte';import ContentPage from './ContentPage.svelte';import PersonPage from './PersonPage.svelte';
  import {groupCard,type Card} from './experience';import {waitForProgress} from './progress';import type {Work,Contributor} from './types';
   import { emptyQueue, makeQueue, appendQueue, shuffleQueue, moveItem, nextInQueue, savedQueue, restoreQueue, type MusicQueue, type QueueItem } from './music';
-  import { groupMedia } from './collection';
+  import { groupMedia, compareCatalogueEntries } from './collection';
   import type { Kind, Entry, Provider } from './types';
 
   type View = Kind | 'home' | 'watchlist' | 'favorites' | 'playlists' | 'settings' | 'requests';
@@ -30,7 +30,7 @@
  let page:Page|null=null;let backStack:{view:View;page:Page|null}[]=[];let works:Work[]=[];let pageKey=0;
  async function openCard(card:Card){backStack=[...backStack,{view,page}];view=card.kind;page={type:'content',card};pageKey++;window.scrollTo({top:0});}
  function openPerson(provider:string,p:Contributor){backStack=[...backStack,{view,page}];page={type:'person',provider,id:p.id,name:p.name};pageKey++;window.scrollTo({top:0});}
- function playAlbum(card:Card){const tracks=card.group?.entries??entries.filter(e=>card.work?.localIds.includes(e.id));playMusic([...tracks].sort((a,b)=>(a.metadata?.disc??0)-(b.metadata?.disc??0)||(a.metadata?.track??0)-(b.metadata?.track??0)));}
+ function playAlbum(card:Card){const tracks=card.group?.entries??entries.filter(e=>card.work?.localIds.includes(e.id));playMusic([...tracks].sort(compareCatalogueEntries));}
  function openArtist(name:string){openPerson('',{id:'',name});}
  function back(){const previous=backStack.pop();backStack=[...backStack];page=previous?.page??null;view=previous?.view??'home';pageKey++;window.scrollTo({top:0});}
  function updateWork(work:Work){works=works.some(w=>w.id===work.id)?works.map(w=>w.id===work.id?work:w):[...works,work];}
@@ -47,6 +47,7 @@
   let startOver = false;
   let playbackKey = 0;
   let libraryError = '';
+ let catalogueWarnings:string[]=[];
 
   let status: Status | null = null;
   let connectionError = false;
@@ -94,10 +95,12 @@
     void refreshAppearance();
     const extensionTimer=setInterval(()=>{if(!document.hidden){void refreshAppearance();void refreshProviders();}},30000);
     const extensionRefresh=()=>{void refreshAppearance();void refreshProviders();};
-    window.addEventListener('mosaune:extensions-changed',extensionRefresh);
+    const catalogueRefresh=()=>{page=null;backStack=[];void refreshLibrary().catch(()=>{});};
+ window.addEventListener('mosaune:catalogue-changed',catalogueRefresh);
+ window.addEventListener('mosaune:extensions-changed',extensionRefresh);
     window.addEventListener('focus',extensionRefresh);
     const arrivalTimer=setInterval(()=>void checkArrivals(),30000);
-    return () => {clearInterval(extensionTimer);window.removeEventListener('mosaune:extensions-changed',extensionRefresh);window.removeEventListener('focus',extensionRefresh);clearInterval(arrivalTimer);entries.filter(e => !e.libraryId).forEach(e => URL.revokeObjectURL(e.url));};
+    return () => {window.removeEventListener('mosaune:catalogue-changed',catalogueRefresh);clearInterval(extensionTimer);window.removeEventListener('mosaune:extensions-changed',extensionRefresh);window.removeEventListener('focus',extensionRefresh);clearInterval(arrivalTimer);entries.filter(e => !e.libraryId).forEach(e => URL.revokeObjectURL(e.url));};
   });
 
   function navigate(next: View) {view=next;page=null;backStack=[];query='';notice='';pageKey++;window.scrollTo({top:0});}
@@ -125,8 +128,9 @@
     try {
       const response = await fetch('/api/v1/library');
       if (!response.ok) throw new Error('Impossible de charger la bibliothèque.');
-      const data = await response.json() as { libraries: typeof libraries; items: Entry[] };
+      const data = await response.json() as { libraries: typeof libraries; items: Entry[]; catalogueWarnings?:string[] };
       libraries = data.libraries;
+ catalogueWarnings=data.catalogueWarnings??[];
       entries = [...data.items, ...entries.filter(e => !e.libraryId)];
       if (inspected) inspected=entries.find(e=>e.id===inspected?.id) ?? null;
       libraryError = ''; await refreshWorks();
@@ -213,9 +217,10 @@
  <aside class="sidebar"><a class="brand" href="#accueil" onclick={()=>navigate('home')} aria-label="Mosaune, accueil"><span class="brand-mark"><span></span><span></span><span></span></span><span>Mosaune<small>LE GOÛT DES HISTOIRES</small></span></a>
  <div class="nav-caption">VOTRE ESPACE</div><nav aria-label="Navigation principale"><button class:current={view==='home'} onclick={()=>navigate('home')}><Icon name="home"/>Accueil</button>{#each kinds as kind}<button class:current={view===kind} onclick={()=>navigate(kind)}><Icon name={kind}/>{labels[kind]}</button>{/each}</nav>
  <div class="nav-caption secondary-caption">VOS ENVIES</div><nav aria-label="Vos listes"><button class:current={view==='watchlist'} onclick={()=>navigate('watchlist')}><Icon name="bookmark"/>Ma liste</button><button class:current={view==='favorites'} onclick={()=>navigate('favorites')}><Icon name="heart"/>Favoris</button>{#if kinds.includes('music')}<button class:current={view==='playlists'} onclick={()=>navigate('playlists')}><Icon name="queue"/>Playlists</button>{/if}{#if kinds.includes('films')||kinds.includes('series')}<button class:current={view==='requests'} onclick={()=>navigate('requests')}><Icon name="server"/>Demandes</button>{/if}</nav>
- <div class="sidebar-bottom"><div class="account-identity"><strong>{user.name}</strong><button class="text-action" onclick={onlogout}>Se déconnecter</button></div><button class="settings-nav" class:current={view==='settings'} onclick={()=>navigate('settings')}><Icon name="settings"/>Réglages</button><div class="server-card"><Icon name="server"/><div><strong>Votre collection, chez vous</strong><span>{connectionError?'Serveur inaccessible':loading?'Connexion…':'Connecté à cet ordinateur'}</span></div></div><div class="version">PROJET MOSAUNE <span>v{status?.version??'0.0.34'}</span></div></div></aside>
+ <div class="sidebar-bottom"><div class="account-identity"><strong>{user.name}</strong><button class="text-action" onclick={onlogout}>Se déconnecter</button></div><button class="settings-nav" class:current={view==='settings'} onclick={()=>navigate('settings')}><Icon name="settings"/>Réglages</button><div class="server-card"><Icon name="server"/><div><strong>Votre collection, chez vous</strong><span>{connectionError?'Serveur inaccessible':loading?'Connexion…':'Connecté à cet ordinateur'}</span></div></div><div class="version">PROJET MOSAUNE <span>v{status?.version??'0.0.35'}</span></div></div></aside>
  <main id="main" class:settings-main={view==='settings'}><header class="topbar experience-topbar"><div class="page-navigation">{#if page}<button class="icon-button" aria-label="Revenir à la page précédente" onclick={back}>←</button>{/if}<span>{labels[view]}</span></div>{#if status}<SearchBox {works} {entries} {providers} {kinds} context={view} token={status.token} open={openCard}/>{/if}{#if kinds.includes('music')}<button class="queue-toggle" aria-label="Ouvrir la file d’écoute" aria-expanded={queueOpen} onclick={()=>queueOpen=!queueOpen}><Icon name="queue"/><span>{musicQueue.items.length}</span></button>{/if}</header>
  {#if connectionError}<div class="connection-warning" role="alert">Le serveur ne répond pas. <button onclick={connect}>Réessayer</button></div>{/if}
+ {#each catalogueWarnings as warning}<p class="extension-notice" role="status">{warning}</p>{/each}
  {#if libraryError}<p class="playback-error" role="alert">{libraryError}</p>{/if}
  <div hidden={view!=='settings'} class="settings-page"><div class="page-heading"><span class="eyebrow">FAITES COMME CHEZ VOUS</span><h1>Paramètres</h1><p>Un espace pour chaque réglage de Mosaune.</p></div>
  <div class="settings-layout"><nav class="settings-navigation" aria-label="Rubriques des paramètres">{#each settingsSections.filter(s=>(!s.admin||user.admin)&&(!s.video||kinds.includes('films')||kinds.includes('series'))) as section}<button aria-current={settingsTab===section.id?'page':undefined} class:selected={settingsTab===section.id} onclick={()=>{settingsTab=section.id;document.querySelector('.settings-content')?.scrollTo({top:0});}}><strong>{section.label}</strong><small>{section.description}</small></button>{/each}</nav>

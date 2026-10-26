@@ -29,11 +29,13 @@ function wasm(output, source) {
 try {
   wasm('providers/tmdb/provider.wasm', './providers/tmdb/source');
   wasm('modules/audiotags/tags.wasm', './modules/audiotags/source');
-  for (const kind of ['films', 'series', 'music']) wasm(`modules/${kind}/recognizer.wasm`, `./modules/${kind}/source`);
+  for (const kind of ['films', 'series', 'music', 'catalogue-films', 'catalogue-series', 'catalogue-music']) wasm(`modules/${kind}/recognizer.wasm`, `./modules/${kind}/source`);
   wasm('examples/recognition/module.wasm', './examples/recognition/source');
   wasm('examples/audiotags/module.wasm', './examples/audiotags/source');
+  wasm('examples/catalogue/module.wasm', './examples/catalogue/source');
   mkdirSync(join(root, 'build'), { recursive: true });
   run(go, ['run', './cmd/package-module', 'examples/recognition/extension.json', 'examples/recognition/module.wasm', '../build/example-recognition.mosaune.zip'], kit);
+  run(go, ['run', './cmd/package-module', 'examples/catalogue/extension.json', 'examples/catalogue/module.wasm', '../build/example-catalogue.mosaune.zip'], kit);
   buildRecognitionRepository(root, go, env);
   buildRecognitionRepository(root, go, env, "audiotags");
   // Le serveur embarque l'interface : elle est nécessaire même pour les tests Go.

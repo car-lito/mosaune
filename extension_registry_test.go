@@ -311,7 +311,7 @@ func TestProviderRegistryAtomicInstallAndRollback(t *testing.T) {
 		t.Fatal(err)
 	}
 	s, err := (registry.SQLStore{DB: c.db}).Load(ctx)
-	if _, exists := registryEntryFor(s, "mosaune.tmdb-search"); err != nil || exists || len(s.Entries) != 4 {
+	if _, exists := registryEntryFor(s, "mosaune.tmdb-search"); err != nil || exists || len(s.Entries) != 7 {
 		t.Fatal("provider removal affected recognition entries", s, err)
 	}
 }

@@ -23,7 +23,7 @@ COPY --from=web /source/node_modules/svelte ./node_modules/svelte
 COPY --from=web /source/node_modules/esm-env ./node_modules/esm-env
 RUN cd extension-kit && CGO_ENABLED=0 GOOS=wasip1 GOARCH=wasm go build -trimpath -ldflags="-s -w" -o providers/tmdb/provider.wasm ./providers/tmdb/source
 RUN cd extension-kit && CGO_ENABLED=0 GOOS=wasip1 GOARCH=wasm go build -trimpath -ldflags="-s -w" -o modules/audiotags/tags.wasm ./modules/audiotags/source
-RUN cd extension-kit && for kind in films series music; do CGO_ENABLED=0 GOOS=wasip1 GOARCH=wasm go build -trimpath -ldflags="-s -w" -o modules/$kind/recognizer.wasm ./modules/$kind/source || exit 1; done
+RUN cd extension-kit && for kind in films series music catalogue-films catalogue-series catalogue-music; do CGO_ENABLED=0 GOOS=wasip1 GOARCH=wasm go build -trimpath -ldflags="-s -w" -o modules/$kind/recognizer.wasm ./modules/$kind/source || exit 1; done
 ARG TARGETOS
 ARG TARGETARCH
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags="-s -w" -o /out/mosaune .

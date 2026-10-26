@@ -184,7 +184,7 @@ func TestRecognitionMigrationSeedsOnceWithBackup(t *testing.T) {
 	}
 	defer next.close()
 	list, _, err := next.recognitionPackages(context.Background())
-	if err != nil || len(list) != 4 {
+	if err != nil || len(list) != 7 {
 		t.Fatal(list, err)
 	}
 	for _, p := range list {
@@ -230,6 +230,7 @@ func TestRecognitionPackageHTTPPermissions(t *testing.T) {
 }
 
 func removeAudioTagsForLegacyFixture(t *testing.T, c *catalog) {
+	removeCatalogueForLegacyFixture(t, c)
 	t.Helper()
 	s, e := c.audioTagsState(context.Background())
 	if e != nil {

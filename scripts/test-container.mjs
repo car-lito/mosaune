@@ -120,12 +120,18 @@ try {
     const scan = await request('/api/v1/libraries', { method: 'POST', timeout: 30000, headers: auth, body: { name: `CI ${fixture.kind}`, kind: fixture.kind, path: `/media/${fixture.kind}` } });
     assert(scan.status === 201, `${fixture.kind} read-only scan failed: HTTP ${scan.status}, ${scan.text}`);
   }
-  const library = JSON.parse((await request('/api/v1/library', { headers: auth })).text);
+  const library = JSON.parse((await request('/api/v1/library', { timeout:60000, headers: auth })).text);
   assert(library.items.length === fixtures.length, 'Sample media were not catalogued');
   const movie = library.items.find(item => item.kind === 'films');
   const episode = library.items.find(item => item.kind === 'series');
   const music = library.items.find(item => item.kind === 'music');
   assert(movie?.metadata?.year === 2008 && episode?.metadata?.season === 1 && episode?.metadata?.episode === 2 && music, 'Media recognizers did not return expected metadata');
+  assert(!library.catalogueWarnings?.length&&movie.catalogue?.owner==='mosaune.films.catalogue'&&episode.catalogue?.owner==='mosaune.series.catalogue'&&music.catalogue?.owner==='mosaune.music.catalogue','Catalogue modules did not project the collection');
+  async function catalogueAction(operation){const state=JSON.parse((await request('/api/v1/recognition-packages',{headers:auth})).text);const result=await request('/api/v1/recognition-packages/catalogue-music',{method:'POST',headers:auth,body:{operation,revision:state.revision}});assert(result.status===200,'Catalogue lifecycle failed: '+operation);}
+  await catalogueAction('remove');
+  const ungrouped=JSON.parse((await request('/api/v1/library',{timeout:60000,headers:auth})).text);assert(!ungrouped.items.find(i=>i.id===music.id)?.catalogue&&ungrouped.items.find(i=>i.id===music.id)?.metadata?.title===music.metadata.title&&ungrouped.catalogueWarnings.length===1,'Removed catalogue lost media or silently fell back');
+  await catalogueAction('install');await catalogueAction('enable');
+  const regrouped=JSON.parse((await request('/api/v1/library',{timeout:60000,headers:auth})).text);assert(regrouped.items.find(i=>i.id===music.id)?.catalogue?.owner==='mosaune.music.catalogue','Catalogue needs a rescan after reinstall');
   const streamed = await request(music.url, { headers: { ...auth, Range: 'bytes=2-5' } });
   assert(streamed.status === 206 && streamed.text === taggedAudio.subarray(2,6).toString(), 'HTTPS range streaming failed');
   assert(music.metadata?.title==='Morceau conteneur'&&music.metadata.artist==='Artiste test'&&music.metadata.album==='Album test'&&music.metadata.imageId,'Audio tag module or artwork staging failed');
@@ -143,7 +149,7 @@ try {
   assert(!after.setup, 'Account lost after restart');
   const login = await request('/api/v1/auth/login', { method: 'POST', headers: { Origin: origin, 'X-Mosaune-Token': after.token }, body: { name: 'ContainerTest', password } });
   assert(login.status === 200, 'Login after restart failed');
-  const persisted = JSON.parse((await request('/api/v1/library', { headers: { Cookie: login.headers['set-cookie'][0].split(';')[0] } })).text);
+  const persisted = JSON.parse((await request('/api/v1/library', { timeout:60000, headers: { Cookie: login.headers['set-cookie'][0].split(';')[0] } })).text);
   assert(persisted.items.length === fixtures.length, 'Catalogue lost after restart');
   const restartedAuth = { Cookie: login.headers['set-cookie'][0].split(';')[0], Origin: origin, 'X-Mosaune-Token': JSON.parse(login.text).token };
   const tagsAfter=JSON.parse((await request('/api/v1/audio-tags',{headers:restartedAuth})).text);assert(tagsAfter.installed&&!tagsAfter.enabled,'Audio tags disabled state lost');
@@ -173,7 +179,7 @@ try {
   // intentionally not overwritten simply because the recognizer changed.
   const externalScan=await request('/api/v1/libraries',{method:'POST',timeout:30000,headers:restartedAuth,body:{name:'External recognition',kind:'films',path:'/media/external'}});
   assert(externalScan.status===201,'External scan failed: '+externalScan.text);
-  const recognized=JSON.parse((await request('/api/v1/library',{headers:restartedAuth})).text);
+  const recognized=JSON.parse((await request('/api/v1/library',{timeout:60000,headers:restartedAuth})).text);
   assert(recognized.items.some(item=>item.metadata?.title?.startsWith('Exemple — ')),'Scan did not execute imported program');
   await externalAction('remove');
   const unavailableScan=await request('/api/v1/libraries',{method:'POST',timeout:30000,headers:restartedAuth,body:{name:'Unavailable recognition',kind:'films',path:'/media/external'}});
@@ -186,7 +192,7 @@ try {
   for(const operation of ['enable','select']){const state=JSON.parse((await request('/api/v1/recognition-packages',{headers:restartedAuth})).text);const action=await request('/api/v1/recognition-packages/'+tp.package.manifest.module.id,{method:'POST',headers:restartedAuth,body:{operation,revision:state.revision}});assert(action.status===200,'Tag reader selection failed');}
   const tagsScan=await request('/api/v1/libraries',{method:'POST',timeout:30000,headers:restartedAuth,body:{name:'External tags',kind:'music',path:'/media/external-tags'}});
   assert(tagsScan.status===201,'External tag scan failed: '+tagsScan.text);
-  const withTags=JSON.parse((await request('/api/v1/library',{headers:restartedAuth})).text);
+  const withTags=JSON.parse((await request('/api/v1/library',{timeout:60000,headers:restartedAuth})).text);
   assert(withTags.items.some(item=>item.metadata?.title==='Lecteur externe conteneur'&&item.metadata?.artist==='Artiste externe'),'External tag reader not executed');
   assert(readFileSync(join(mediaDirectory,'external-tags','example.mp3')).equals(id3v1),'External tags file modified');
   for (const fixture of fixtures) assert(readFileSync(join(mediaDirectory, fixture.kind, fixture.name)).equals(fixture.kind==='music'?taggedAudio:Buffer.from('0123456789')), 'Source media modified');

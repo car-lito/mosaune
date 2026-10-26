@@ -61,6 +61,9 @@ func validateRecognitionImport(p packageformat.Executable) (string, error) {
 	if strings.HasPrefix(d.ID, "mosaune.") {
 		return "", errors.New("Les identifiants mosaune.* sont réservés.")
 	}
+	if len(m.Contributions) == 1 && m.Contributions[0].Role == "media.catalogue.v1" {
+		return catalogueImport(p)
+	}
 	if len(m.Contributions) == 1 && m.Contributions[0].Role == "media.audio-tags.v1" {
 		return audioTagsImport(p)
 	}

@@ -1,11 +1,11 @@
 <script lang="ts">
  import {permitted,canRequest,currentAccount} from './accounts';
  import RequestDownload from './RequestDownload.svelte';import PosterEditor from './PosterEditor.svelte';
- import {onMount} from 'svelte';import Portrait from './Portrait.svelte';import AlbumMatch from './AlbumMatch.svelte';import Icon from './Icon.svelte';import MediaShelf from './MediaShelf.svelte';import {groupMedia} from './collection';import {groupCard,workCard,trackEntry,timeLabel,type Card} from './experience';import type {Entry,Work,Provider,Contributor} from './types';
+ import {onMount} from 'svelte';import Portrait from './Portrait.svelte';import AlbumMatch from './AlbumMatch.svelte';import Icon from './Icon.svelte';import MediaShelf from './MediaShelf.svelte';import {groupMedia,compareCatalogueEntries} from './collection';import {groupCard,workCard,trackEntry,timeLabel,type Card} from './experience';import type {Entry,Work,Provider,Contributor} from './types';
  export let card:Card;export let entries:Entry[];export let works:Work[];export let providers:Provider[];export let token:string;export let play:(e:Entry,restart?:boolean)=>void;export let enqueue:(e:Entry[])=>void;export let playlist:(e:Entry[])=>void;export let inspect:(e:Entry)=>void;export let open:(c:Card)=>void;export let person:(provider:string,person:Contributor)=>void;export let artist:(name:string)=>void;export let changed:(w:Work)=>void;export let refresh:()=>Promise<void>;export let mark:(e:Entry,v:boolean)=>void;
  let editingPoster=false;let posterEpoch=0;let downloadSeason:number|null=null;let matching=false;let selectedSeason:number|null=null;let failedImage='';let failedSeasons:Record<number,boolean>={};let failedTrailers:Record<string,boolean>={};let work:Work|undefined=card.work;let busy=false;let warning='';let related:Work[]=[];let alive=true;let requested='';const abort=new AbortController();
  $: local=work?entries.filter(e=>work?.localIds.includes(e.id)):card.group?entries.filter(e=>card.group?.entries.some(a=>a.id===e.id)):card.entry?[entries.find(e=>e.id===card.entry?.id)||card.entry]:[];
- $: sorted=[...local].sort((a,b)=>(a.metadata?.season??a.metadata?.disc??0)-(b.metadata?.season??b.metadata?.disc??0)||(a.metadata?.episode??a.metadata?.track??0)-(b.metadata?.episode??b.metadata?.track??0));
+ $: sorted=[...local].sort(compareCatalogueEntries);
  $: trackMode=!!card.entry&&card.entry.kind==='music';
  $: m=work?.metadata||card.group?.entries[0]?.metadata||card.entry?.metadata;
  $: title=trackMode?(card.entry?.metadata?.title||card.title):(work?.metadata.title||card.title);

@@ -6,6 +6,7 @@ import (
 	"errors"
 	tags "mosaune/extensionkit/capabilities/audiotags/v1"
 	"mosaune/extensionkit/packageformat"
+	"strings"
 )
 
 // Fold the existing audio-tag package into the shared executable lifecycle.
@@ -46,6 +47,14 @@ func validateExtractionCode(ctx context.Context, p packageformat.Executable) err
 	kind, err := validateRecognitionImport(p)
 	if err != nil {
 		return err
+	}
+	if strings.HasPrefix(kind, "catalogue-") {
+		r, e := loadCataloguer(ctx, p.Manifest.Module, p.Code)
+		if e != nil {
+			return e
+		}
+		r.engine.Close()
+		return nil
 	}
 	if kind == "audiotags" {
 		r, e := loadAudioTags(ctx, p.Manifest.Module, p.Code)

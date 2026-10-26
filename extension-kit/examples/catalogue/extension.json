@@ -1,0 +1,20 @@
+{
+  "schema": 2,
+  "name": "Albums individuels — exemple",
+  "publisher": "Exemple contributeur",
+  "description": "Présente chaque morceau séparément pour démontrer le remplacement des règles de catalogue.",
+  "minCore": "0.0.35",
+  "module": {
+    "id": "example.music.individual",
+    "version": "1.0.0",
+    "capabilities": [
+      "media.catalogue.v1"
+    ]
+  },
+  "contributions": [
+    {
+      "role": "media.catalogue.v1",
+      "target": "music"
+    }
+  ]
+}

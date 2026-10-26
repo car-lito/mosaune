@@ -6,3 +6,5 @@
 /modules/audiotags/tags.wasm
 
 /examples/audiotags/module.wasm
+
+/examples/catalogue/module.wasm
