@@ -33,9 +33,9 @@ try {
   wasm('examples/recognition/module.wasm', './examples/recognition/source');
   wasm('examples/audiotags/module.wasm', './examples/audiotags/source');
   wasm('examples/detaillist/module.wasm', './examples/detaillist/source');
-  run(go, ['run', './cmd/package-module', 'examples/detaillist/extension.json', 'examples/detaillist/module.wasm', '../build/example-detaillist.mosaune.zip'], kit);
   wasm('examples/catalogue/module.wasm', './examples/catalogue/source');
   mkdirSync(join(root, 'build'), { recursive: true });
+  run(go, ['run', './cmd/package-module', 'examples/detaillist/extension.json', 'examples/detaillist/module.wasm', '../build/example-detaillist.mosaune.zip'], kit);
   run(go, ['run', './cmd/package-module', 'examples/recognition/extension.json', 'examples/recognition/module.wasm', '../build/example-recognition.mosaune.zip'], kit);
   run(go, ['run', './cmd/package-module', 'examples/catalogue/extension.json', 'examples/catalogue/module.wasm', '../build/example-catalogue.mosaune.zip'], kit);
   buildRecognitionRepository(root, go, env);
