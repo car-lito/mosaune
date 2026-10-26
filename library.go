@@ -48,6 +48,7 @@ type media struct {
 	Metadata   *Metadata            `json:"metadata,omitempty"`
 }
 type catalog struct {
+	detailMu            sync.Mutex
 	catalogueMu         sync.Mutex
 	catalogueCache      map[string]catalogueCacheEntry
 	dataDir             string
@@ -194,6 +195,10 @@ func openCatalog(dir string) (*catalog, error) {
 		return nil, err
 	}
 	if err = migrateCataloguePackages(db); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if err = migrateDetailLists(db); err != nil {
 		db.Close()
 		return nil, err
 	}

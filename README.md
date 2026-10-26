@@ -1,5 +1,7 @@
 Étape actuelle : [organisation des catalogues par extensions — 0.0.35](ESSAYER-LES-EXTENSIONS-035.md).
 
+Dernière étape : [fiches de séries par extension — 0.0.36](ESSAYER-LES-EXTENSIONS-036.md).
+
 # Mosaune
 
 [![Vérifications](https://github.com/car-lito/mosaune/actions/workflows/verify.yml/badge.svg)](https://github.com/car-lito/mosaune/actions/workflows/verify.yml)

@@ -20,7 +20,10 @@ func problem(w http.ResponseWriter, code int, message string) {
 	sendJSON(w, code, map[string]string{"error": message})
 }
 func readJSON(w http.ResponseWriter, r *http.Request, value any) bool {
-	r.Body = http.MaxBytesReader(w, r.Body, 8192)
+	return readJSONLimit(w, r, value, 8192)
+}
+func readJSONLimit(w http.ResponseWriter, r *http.Request, value any, limit int64) bool {
+	r.Body = http.MaxBytesReader(w, r.Body, limit)
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 	if err := d.Decode(value); err != nil {
@@ -47,6 +50,7 @@ func libraryRoutes(mux *secureMux, c *catalog, modules []module) string {
 		}
 		return false
 	}
+	detailListRoutes(mux, c, allowed)
 	posterRoutes(mux, c, allowed)
 	metadataRoutes(mux, c, allowed)
 	musicRoutes(mux, c, allowed)

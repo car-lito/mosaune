@@ -1,0 +1,4 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {detailRows,groupCount} from './detail-list.ts';
+const entries=[{id:'a',name:'A',metadata:{season:9,episode:99}},{id:'b',name:'B',metadata:{season:1,episode:1}}];
+test('detail renderer follows module groups/order and only resolves visible IDs',()=>{const view={groups:[{key:'custom',title:'Custom'}],rows:[{id:'b',title:'Second',group:'custom',ordinal:'X'},{id:'a',title:'First',group:'',ordinal:'Y'},{id:'hidden',title:'Secret',group:'custom',ordinal:'Z'}]};assert.deepEqual(detailRows(view,entries,null).map(r=>r.id),['b','a']);assert.equal(detailRows(view,entries,'custom')[0].ordinal,'X');assert.equal(groupCount(view,'custom',entries),1)});
+test('absent presentation shows files without deriving seasons or grouping',()=>{assert.deepEqual(detailRows(null,entries,null).map(r=>r.group),['','']);assert.equal(detailRows(null,entries,null)[0].title,'A')});

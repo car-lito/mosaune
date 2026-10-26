@@ -184,7 +184,7 @@ func TestRecognitionMigrationSeedsOnceWithBackup(t *testing.T) {
 	}
 	defer next.close()
 	list, _, err := next.recognitionPackages(context.Background())
-	if err != nil || len(list) != 7 {
+	if err != nil || len(list) != 8 {
 		t.Fatal(list, err)
 	}
 	for _, p := range list {

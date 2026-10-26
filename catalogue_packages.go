@@ -81,12 +81,16 @@ type catalogueCacheEntry struct {
 }
 
 type cataloguer struct {
-	engine *runtime.Engine
-	id     string
+	engine     *runtime.Engine
+	capability string
+	id         string
 }
 
 func loadCataloguer(ctx context.Context, d protocol.Descriptor, code []byte) (*cataloguer, error) {
-	if len(d.Capabilities) != 1 || d.Capabilities[0] != catalogue.Capability || len(d.Services) != 0 || len(d.Dependencies) != 0 {
+	return loadFactProjector(ctx, d, code, catalogue.Capability)
+}
+func loadFactProjector(ctx context.Context, d protocol.Descriptor, code []byte, capability string) (*cataloguer, error) {
+	if len(d.Capabilities) != 1 || d.Capabilities[0] != capability || len(d.Services) != 0 || len(d.Dependencies) != 0 {
 		return nil, errors.New("Contrat de catalogue incompatible.")
 	}
 	limits := runtime.DefaultLimits()
@@ -96,7 +100,7 @@ func loadCataloguer(ctx context.Context, d protocol.Descriptor, code []byte) (*c
 	if err != nil {
 		return nil, err
 	}
-	r := &cataloguer{engine: e, id: d.ID}
+	r := &cataloguer{engine: e, id: d.ID, capability: capability}
 	ok := false
 	defer func() {
 		if !ok {
@@ -126,7 +130,7 @@ func (r *cataloguer) call(ctx context.Context, operation string, payload, out an
 	if err != nil {
 		return err
 	}
-	v, err := r.engine.Call(ctx, r.id, protocol.Request{Protocol: protocol.Version, ID: "catalogue-" + operation, Capability: catalogue.Capability, Operation: operation, Payload: b})
+	v, err := r.engine.Call(ctx, r.id, protocol.Request{Protocol: protocol.Version, ID: "catalogue-" + operation, Capability: r.capability, Operation: operation, Payload: b})
 	if err != nil {
 		return err
 	}

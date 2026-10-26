@@ -132,6 +132,11 @@ try {
   const ungrouped=JSON.parse((await request('/api/v1/library',{timeout:60000,headers:auth})).text);assert(!ungrouped.items.find(i=>i.id===music.id)?.catalogue&&ungrouped.items.find(i=>i.id===music.id)?.metadata?.title===music.metadata.title&&ungrouped.catalogueWarnings.length===1,'Removed catalogue lost media or silently fell back');
   await catalogueAction('install');await catalogueAction('enable');
   const regrouped=JSON.parse((await request('/api/v1/library',{timeout:60000,headers:auth})).text);assert(regrouped.items.find(i=>i.id===music.id)?.catalogue?.owner==='mosaune.music.catalogue','Catalogue needs a rescan after reinstall');
+  const detailBody={kind:'series',ids:[episode.id],workId:''};
+  async function detail(){const r=await request('/api/v1/detail-list',{method:'POST',timeout:30000,headers:auth,body:detailBody});assert(r.status===200,'Detail route failed');return JSON.parse(r.text);}
+  const layout=await detail();assert(layout.view?.owner==='mosaune.series.details'&&layout.view.groups.length===1&&layout.view.rows[0].id===episode.id,'Series detail module missing');
+  async function detailAction(operation){const state=JSON.parse((await request('/api/v1/recognition-packages',{headers:auth})).text);const r=await request('/api/v1/recognition-packages/detail-series',{method:'POST',headers:auth,body:{operation,revision:state.revision}});assert(r.status===200,'Detail lifecycle failed');}
+  await detailAction('remove');assert(!(await detail()).view,'Removed detail silently replaced');await detailAction('install');await detailAction('enable');assert((await detail()).view?.rows[0].id===episode.id,'Detail reinstall requires scan');
   const streamed = await request(music.url, { headers: { ...auth, Range: 'bytes=2-5' } });
   assert(streamed.status === 206 && streamed.text === taggedAudio.subarray(2,6).toString(), 'HTTPS range streaming failed');
   assert(music.metadata?.title==='Morceau conteneur'&&music.metadata.artist==='Artiste test'&&music.metadata.album==='Album test'&&music.metadata.imageId,'Audio tag module or artwork staging failed');

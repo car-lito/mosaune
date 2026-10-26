@@ -1,3 +1,11 @@
+## 0.0.36 — Saisons et listes d’épisodes par extension
+
+- Nouveau module Fiches des séries installable, désactivable et remplaçable via le cycle commun ; migration23 sans changement des autres choix.
+- Contrat déclaratif media.detail-list.v1, ordre/groupes/libellés fournis par le programme isolé, rendu partagé et thémable. Pas de HTML ou JavaScript externe.
+- Liste simple lorsque le module manque, échoue ou dépasse ses limites. Fichiers, métadonnées et progression conservés.
+- Exemple indépendant, import local et dépôts GitHub, tests de permissions, migration, remplacement, restauration et références invalides.
+- Le reste des fiches et les autres comportements restent à extraire ; aucun déploiement NAS.
+
 ## 0.0.35 — Catalogues organisés par extensions
 
 Trois programmes distincts fournissent les regroupements et le tri des films, séries et albums. Remplacement par paquet externe local ou dépôt, sélection explicite et cycle de vie partagé. Les métadonnées sont filtrées par permissions avant exécution ; aucune réécriture du catalogue. Module absent ou en panne : fichiers individuels et explication. Migration 22 sauvegardée, exemple contributeur, tests de contrats et de bibliothèque réelle. Les grandes familles médias ne sont pas encore entièrement extraites.

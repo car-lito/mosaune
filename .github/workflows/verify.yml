@@ -59,6 +59,7 @@ jobs:
             build/THIRD-PARTY-NOTICES.txt
             build/example-recognition.mosaune.zip
             build/example-catalogue.mosaune.zip
+            build/example-detaillist.mosaune.zip
             build/recognition-repository/
             build/audiotags-repository/
           if-no-files-found: error

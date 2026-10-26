@@ -1,0 +1,20 @@
+{
+  "schema": 2,
+  "name": "Épisodes sans saisons — exemple",
+  "publisher": "Exemple contributeur",
+  "description": "Une liste simple pour démontrer le remplacement de la présentation des épisodes.",
+  "minCore": "0.0.36",
+  "module": {
+    "id": "example.series.flat",
+    "version": "1.0.0",
+    "capabilities": [
+      "media.detail-list.v1"
+    ]
+  },
+  "contributions": [
+    {
+      "role": "media.detail-list.v1",
+      "target": "series"
+    }
+  ]
+}

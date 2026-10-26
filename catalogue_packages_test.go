@@ -40,6 +40,10 @@ func catalogueExample(t *testing.T, v string) ([]byte, packageformat.Executable)
 }
 
 func removeCatalogueForLegacyFixture(t *testing.T, c *catalog) {
+	recognitionChange(t, c, "detail-series", "remove")
+	if _, e := c.db.Exec("DELETE FROM recognition_selection WHERE kind='detail-series'"); e != nil {
+		t.Fatal(e)
+	}
 	t.Helper()
 	for _, kind := range catalogueKinds {
 		recognitionChange(t, c, "catalogue-"+kind, "remove")
