@@ -167,6 +167,7 @@ func TestDetailSectionsPermissionAndPreservation(t *testing.T) {
 }
 func TestDetailSectionsMigrationAndPolicy(t *testing.T) {
 	c, dir := testCatalog(t)
+	removeHeaderForLegacyFixture(t, c)
 	recognitionChange(t, c, "detail-information", "remove")
 	if _, e := c.db.Exec("DELETE FROM recognition_selection WHERE kind='detail-information'; PRAGMA user_version=23;"); e != nil {
 		t.Fatal(e)
@@ -198,6 +199,7 @@ func TestDetailSectionsMigrationAndPolicy(t *testing.T) {
 }
 
 func removeSectionsForLegacyFixture(t *testing.T, c *catalog) {
+	removeHeaderForLegacyFixture(t, c)
 	t.Helper()
 	recognitionChange(t, c, "detail-information", "remove")
 	if _, e := c.db.Exec("DELETE FROM recognition_selection WHERE kind='detail-information'"); e != nil {

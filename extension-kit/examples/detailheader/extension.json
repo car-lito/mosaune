@@ -1,0 +1,20 @@
+{
+  "schema": 2,
+  "name": "Dans le cadre — exemple",
+  "publisher": "Exemple contributeur",
+  "description": "Une présentation minimale du titre, sans notes ni détails secondaires.",
+  "minCore": "0.0.38",
+  "module": {
+    "id": "example.media.header",
+    "version": "1.0.0",
+    "capabilities": [
+      "media.detail-header.v1"
+    ]
+  },
+  "contributions": [
+    {
+      "role": "media.detail-header.v1",
+      "target": "media"
+    }
+  ]
+}

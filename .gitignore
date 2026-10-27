@@ -21,3 +21,5 @@ Thumbs.db
 /deploy/compose.local.yml
 
 extension-kit/examples/detailsections/module.wasm
+
+extension-kit/examples/detailheader/module.wasm

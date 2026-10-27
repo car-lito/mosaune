@@ -142,6 +142,11 @@ try {
   const sectionView=await sections();assert(sectionView.view?.owner==='mosaune.media.information'&&sectionView.view.blocks.some(b=>b.kind==='facts'),'Section WASI not used');
   await sectionAction('remove');assert((await sections()).view===null,'Removed section module still used');
   await sectionAction('install');await sectionAction('enable');assert((await sections()).view?.owner==='mosaune.media.information','Section reinstall failed');
+  async function header(){const r=await request('/api/v1/detail-header',{method:'POST',timeout:30000,headers:auth,body:{kind:'films',ids:[movie.id]}});assert(r.status===200,'Header route failed');return JSON.parse(r.text);}
+  async function headerAction(operation){const state=JSON.parse((await request('/api/v1/recognition-packages',{headers:auth})).text);const r=await request('/api/v1/recognition-packages/detail-header',{method:'POST',headers:auth,body:{operation,revision:state.revision}});assert(r.status===200,'Header lifecycle failed');}
+  assert((await header()).view?.owner==='mosaune.media.header','Header WASI not used');
+  await headerAction('remove');assert((await header()).view===null,'Removed header module still used');
+  await headerAction('install');await headerAction('enable');assert((await header()).view?.owner==='mosaune.media.header','Header reinstall failed');
   const streamed = await request(music.url, { headers: { ...auth, Range: 'bytes=2-5' } });
   assert(streamed.status === 206 && streamed.text === taggedAudio.subarray(2,6).toString(), 'HTTPS range streaming failed');
   assert(music.metadata?.title==='Morceau conteneur'&&music.metadata.artist==='Artiste test'&&music.metadata.album==='Album test'&&music.metadata.imageId,'Audio tag module or artwork staging failed');

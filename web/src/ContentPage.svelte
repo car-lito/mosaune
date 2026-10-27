@@ -1,6 +1,6 @@
 <script lang="ts">
  import {permitted,canRequest,currentAccount} from './accounts';
- import DetailList from './DetailList.svelte';import DetailSections from './DetailSections.svelte';
+ import DetailHeader from './DetailHeader.svelte';import DetailList from './DetailList.svelte';import DetailSections from './DetailSections.svelte';
  import RequestDownload from './RequestDownload.svelte';import PosterEditor from './PosterEditor.svelte';
  import {onMount} from 'svelte';import AlbumMatch from './AlbumMatch.svelte';import Icon from './Icon.svelte';import MediaShelf from './MediaShelf.svelte';import {groupMedia,compareCatalogueEntries} from './collection';import {groupCard,workCard,trackEntry,timeLabel,type Card} from './experience';import type {Entry,Work,Provider,Contributor} from './types';
  export let card:Card;export let entries:Entry[];export let works:Work[];export let providers:Provider[];export let token:string;export let play:(e:Entry,restart?:boolean)=>void;export let enqueue:(e:Entry[])=>void;export let playlist:(e:Entry[])=>void;export let inspect:(e:Entry)=>void;export let open:(c:Card)=>void;export let person:(provider:string,person:Contributor)=>void;export let artist:(name:string)=>void;export let changed:(w:Work)=>void;export let refresh:()=>Promise<void>;export let mark:(e:Entry,v:boolean)=>void;
@@ -35,18 +35,17 @@
 <article class="content-page">
  <section class="content-hero" class:album-hero={card.kind==='music'}>
  <div class="content-cover">{#if displayedImage}<img src={displayedImage+(displayedImage.includes('?')?'&':'?')+'display='+posterEpoch} alt={`Affiche de ${title}`} onerror={()=>{if(displayedImage===fallbackImage)fallbackImage=undefined;failedImage=picture||'';}}/>{:else}<Icon name={card.kind} size={64}/>{/if}</div>
- <div class="content-copy"><span class="eyebrow">{trackMode?'MORCEAU':card.kind==='music'?'ALBUM':card.kind==='series'?'SÉRIE':'FILM'} · {local.length?'DANS VOTRE COLLECTION':'À DÉCOUVRIR'}</span><h1>{title}</h1>
- <div class="content-facts">{#if m?.year}<span>{m.year}</span>{/if}{#if m?.runtime}<span>{m.runtime} min</span>{/if}{#if m?.genres?.length}<span>{m.genres.join(' · ')}</span>{/if}{#if m?.voteCount}<span>★ {m.rating?.toFixed(1)} / 10 <small>TMDB · {m.voteCount} votes</small></span>{/if}</div>
+ <div class="content-copy"><DetailHeader entries={local} workId={work?.id||''} kind={card.kind} trackId={trackMode?card.entry?.id||'':''} {token} revision={JSON.stringify(m)} fallbackTitle={title}>
+ <svelte:fragment slot="people">
  {#if card.kind==='music'}<div class="artist-links">{#if people.length}{#each people as p}<button onclick={()=>person(m?.provider||'musicbrainz',p)}>{p.name}</button>{/each}{:else}{#each [...new Set(local.map(e=>trackMode?(e.id===card.entry?.id?e.metadata?.artist:undefined):(e.metadata?.albumArtist||e.metadata?.artist)).filter(Boolean))] as name}<button onclick={()=>artist(name!)}>{name}</button>{/each}{/if}</div>{/if}
- {#if m?.tagline}<p class="tagline">{m.tagline}</p>{/if}
- <div class="content-actions">{#if first}<button class="primary" onclick={()=>play(trackMode?card.entry!:first)}><Icon name="play" size={17}/>{first.position&&!first.completed?'Reprendre':'Lire'}{card.kind==='music'&&!trackMode?' l’album':''}</button>{/if}
+ </svelte:fragment>
+ <div slot="commands" class="content-actions">{#if first}<button class="primary" onclick={()=>play(trackMode?card.entry!:first)}><Icon name="play" size={17}/>{first.position&&!first.completed?'Reprendre':'Lire'}{card.kind==='music'&&!trackMode?' l’album':''}</button>{/if}
  {#if work}<button class="secondary" disabled={busy} aria-pressed={work.watchlist} onclick={()=>toggle('watchlist')}>{work.watchlist?'✓ Dans ma liste':card.kind==='music'?'+ À écouter':'+ À voir'}</button><button class="secondary" disabled={busy} aria-pressed={work.favorite} onclick={()=>toggle('favorite')}>{work.favorite?'♥ Favori':'♡ Favori'}</button>{/if}
  {#if card.kind==='music'&&local.length}<button class="secondary" onclick={()=>enqueue(trackMode?[card.entry!]:sorted)}>À la file</button><button class="secondary" onclick={()=>playlist(trackMode?[card.entry!]:sorted)}>Ajouter à une playlist</button>{/if}
  {#if work&&card.kind!=='music'&&(!local.length||card.kind==='series')}<button class="secondary" disabled={!canRequest(card.kind)} onclick={()=>downloadSeason=-1}>{card.kind==='series'?'Demander la série':'Demander le téléchargement'}</button>{:else if !local.length&&card.kind==='music'}<button class="secondary" onclick={()=>requestLater(title)}>Demander le téléchargement <small>· bientôt</small></button>{/if}</div>
- {#if card.kind==='music'&&m?.edition}<p class="folder-help">Édition : {m.edition}</p>{/if}
  {#if card.kind!=='music'&&(permitted(local[0],'edit')||(!local.length&&currentAccount?.admin&&work))}<button class="text-action" onclick={()=>editingPoster=true}>Changer l’affiche</button>{/if}
  {#if card.kind!=='music'&&local[0]?.libraryId&&permitted(local[0],'edit')}<button class="text-action" onclick={()=>inspect(local[0])}>Corriger l’association</button>{/if}
- </div></section>
+ </DetailHeader></div></section>
  {#if busy}<p class="folder-help" role="status">La fiche se complète…</p>{/if}{#if warning}<p class="notice" role="status">{warning}</p>{/if}{#if requested}<p class="notice" role="status">{requested}</p>{/if}
  <DetailSections entries={local} workId={work?.id||''} kind={card.kind} {token} {person} revision={JSON.stringify(m)}/>
  {#if card.kind==='music'&&!trackMode}

@@ -61,6 +61,7 @@ jobs:
             build/example-catalogue.mosaune.zip
             build/example-detaillist.mosaune.zip
             build/example-detailsections.mosaune.zip
+            build/example-detailheader.mosaune.zip
             build/recognition-repository/
             build/audiotags-repository/
           if-no-files-found: error

@@ -1,6 +1,6 @@
 Étape actuelle : [organisation des catalogues par extensions — 0.0.35](ESSAYER-LES-EXTENSIONS-035.md).
 
-Dernière étape : [rubriques des fiches par extension — 0.0.37](ESSAYER-LES-EXTENSIONS-037.md).
+Dernière étape : [en-têtes des fiches par extension — 0.0.38](ESSAYER-LES-EXTENSIONS-038.md).
 
 # Mosaune
 

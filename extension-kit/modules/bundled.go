@@ -9,7 +9,7 @@ import (
 	"mosaune/extensionkit/protocol"
 )
 
-//go:embed detail-information/recognizer.wasm detail-information/module.json detail-series/recognizer.wasm detail-series/module.json catalogue-films/recognizer.wasm catalogue-films/module.json catalogue-series/recognizer.wasm catalogue-series/module.json catalogue-music/recognizer.wasm catalogue-music/module.json audiotags/tags.wasm audiotags/module.json films/recognizer.wasm series/recognizer.wasm music/recognizer.wasm films/module.json series/module.json music/module.json
+//go:embed detail-header/recognizer.wasm detail-header/module.json detail-information/recognizer.wasm detail-information/module.json detail-series/recognizer.wasm detail-series/module.json catalogue-films/recognizer.wasm catalogue-films/module.json catalogue-series/recognizer.wasm catalogue-series/module.json catalogue-music/recognizer.wasm catalogue-music/module.json audiotags/tags.wasm audiotags/module.json films/recognizer.wasm series/recognizer.wasm music/recognizer.wasm films/module.json series/module.json music/module.json
 var assets embed.FS
 
 func Lookup(kind string) (protocol.Descriptor, []byte, error) {
@@ -30,7 +30,7 @@ func Lookup(kind string) (protocol.Descriptor, []byte, error) {
 func Descriptor(kind string) (protocol.Descriptor, error) {
 	var d protocol.Descriptor
 	switch kind {
-	case "films", "series", "music", "audiotags", "catalogue-films", "catalogue-series", "catalogue-music", "detail-series", "detail-information":
+	case "films", "series", "music", "audiotags", "catalogue-films", "catalogue-series", "catalogue-music", "detail-series", "detail-information", "detail-header":
 	default:
 		return d, fmt.Errorf("unknown recognition module")
 	}

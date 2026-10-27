@@ -17,6 +17,9 @@ import (
 func recognitionRepositoryEntry(p packageformat.Executable) repositoryEntry {
 	m := p.Manifest
 	kind := "recognition"
+	if m.Contributions[0].Role == "media.detail-header.v1" {
+		kind = "detail-header"
+	}
 	if m.Contributions[0].Role == "media.detail-sections.v1" {
 		kind = "detail-sections"
 	}
@@ -258,4 +261,8 @@ func TestRepositoryRecognitionManifestPolicyAndLimits(t *testing.T) {
 			t.Fatal("host policy bypass")
 		}
 	}
+}
+
+func TestRepositoryDetailHeaderLifecycle(t *testing.T) {
+	testRepositoryExtractionLifecycle(t, headerExample)
 }

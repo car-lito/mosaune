@@ -21,7 +21,7 @@ var errRecognitionUnavailable = errors.New("Reconnaissance désactivée ou dési
 var recognitionKinds = []string{"films", "series", "music"}
 
 // Shared executable-package lifecycle; the legacy table/API names stay compatible.
-var extractionKinds = []string{"films", "series", "music", "audiotags", "catalogue-films", "catalogue-series", "catalogue-music", "detail-series", "detail-information"}
+var extractionKinds = []string{"films", "series", "music", "audiotags", "catalogue-films", "catalogue-series", "catalogue-music", "detail-series", "detail-information", "detail-header"}
 
 // Legacy kind paths still address their factory package; all other operations
 // use the stable module ID, never a publisher label supplied by an archive.
@@ -145,7 +145,7 @@ func (c *catalog) recognitionPackages(ctx context.Context) ([]recognitionPackage
 		return nil, 0, err
 	}
 	seen := map[string]bool{}
-	names := map[string]string{"films": "Reconnaissance des films", "series": "Reconnaissance des séries", "music": "Reconnaissance musicale", "audiotags": "Informations des fichiers musicaux", "catalogue-films": "Catalogue des films", "catalogue-series": "Catalogue des séries", "catalogue-music": "Catalogue musical", "detail-series": "Fiches des séries", "detail-information": "Informations des fiches"}
+	names := map[string]string{"films": "Reconnaissance des films", "series": "Reconnaissance des séries", "music": "Reconnaissance musicale", "audiotags": "Informations des fichiers musicaux", "catalogue-films": "Catalogue des films", "catalogue-series": "Catalogue des séries", "catalogue-music": "Catalogue musical", "detail-series": "Fiches des séries", "detail-information": "Informations des fiches", "detail-header": "En-têtes des fiches"}
 	for _, kind := range extractionKinds {
 		d, err := modules.Descriptor(kind)
 		if err != nil {

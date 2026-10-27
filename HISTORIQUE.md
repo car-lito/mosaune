@@ -1,3 +1,11 @@
+## 0.0.38 — En-têtes par extension
+
+- Titres et informations du haut des fiches Films/Séries/Musique composés par un programme WASI remplaçable, avec le thème existant.
+- Contrat public media.detail-header.v1 et exemple indépendant « Dans le cadre » ; import, dépôts, sélection, mise à jour et restauration communs.
+- Distinction album/morceau contrôlée côté serveur ; permissions et associations vérifiées avant de transmettre les faits. Les notes portent le fournisseur réel.
+- Désactivation sans perte de données ni remplacement automatique : titre simple et commandes conservés. Migration25 préservant les choix précédents.
+- Affiches, liens d’artistes, commandes, suggestions et listes musicales restent intégrés ; aucun lecteur nouveau ni déploiement NAS.
+
 ## 0.0.37 — Rubriques descriptives par extension
 
 - Informations des fiches : programme WASI indépendant pour les résumés, informations complémentaires, portraits et bandes-annonces Films/Séries.

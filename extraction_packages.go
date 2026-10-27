@@ -48,6 +48,13 @@ func validateExtractionCode(ctx context.Context, p packageformat.Executable) err
 	if err != nil {
 		return err
 	}
+	if kind == "detail-header" {
+		r, e := loadFactProjector(ctx, p.Manifest.Module, p.Code, "media.detail-header.v1")
+		if e == nil {
+			r.engine.Close()
+		}
+		return e
+	}
 	if kind == "detail-information" {
 		r, e := loadFactProjector(ctx, p.Manifest.Module, p.Code, "media.detail-sections.v1")
 		if e != nil {

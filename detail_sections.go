@@ -150,51 +150,11 @@ func detailSectionsRoutes(mux *secureMux, c *catalog, allowed func(string) bool)
 		if !readJSONLimit(w, r, &input, 128<<10) {
 			return
 		}
-		if !allowed(input.Kind) || !canKind(r.Context(), input.Kind) {
-			problem(w, 404, "Présentation indisponible.")
+		facts, ok := c.visibleDetailFacts(w, r, allowed, input.Kind, input.WorkID, input.IDs)
+		if !ok {
 			return
 		}
-		if len(input.IDs) > 1000 || (len(input.IDs) == 0 && input.WorkID == "") {
-			problem(w, 400, "Fiche invalide ou trop volumineuse.")
-			return
-		}
-		items, e := c.items(r.Context())
-		if e != nil {
-			problem(w, 500, "Catalogue indisponible.")
-			return
-		}
-		visible := map[string]media{}
-		for _, m := range items {
-			if m.Kind == input.Kind {
-				visible[m.ID] = m
-			}
-		}
-		var md *Metadata
-		linked := map[string]bool{}
-		if input.WorkID != "" {
-			work, e := c.work(r.Context(), input.WorkID)
-			if e != nil || work.Kind != input.Kind {
-				problem(w, 404, "Fiche introuvable.")
-				return
-			}
-			attachAvailability(&work, items)
-			for _, id := range work.LocalIDs {
-				linked[id] = true
-			}
-			md = &work.Metadata
-		}
-		seen := map[string]bool{}
-		for _, id := range input.IDs {
-			m, ok := visible[id]
-			if !ok || seen[id] || (input.WorkID != "" && !linked[id]) {
-				problem(w, 404, "Fichiers indisponibles pour cette fiche.")
-				return
-			}
-			seen[id] = true
-			if md == nil {
-				md = m.Metadata
-			}
-		}
+		md := facts.metadata
 		q, people, trailers := sectionFacts(input.Kind, md, len(input.IDs))
 		view, e := c.projectDetailSections(r.Context(), q)
 		warning := ""

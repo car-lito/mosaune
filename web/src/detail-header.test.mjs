@@ -1,0 +1,2 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {headerRequest} from './detail-header.ts';
+test('header request carries only stored identities and distinguishes a track from its album',()=>{assert.deepEqual(JSON.parse(headerRequest('music','work',['one','two'],'two')),{kind:'music',workId:'work',ids:['one','two'],trackId:'two'});assert.equal(JSON.parse(headerRequest('music','work',['one'])).trackId,'');});

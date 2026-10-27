@@ -103,6 +103,9 @@ func (c *catalog) extensionRepositoryRoutes(mux *secureMux) {
 		for _, module := range modules {
 			if module.Installed {
 				kind := "recognition"
+				if module.Kind == "detail-header" {
+					kind = "detail-header"
+				}
 				if module.Kind == "detail-information" {
 					kind = "detail-sections"
 				}
