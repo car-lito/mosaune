@@ -1,6 +1,6 @@
 # Préparer Mosaune pour Docker et CasaOS
 
-Version 0.0.32 : installation et mise à jour des modules de reconnaissance depuis les dépôts GitHub, sur la base réseau et conteneur introduite en 0.0.23. **Préversion de développement ; le premier déploiement sur le NAS attend encore les autres points du [plan avant NAS](../PLAN-AVANT-NAS.md).** Aucun certificat, secret, média ou catalogue personnel n'est inclus dans l'image.
+Version 0.0.37 : [rubriques des fiches par extension](../ESSAYER-LES-EXTENSIONS-037.md), sur la base réseau et conteneur introduite en 0.0.23. **Préversion de développement ; le premier déploiement sur le NAS attend encore les autres points du [plan avant NAS](../PLAN-AVANT-NAS.md).** Aucun certificat, secret, média ou catalogue personnel n'est inclus dans l'image.
 
 ## Ce que cette version apporte
 
@@ -16,7 +16,7 @@ Version 0.0.32 : installation et mise à jour des modules de reconnaissance depu
 1. **Adresse stable** : une adresse HTTPS exacte, par exemple `https://192.168.1.50:47831` (exemple fictif), ou un nom résolu sur le réseau. Le certificat doit couvrir cette IP ou ce nom. Un changement de port publié doit aussi être reporté dans cette adresse.
 2. **Certificat et confiance** : un certificat serveur avec sa chaîne (`server.crt`) et sa clé privée (`server.key`). Pour une autorité locale, son certificat public (`ca.crt`) doit être reconnu par chaque appareil client. Un certificat public reconnu peut aussi être utilisé. Ne pas désactiver les vérifications HTTPS pour contourner une erreur de certificat.
 3. **Dossiers** : données Mosaune, certificats et médias. Le dossier des données doit être accessible en écriture au compte du conteneur ; les certificats et médias en lecture. La clé privée doit rester accessible uniquement aux comptes nécessaires. Adapter UID/GID ou les droits des dossiers, sans lancer le service en administrateur pour éviter le réglage.
-4. **Migration** : les chemins `N:\films` du PC ne correspondent pas aux chemins `/media/...` du conteneur. Ne pas brancher directement la base Windows sans préparer cette migration et sauvegarder les données.
+4. **Première installation** : utiliser un dossier de données Mosaune vide et monter les dossiers de médias dans le conteneur. Il n’est pas nécessaire de reprendre le catalogue du PC. Pour une éventuelle migration ultérieure, les chemins `N:\films` du PC ne correspondent pas aux chemins `/media/...` du conteneur. Ne pas brancher directement la base Windows sans préparer cette migration et sauvegarder les données.
 
 La gestion automatique et le renouvellement des certificats ne sont pas fournis par cette première version. Le serveur vérifie l'adresse et les dates de validité du certificat au démarrage ; après remplacement des fichiers, il faut redémarrer le service. La terminaison HTTPS par un reverse proxy n'est pas encore prise en charge : utiliser HTTPS jusqu'au serveur, sans configurer de mode HTTP réseau.
 
@@ -202,3 +202,13 @@ Image publique : ghcr.io/car-lito/mosaune:0.0.36-preview. Index : sha256:5b631fa
 Localement : 140 tests serveur et 25 tests interface validés, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Les dix tests de connexion locale lancés avant l’autorisation réseau ont été relancés avec succès après son accord ; les autres avaient réussi. Exécutables Windows/Linux amd64/Linux arm64 construits. La vérification GitHub repart de sources propres.
 
 Parcours navigateur sur une bibliothèque temporaire : saisons 1/2, filtre de saison, désactivation en liste individuelle, puis réactivation sans scan. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-036.md). Le remplacement externe, les permissions, migrations, mises à jour/restaurations et réponses invalides sont couverts par les tests automatisés.
+
+## Validation de la préversion 0.0.37
+
+Vérification finale le 27 octobre 2026 : [tests GitHub réussis](https://github.com/car-lito/mosaune/actions/runs/40507496331) sur le commit 43cfb7ba4412b6096f51989421ad964c5b9dd8c7. Tests Windows/Linux et conteneurs HTTPS amd64/arm64 (ARM sous émulation), puis publication. Les conteneurs vérifient les rubriques produites par le module, son retrait sans remplacement implicite et sa réinstallation sans scan. Aucun déploiement sur le NAS personnel.
+
+Image publique : ghcr.io/car-lito/mosaune:0.0.37-preview. Index : sha256:5612a9761b7d6012ccdd8bebaa1baa77db3944beabe536588ff3108850c93e83. Téléchargement anonyme et SHA-256 des deux architectures vérifiés ; archive CasaOS publique identique à la copie locale.
+
+Localement : 144 tests serveur et 27 tests interface validés, kit et analyse Go réussis, Svelte sans erreur ni avertissement. La suite serveur locale a atteint sa limite globale de 12 minutes : les 17 tests restants ont été lancés séparément ; aucune assertion n’avait échoué. Trois essais conditionnels sont ignorés localement (liens symboliques Windows, médias personnels facultatifs, sources publiques facultatives). Une correction de libellé a ensuite été vérifiée et les trois exécutables reconstruits. GitHub repart des sources finales propres.
+
+Parcours navigateur sur une bibliothèque temporaire : résumé, informations, distribution et bande-annonce ; désactivation avec conservation des fichiers ; remplacement réel par l’exemple indépendant « Fiche épurée ». Le rendu mobile conserve les saisons et listes d’épisodes gérées séparément. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-037.md).
