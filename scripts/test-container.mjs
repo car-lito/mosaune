@@ -137,6 +137,11 @@ try {
   const layout=await detail();assert(layout.view?.owner==='mosaune.series.details'&&layout.view.groups.length===1&&layout.view.rows[0].id===episode.id,'Series detail module missing');
   async function detailAction(operation){const state=JSON.parse((await request('/api/v1/recognition-packages',{headers:auth})).text);const r=await request('/api/v1/recognition-packages/detail-series',{method:'POST',headers:auth,body:{operation,revision:state.revision}});assert(r.status===200,'Detail lifecycle failed');}
   await detailAction('remove');assert(!(await detail()).view,'Removed detail silently replaced');await detailAction('install');await detailAction('enable');assert((await detail()).view?.rows[0].id===episode.id,'Detail reinstall requires scan');
+  async function sections(){const r=await request('/api/v1/detail-sections',{method:'POST',timeout:30000,headers:auth,body:{kind:'films',ids:[movie.id]}});assert(r.status===200,'Section route failed');return JSON.parse(r.text);}
+  async function sectionAction(operation){const state=JSON.parse((await request('/api/v1/recognition-packages',{headers:auth})).text);const r=await request('/api/v1/recognition-packages/detail-information',{method:'POST',headers:auth,body:{operation,revision:state.revision}});assert(r.status===200,'Section lifecycle failed');}
+  const sectionView=await sections();assert(sectionView.view?.owner==='mosaune.media.information'&&sectionView.view.blocks.some(b=>b.kind==='facts'),'Section WASI not used');
+  await sectionAction('remove');assert((await sections()).view===null,'Removed section module still used');
+  await sectionAction('install');await sectionAction('enable');assert((await sections()).view?.owner==='mosaune.media.information','Section reinstall failed');
   const streamed = await request(music.url, { headers: { ...auth, Range: 'bytes=2-5' } });
   assert(streamed.status === 206 && streamed.text === taggedAudio.subarray(2,6).toString(), 'HTTPS range streaming failed');
   assert(music.metadata?.title==='Morceau conteneur'&&music.metadata.artist==='Artiste test'&&music.metadata.album==='Album test'&&music.metadata.imageId,'Audio tag module or artwork staging failed');

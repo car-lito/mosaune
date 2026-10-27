@@ -17,6 +17,9 @@ import (
 func recognitionRepositoryEntry(p packageformat.Executable) repositoryEntry {
 	m := p.Manifest
 	kind := "recognition"
+	if m.Contributions[0].Role == "media.detail-sections.v1" {
+		kind = "detail-sections"
+	}
 	if m.Contributions[0].Role == "media.detail-list.v1" {
 		kind = "detail-list"
 	}
@@ -31,6 +34,9 @@ func recognitionRepositoryEntry(p packageformat.Executable) repositoryEntry {
 
 func TestRepositoryRecognitionLifecycle(t *testing.T) {
 	testRepositoryExtractionLifecycle(t, recognitionExample)
+}
+func TestRepositoryDetailSectionsLifecycle(t *testing.T) {
+	testRepositoryExtractionLifecycle(t, sectionsExample)
 }
 func TestRepositoryDetailListLifecycle(t *testing.T) {
 	testRepositoryExtractionLifecycle(t, detailExample)

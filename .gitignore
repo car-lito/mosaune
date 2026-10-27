@@ -19,3 +19,5 @@ Thumbs.db
 /REPRISE.md
 /VALIDATION.md
 /deploy/compose.local.yml
+
+extension-kit/examples/detailsections/module.wasm

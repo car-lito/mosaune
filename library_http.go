@@ -51,6 +51,7 @@ func libraryRoutes(mux *secureMux, c *catalog, modules []module) string {
 		return false
 	}
 	detailListRoutes(mux, c, allowed)
+	detailSectionsRoutes(mux, c, allowed)
 	posterRoutes(mux, c, allowed)
 	metadataRoutes(mux, c, allowed)
 	musicRoutes(mux, c, allowed)

@@ -166,6 +166,7 @@ func TestDetailListPermissionAndPreservation(t *testing.T) {
 }
 func TestDetailListMigrationAndPolicy(t *testing.T) {
 	c, dir := testCatalog(t)
+	removeSectionsForLegacyFixture(t, c)
 	recognitionChange(t, c, "detail-series", "remove")
 	if _, e := c.db.Exec("DELETE FROM recognition_selection WHERE kind='detail-series'; PRAGMA user_version=22;"); e != nil {
 		t.Fatal(e)

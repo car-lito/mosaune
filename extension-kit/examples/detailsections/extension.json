@@ -1,0 +1,20 @@
+{
+  "schema": 2,
+  "name": "Fiche épurée — exemple",
+  "publisher": "Exemple contributeur",
+  "description": "Remplace les rubriques descriptives par un résumé en pleine largeur.",
+  "minCore": "0.0.37",
+  "module": {
+    "id": "example.media.summary",
+    "version": "1.0.0",
+    "capabilities": [
+      "media.detail-sections.v1"
+    ]
+  },
+  "contributions": [
+    {
+      "role": "media.detail-sections.v1",
+      "target": "media"
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {regionBlocks,sectionReferences} from './detail-sections.ts';
+test('extension order survives region projection without media-specific rules',()=>{const view={blocks:[{key:'b',region:'main'},{key:'a',region:'aside'},{key:'c',region:'main'}]};assert.deepEqual(regionBlocks(view,'main').map(b=>b.key),['b','c']);assert.deepEqual(regionBlocks(null,'full'),[])});
+test('only supplied resources become actionable references',()=>{const p={name:'Actor'};assert.deepEqual(sectionReferences({references:[{index:0,label:'Guest'},{index:8,label:'Missing'}]},[p]),[{index:0,label:'Guest',resource:p}]);assert.deepEqual(sectionReferences({},[]),[])});

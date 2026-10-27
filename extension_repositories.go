@@ -124,7 +124,7 @@ func parseRepositoryIndex(raw []byte) (repositoryIndex, error) {
 	}
 	seen := map[string]bool{}
 	for _, p := range index.Packages {
-		if !extensionID.MatchString(p.ID) || len(p.ID) > 100 || !extensionVersion.MatchString(p.Version) || !extensionVersion.MatchString(p.MinCore) || (p.Kind != "theme" && p.Kind != "provider" && p.Kind != "recognition" && p.Kind != "audio-tags" && p.Kind != "catalogue" && p.Kind != "detail-list") || strings.TrimSpace(p.Name) == "" || len(p.Name) > 100 || strings.TrimSpace(p.Publisher) == "" || len(p.Publisher) > 100 || len(p.Description) > 1000 || !repositoryPath(p.Path) || !strings.HasSuffix(p.Path, ".zip") || !repositoryHash.MatchString(p.SHA256) {
+		if !extensionID.MatchString(p.ID) || len(p.ID) > 100 || !extensionVersion.MatchString(p.Version) || !extensionVersion.MatchString(p.MinCore) || (p.Kind != "theme" && p.Kind != "provider" && p.Kind != "recognition" && p.Kind != "audio-tags" && p.Kind != "catalogue" && p.Kind != "detail-list" && p.Kind != "detail-sections") || strings.TrimSpace(p.Name) == "" || len(p.Name) > 100 || strings.TrimSpace(p.Publisher) == "" || len(p.Publisher) > 100 || len(p.Description) > 1000 || !repositoryPath(p.Path) || !strings.HasSuffix(p.Path, ".zip") || !repositoryHash.MatchString(p.SHA256) {
 			return index, errors.New("Une fiche du catalogue est incomplète ou non valide.")
 		}
 		key := p.ID + "@" + p.Version
@@ -288,7 +288,7 @@ func (c *catalog) repositoryPackage(ctx context.Context, repo extensionRepositor
 		}
 	} else {
 		limit := int64(extensionLimit)
-		if entry.Kind == "provider" || (entry.Kind == "recognition" || entry.Kind == "audio-tags" || (entry.Kind == "catalogue" || entry.Kind == "detail-list")) {
+		if entry.Kind == "provider" || (entry.Kind == "recognition" || entry.Kind == "audio-tags" || (entry.Kind == "catalogue" || (entry.Kind == "detail-list" || entry.Kind == "detail-sections"))) {
 			limit = packageformat.MaxArchive
 		}
 		raw, err = c.fetchRepositoryFile(ctx, repo, entry.Path, limit)
@@ -300,7 +300,7 @@ func (c *catalog) repositoryPackage(ctx context.Context, repo extensionRepositor
 		return nil, errors.New("Le fichier ne correspond plus à l’empreinte du catalogue. Actualisez le dépôt et vérifiez de nouveau le paquet.")
 	}
 	var actual repositoryEntry
-	if entry.Kind == "recognition" || entry.Kind == "audio-tags" || (entry.Kind == "catalogue" || entry.Kind == "detail-list") {
+	if entry.Kind == "recognition" || entry.Kind == "audio-tags" || (entry.Kind == "catalogue" || (entry.Kind == "detail-list" || entry.Kind == "detail-sections")) {
 		p, err := packageformat.ParseExecutable(raw, version)
 		if err != nil {
 			return nil, err
@@ -309,7 +309,7 @@ func (c *catalog) repositoryPackage(ctx context.Context, repo extensionRepositor
 		if err != nil {
 			return nil, err
 		}
-		if (kind == "audiotags") != (entry.Kind == "audio-tags") || strings.HasPrefix(kind, "catalogue-") != (entry.Kind == "catalogue") || (kind == "detail-series") != (entry.Kind == "detail-list") {
+		if (kind == "audiotags") != (entry.Kind == "audio-tags") || strings.HasPrefix(kind, "catalogue-") != (entry.Kind == "catalogue") || (kind == "detail-series") != (entry.Kind == "detail-list") || (kind == "detail-information") != (entry.Kind == "detail-sections") {
 			return nil, errors.New("Le rôle du paquet ne correspond pas à sa fiche du dépôt.")
 		}
 		m := p.Manifest

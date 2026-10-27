@@ -1,3 +1,11 @@
+## 0.0.37 — Rubriques descriptives par extension
+
+- Informations des fiches : programme WASI indépendant pour les résumés, informations complémentaires, portraits et bandes-annonces Films/Séries.
+- Contrat déclaratif media.detail-sections.v1 : blocs ordonnés, trois régions, quatre composants partagés et thémables, références contrôlées par le serveur.
+- Installation, sélection explicite, désactivation, retrait, mise à jour et restauration via le moteur commun ; données conservées.
+- Exemple externe « Fiche épurée », import et dépôts GitHub, migration24.
+- En-têtes, commandes, suggestions, autres comportements et lecteurs restent à extraire ; aucun déploiement NAS.
+
 ## 0.0.36 — Saisons et listes d’épisodes par extension
 
 - Nouveau module Fiches des séries installable, désactivable et remplaçable via le cycle commun ; migration23 sans changement des autres choix.

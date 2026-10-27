@@ -1,0 +1,7 @@
+{
+  "id": "mosaune.media.information",
+  "version": "0.1.0",
+  "capabilities": [
+    "media.detail-sections.v1"
+  ]
+}
