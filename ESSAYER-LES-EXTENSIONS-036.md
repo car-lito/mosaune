@@ -20,3 +20,5 @@ Pour retrouver les saisons, sélectionnez de nouveau Fiches des séries. Le remp
 ## Limites de cette tranche
 
 Le haut des fiches, les acteurs, les suggestions, les fiches Films/Musique et les autres comportements restent à extraire. Ce module ne représente donc pas encore toute l’extension Séries. Une fiche trop volumineuse pour le contrat conserve une liste simple, sans cacher d’épisodes ; la pagination viendra ensuite. Les lecteurs personnalisés et le déploiement NAS restent les étapes suivantes.
+
+Validation finale : [tests Windows/Linux et conteneurs réussis](https://github.com/car-lito/mosaune/actions/runs/40399371864). Image ghcr.io/car-lito/mosaune:0.0.36-preview publique et vérifiée. Le parcours de désactivation et réactivation des saisons a été testé dans le navigateur sur une installation isolée.

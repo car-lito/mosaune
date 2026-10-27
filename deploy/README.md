@@ -192,3 +192,13 @@ Image publique : ghcr.io/car-lito/mosaune:0.0.35-preview. Index : sha256:d913a53
 Localement : 136 tests serveur et 23 tests interface réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Exécutables Windows/Linux amd64/Linux arm64 construits. Les tests couvrent migration, permissions, sélection explicite d'un module indépendant, annulation, mises à jour, restauration, panne, mode secours et conservation des données.
 
 Parcours navigateur sur une installation temporaire : les deux morceaux se séparent après désactivation du catalogue musical et se regroupent en album après réactivation sans scan. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-035.md).
+
+## Validation de la préversion 0.0.36
+
+Vérification finale le 27 octobre 2026 : [tests GitHub réussis](https://github.com/car-lito/mosaune/actions/runs/40399371864) sur le commit 4e248c8406e9323ac48711a77dffcfe781b15342. Tests Windows/Linux, conteneurs HTTPS amd64/arm64 (ARM sous émulation), puis publication. Les conteneurs vérifient l’exécution du module de fiches séries, son retrait sans remplacement implicite et sa réinstallation sans scan. Aucun déploiement sur le NAS personnel.
+
+Image publique : ghcr.io/car-lito/mosaune:0.0.36-preview. Index : sha256:5b631fa4bcd349da9bbbdf9bd20071fe6a20f745f5546cfe91501a6224ec289f. Téléchargement anonyme et SHA-256 des deux architectures vérifiés ; archive CasaOS publique identique à la copie locale.
+
+Localement : 140 tests serveur et 25 tests interface validés, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Les dix tests de connexion locale lancés avant l’autorisation réseau ont été relancés avec succès après son accord ; les autres avaient réussi. Exécutables Windows/Linux amd64/Linux arm64 construits. La vérification GitHub repart de sources propres.
+
+Parcours navigateur sur une bibliothèque temporaire : saisons 1/2, filtre de saison, désactivation en liste individuelle, puis réactivation sans scan. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-036.md). Le remplacement externe, les permissions, migrations, mises à jour/restaurations et réponses invalides sont couverts par les tests automatisés.
