@@ -1,6 +1,6 @@
 # Préparer Mosaune pour Docker et CasaOS
 
-Version 0.0.37 : [rubriques des fiches par extension](../ESSAYER-LES-EXTENSIONS-037.md), sur la base réseau et conteneur introduite en 0.0.23. **Préversion de développement ; le premier déploiement sur le NAS attend encore les autres points du [plan avant NAS](../PLAN-AVANT-NAS.md).** Aucun certificat, secret, média ou catalogue personnel n'est inclus dans l'image.
+Version 0.0.38 : [en-têtes des fiches par extension](../ESSAYER-LES-EXTENSIONS-038.md), sur la base réseau et conteneur introduite en 0.0.23. **Préversion de développement ; le premier déploiement sur le NAS attend encore les autres points du [plan avant NAS](../PLAN-AVANT-NAS.md).** Aucun certificat, secret, média ou catalogue personnel n'est inclus dans l'image.
 
 ## Ce que cette version apporte
 
@@ -212,3 +212,13 @@ Image publique : ghcr.io/car-lito/mosaune:0.0.37-preview. Index : sha256:5612a97
 Localement : 144 tests serveur et 27 tests interface validés, kit et analyse Go réussis, Svelte sans erreur ni avertissement. La suite serveur locale a atteint sa limite globale de 12 minutes : les 17 tests restants ont été lancés séparément ; aucune assertion n’avait échoué. Trois essais conditionnels sont ignorés localement (liens symboliques Windows, médias personnels facultatifs, sources publiques facultatives). Une correction de libellé a ensuite été vérifiée et les trois exécutables reconstruits. GitHub repart des sources finales propres.
 
 Parcours navigateur sur une bibliothèque temporaire : résumé, informations, distribution et bande-annonce ; désactivation avec conservation des fichiers ; remplacement réel par l’exemple indépendant « Fiche épurée ». Le rendu mobile conserve les saisons et listes d’épisodes gérées séparément. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-037.md).
+
+## Validation de la préversion 0.0.38
+
+Vérification finale le 28 octobre 2026 : [tests GitHub réussis](https://github.com/car-lito/mosaune/actions/runs/40582539797) sur le commit b77c8be9b65d0f82e9e4fc7131fcbd2c7442e5fb. Tests Windows/Linux et conteneurs HTTPS amd64/arm64 (ARM sous émulation), puis publication. Les conteneurs vérifient l’en-tête produit par le module, son retrait sans remplacement implicite et sa réinstallation sans scan. Aucun déploiement sur le NAS personnel.
+
+Image publique : ghcr.io/car-lito/mosaune:0.0.38-preview. Index : sha256:067b54327ea5aadb800fee13fcc8d363ecff313b7ea469a5fb4d65af7b81f24c. Téléchargement anonyme et SHA-256 des deux architectures vérifiés ; archive CasaOS publique identique à la copie locale.
+
+Localement : 149 tests serveur et 28 tests interface validés, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Un premier essai a détecté un numéro global de schéma oublié, corrigé avant de relancer la suite complète. Dix tests de connexions locales ont ensuite été relancés avec succès après renouvellement de l’autorisation réseau. Trois essais conditionnels sont ignorés localement (liens symboliques Windows, médias personnels facultatifs, sources publiques facultatives). L’exemple a été ajusté pour conserver les titres de groupes personnalisés, puis ses tests de cycle de vie et dépôt ont été relancés. GitHub repart des sources finales propres.
+
+Parcours navigateur sur une bibliothèque temporaire : titre, type, année, durée, genres, note et accroche ; désactivation avec conservation du titre simple, commandes et autres rubriques ; remplacement réel par l’exemple indépendant « Dans le cadre ». [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-038.md).

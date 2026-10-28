@@ -18,3 +18,5 @@ Pour revenir à la présentation habituelle, sélectionnez **En-têtes des fiche
 [Contrat contributeur](extension-kit/capabilities/detailheader/v1/README.md) · [Exemple indépendant](extension-kit/examples/detailheader)
 
 Cette étape concerne les textes de l’en-tête. Les affiches, liens d’artistes, commandes, suggestions et listes musicales restent à découper. Les lecteurs personnalisés et le déploiement NAS viennent ensuite.
+
+Validation finale : [tests Windows/Linux et conteneurs réussis](https://github.com/car-lito/mosaune/actions/runs/40582539797). Image ghcr.io/car-lito/mosaune:0.0.38-preview publique et vérifiée. La désactivation et le remplacement ont été testés dans le navigateur sur une installation isolée.
