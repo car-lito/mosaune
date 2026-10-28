@@ -1,0 +1,20 @@
+{
+  "schema": 2,
+  "name": "Lecture directe — exemple",
+  "publisher": "Exemple contributeur",
+  "description": "Une fiche compacte : fichiers et lecture, sans listes distantes ni suggestions.",
+  "minCore": "0.0.39",
+  "module": {
+    "id": "example.media.experience",
+    "version": "1.0.0",
+    "capabilities": [
+      "media.detail-experience.v1"
+    ]
+  },
+  "contributions": [
+    {
+      "role": "media.detail-experience.v1",
+      "target": "media"
+    }
+  ]
+}

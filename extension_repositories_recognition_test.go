@@ -17,6 +17,9 @@ import (
 func recognitionRepositoryEntry(p packageformat.Executable) repositoryEntry {
 	m := p.Manifest
 	kind := "recognition"
+	if m.Contributions[0].Role == "media.detail-experience.v1" {
+		kind = "detail-experience"
+	}
 	if m.Contributions[0].Role == "media.detail-header.v1" {
 		kind = "detail-header"
 	}
@@ -265,4 +268,8 @@ func TestRepositoryRecognitionManifestPolicyAndLimits(t *testing.T) {
 
 func TestRepositoryDetailHeaderLifecycle(t *testing.T) {
 	testRepositoryExtractionLifecycle(t, headerExample)
+}
+
+func TestRepositoryDetailExperienceLifecycle(t *testing.T) {
+	testRepositoryExtractionLifecycle(t, experienceExample)
 }

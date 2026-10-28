@@ -1,3 +1,7 @@
+## 0.0.39 — comportements des fiches par extension
+
+Commandes, artistes, format de couverture, pistes/fichiers, rapprochement des pistes manquantes et présentation des suggestions extraits ensemble. Rendu déclaratif, permissions conservées, exemple tiers et transport borné pour grandes éditions. [Guide](ESSAYER-LES-EXTENSIONS-039.md).
+
 ## 0.0.38 — En-têtes par extension
 
 - Titres et informations du haut des fiches Films/Séries/Musique composés par un programme WASI remplaçable, avec le thème existant.

@@ -1,6 +1,4 @@
-Étape actuelle : [organisation des catalogues par extensions — 0.0.35](ESSAYER-LES-EXTENSIONS-035.md).
-
-Dernière étape : [en-têtes des fiches par extension — 0.0.38](ESSAYER-LES-EXTENSIONS-038.md).
+Dernière étape : [comportements des fiches par extension — 0.0.39](ESSAYER-LES-EXTENSIONS-039.md).
 
 # Mosaune
 
@@ -8,7 +6,7 @@ Dernière étape : [en-têtes des fiches par extension — 0.0.38](ESSAYER-LES-E
 
 Un espace pour vos films, séries et musiques, hébergé chez vous. Mosaune réunit une bibliothèque locale, des fiches enrichies et la découverte de contenus dans une interface commune. Le projet privilégie un serveur léger en Go et une architecture extensible.
 
-**Prototype 0.0.33 — développement actif.** La [lecture des informations musicales est désormais une extension indépendante](ESSAYER-LES-EXTENSIONS-033.md), avec activation et retrait sans perte du catalogue. Les reconnaisseurs externes restent installables depuis les dépôts GitHub. Les familles médias complètes et les lecteurs restent à extraire/construire avant le premier essai NAS. HTTPS direct, images Docker amd64/arm64 et catalogue CasaOS 0.4.15 sont préparés pour les essais ; ce n’est pas encore la bêta ni un déploiement NAS validé. [Préparation réseau et conteneurs](deploy/README.md).
+**Prototype 0.0.39 — développement actif.** Reconnaissance, tags audio, catalogues, saisons, descriptions, en-têtes et comportements des fiches sont exécutés dans des extensions installables et remplaçables. Les familles médias complètes, fournisseurs/connecteurs restants et lecteurs restent à terminer avant le premier essai NAS. HTTPS direct et images Docker amd64/arm64 sont préparés pour les essais ; ce n’est pas encore la bêta. [Plan avant le NAS](PLAN-AVANT-NAS.md).
 
 ## Déjà disponible
 
@@ -43,5 +41,3 @@ Les médias et données personnelles restent hors du dépôt. Les tests ne néce
 ## Licence
 
 La licence du code Mosaune reste à choisir. L'accès public aux sources ne vaut pas encore licence open source. Les dépendances gardent leurs propres licences ; voir leurs manifestes et les notices présentes dans licenses/ et [NOTICES-METADONNEES.md](NOTICES-METADONNEES.md).
-
-Dernière étape du découpage : [lecteurs de métadonnées musicaux tiers — 0.0.34](ESSAYER-LES-EXTENSIONS-034.md).

@@ -29,14 +29,16 @@ function wasm(output, source) {
 try {
   wasm('providers/tmdb/provider.wasm', './providers/tmdb/source');
   wasm('modules/audiotags/tags.wasm', './modules/audiotags/source');
-  for (const kind of ['films', 'series', 'music', 'catalogue-films', 'catalogue-series', 'catalogue-music', 'detail-series', 'detail-information', 'detail-header']) wasm(`modules/${kind}/recognizer.wasm`, `./modules/${kind}/source`);
+  for (const kind of ['films', 'series', 'music', 'catalogue-films', 'catalogue-series', 'catalogue-music', 'detail-series', 'detail-information', 'detail-header', 'detail-experience']) wasm(`modules/${kind}/recognizer.wasm`, `./modules/${kind}/source`);
   wasm('examples/recognition/module.wasm', './examples/recognition/source');
   wasm('examples/audiotags/module.wasm', './examples/audiotags/source');
+  wasm('examples/detailexperience/module.wasm', './examples/detailexperience/source');
   wasm('examples/detailheader/module.wasm', './examples/detailheader/source');
   wasm('examples/detailsections/module.wasm', './examples/detailsections/source');
   wasm('examples/detaillist/module.wasm', './examples/detaillist/source');
   wasm('examples/catalogue/module.wasm', './examples/catalogue/source');
   mkdirSync(join(root, 'build'), { recursive: true });
+  run(go, ['run', './cmd/package-module', 'examples/detailexperience/extension.json', 'examples/detailexperience/module.wasm', '../build/example-detailexperience.mosaune.zip'], kit);
   run(go, ['run', './cmd/package-module', 'examples/detailheader/extension.json', 'examples/detailheader/module.wasm', '../build/example-detailheader.mosaune.zip'], kit);
   run(go, ['run', './cmd/package-module', 'examples/detailsections/extension.json', 'examples/detailsections/module.wasm', '../build/example-detailsections.mosaune.zip'], kit);
   run(go, ['run', './cmd/package-module', 'examples/detaillist/extension.json', 'examples/detaillist/module.wasm', '../build/example-detaillist.mosaune.zip'], kit);

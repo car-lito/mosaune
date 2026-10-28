@@ -1,0 +1,2 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {actionEntries} from './detail-experience.ts';
+test('extension actions resolve only visible files and distinguish album from track',()=>{const entries=[{id:'one'},{id:'two'}];assert.deepEqual(actionEntries({fileId:'private'},entries),[]);assert.deepEqual(actionEntries({fileId:'two'},entries),[{id:'two'}]);assert.deepEqual(actionEntries({},entries),entries);});

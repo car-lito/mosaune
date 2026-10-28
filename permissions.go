@@ -47,7 +47,7 @@ func (c *catalog) authorize(pattern string, r *http.Request) bool {
 		return true // The handlers scope packages, preferences and CSS to this account.
 	case "GET /api/v1/status", "GET /api/v1/library", "GET /api/v1/metadata/providers", "GET /api/v1/discovery/library", "PUT /api/v1/account/preferences", "PUT /api/v1/account/password":
 		return true
-	case "POST /api/v1/detail-header", "POST /api/v1/detail-sections", "POST /api/v1/detail-list", "POST /api/v1/discovery/browse", "POST /api/v1/shelves":
+	case "POST /api/v1/detail-experience", "POST /api/v1/detail-header", "POST /api/v1/detail-sections", "POST /api/v1/detail-list", "POST /api/v1/discovery/browse", "POST /api/v1/shelves":
 		return len(u.Kinds) > 0 // Body kind is checked by the handler.
 	case "GET /api/v1/acquisition/requests":
 		return true // Results are filtered by destination.
