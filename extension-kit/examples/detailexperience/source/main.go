@@ -25,8 +25,8 @@ func main() {
 				Version int `json:"version"`
 			}{1}, nil
 		}
-		var q d.Query
-		if r.Operation != "project" || protocol.DecodeOne(r.Payload, &q) != nil || q.Validate() != nil {
+		q, err := d.DecodeQuery(r.Payload)
+		if r.Operation != "project" || err != nil {
 			return fail()
 		}
 		out := d.Result{Cover: "square", Actions: []d.Action{}, People: []int{}, Sections: []d.Section{}}

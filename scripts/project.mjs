@@ -57,7 +57,7 @@ try {
     for (const directory of [kit, root]) {
       // The server suite creates many durable SQLite catalogues; Windows disk flushes vary.
       // This is a suite allowance, not an extension execution-time limit.
-      run(go, ['test', '-timeout', directory === root ? '12m' : '5m', './...'], directory);
+      run(go, ['test', '-timeout', directory === root ? '20m' : '5m', './...'], directory);
       run(go, ['vet', './...'], directory);
     }
   }

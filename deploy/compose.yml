@@ -1,7 +1,7 @@
 name: mosaune
 services:
   mosaune:
-    image: ghcr.io/car-lito/mosaune:0.0.39-preview
+    image: ghcr.io/car-lito/mosaune:0.0.40-preview
     user: "${MOSAUNE_UID:-65532}:${MOSAUNE_GID:-65532}"
     environment:
       MOSAUNE_PUBLIC_URL: ${MOSAUNE_PUBLIC_URL:?Renseigner une adresse HTTPS exacte}

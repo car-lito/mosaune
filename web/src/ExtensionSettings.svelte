@@ -2,6 +2,7 @@
  import {onMount,tick} from 'svelte';
  import ExtensionCard from './ExtensionCard.svelte';
  import RecognitionPackages from './RecognitionPackages.svelte';
+ import MediaSetPanel from './MediaSetPanel.svelte';
  import RecognitionImport from './RecognitionImport.svelte';
  const recognitionNames:Record<string,string>={films:'Reconnaissance des films',series:'Reconnaissance des séries',music:'Reconnaissance musicale'};
  import ExtensionConfiguration from './ExtensionConfiguration.svelte';
@@ -81,6 +82,7 @@
   <span class="extension-tag">{selectedNative.family} · intégré</span><p>{selectedNative.description}</p>
   <p>Cette fonction fait encore partie du programme. Elle sera séparée en extension lors d’une prochaine étape ; elle ne peut pas encore être désactivée ou désinstallée ici.</p>
   <button class="secondary" onclick={()=>openSettings(selectedNative?.settings??'account')}>Ouvrir ses réglages</button>
+  {#if user.admin&&['builtin.films','builtin.series','builtin.music'].includes(selected)}{#key selected}<MediaSetPanel {token} id={selected.slice(8)} changed={()=>{recognitionRefresh++;}}/>{/key}{/if}
  {:else}
   <div class="extension-tabs" aria-label="Catalogue des extensions"><button class:selected={tab==='installed'} aria-pressed={tab==='installed'} onclick={()=>tab='installed'}>Sur le serveur</button><button class:selected={tab==='available'} aria-pressed={tab==='available'} onclick={()=>tab='available'}>À télécharger</button></div>
   {#if tab==='available'}

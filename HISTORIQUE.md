@@ -1,3 +1,10 @@
+# 0.0.40 — Ensembles de composants médias
+
+- Gestion groupée de Films, Séries et Musique avec aperçu détaillé et application atomique.
+- Composants de fiches partagés et remplaçants conservés, refus des aperçus périmés et annulation après validation seulement.
+- Checklist pondérée du découpage, estimé à environ 60 %. Les familles complètes restent à terminer.
+- Correction de la validation Windows 0.0.39 : moins de sérialisation dans les grosses fiches, budget borné adapté et durée globale de test portée à vingt minutes.
+
 ## 0.0.39 — comportements des fiches par extension
 
 Commandes, artistes, format de couverture, pistes/fichiers, rapprochement des pistes manquantes et présentation des suggestions extraits ensemble. Rendu déclaratif, permissions conservées, exemple tiers et transport borné pour grandes éditions. [Guide](ESSAYER-LES-EXTENSIONS-039.md).

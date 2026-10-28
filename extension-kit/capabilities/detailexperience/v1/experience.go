@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"math"
+	"mosaune/extensionkit/protocol"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -84,9 +85,27 @@ func text(s string, n int) bool {
 	return len(s) <= n && utf8.ValidString(s) && strings.IndexFunc(s, unicode.IsControl) < 0
 }
 func bounded(v any, n int) bool { b, e := json.Marshal(v); return e == nil && len(b) <= n }
+
+// DecodeQuery enforces the byte limit before decoding, without re-encoding in WASI.
+func DecodeQuery(raw []byte) (Query, error) {
+	var q Query
+	if len(raw) > 512<<10 {
+		return q, errors.New("detail facts too large")
+	}
+	if err := protocol.DecodeOne(raw, &q); err != nil {
+		return q, err
+	}
+	return q, q.validateFields()
+}
 func (q Query) Validate() error {
+	if !bounded(q, 512<<10) {
+		return errors.New("detail facts too large")
+	}
+	return q.validateFields()
+}
+func (q Query) validateFields() error {
 	bad := errors.New("invalid detail experience facts")
-	if !bounded(q, 512<<10) || !text(q.Kind, 80) || q.Kind == "" || !text(q.Provider, 100) || len(q.Files) > 1000 || len(q.Tracks) > 1000 || len(q.People) > 1000 {
+	if !text(q.Kind, 80) || q.Kind == "" || !text(q.Provider, 100) || len(q.Files) > 1000 || len(q.Tracks) > 1000 || len(q.People) > 1000 {
 		return bad
 	}
 	seen := map[string]bool{}

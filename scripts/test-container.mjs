@@ -158,6 +158,22 @@ try {
   const tagsState=JSON.parse((await request('/api/v1/audio-tags',{headers:auth})).text);
   assert(tagsState.installed&&tagsState.enabled,'Audio tag extension missing');
   assert((await request('/api/v1/audio-tags',{method:'POST',headers:auth,body:{operation:'disable',revision:tagsState.revision}})).status===200,'Audio tag disable failed');
+  async function mediaSetAction(operation){
+    const sets=JSON.parse((await request('/api/v1/media-sets',{headers:auth})).text).sets;
+    const revision=sets.find(s=>s.id==='music').revision;
+    const preview=await request('/api/v1/media-sets/music/preview',{method:'POST',headers:auth,body:{operation,revision}});
+    assert(preview.status===200,'Media set preview failed');const plan=JSON.parse(preview.text);
+    assert(plan.kept.some(s=>s.slot==='detail-header'),'Shared component not protected');
+    const applied=await request('/api/v1/media-sets/music/apply',{method:'POST',headers:auth,body:{operation,revision,checksum:plan.checksum}});
+    assert(applied.status===200,'Atomic media set change failed');
+  }
+  await mediaSetAction('remove');
+  const removedSet=JSON.parse((await request('/api/v1/recognition-packages',{headers:auth})).text).packages;
+  assert(!removedSet.find(p=>p.kind==='music'&&p.factory).installed,'Music set not removed');
+  assert(removedSet.find(p=>p.kind==='detail-header'&&p.factory).enabled,'Shared header disabled');
+  await mediaSetAction('prepare');
+  const readySet=JSON.parse((await request('/api/v1/media-sets',{headers:auth})).text).sets.find(s=>s.id==='music');
+  assert(readySet.steps.length===0&&readySet.blockers.length===0,'Music set not restored');
   const packages = JSON.parse((await request('/api/v1/recognition-packages', { headers: auth })).text);
   const removal = await request('/api/v1/recognition-packages/films', { method: 'POST', headers: auth, body: { operation: 'remove', revision: packages.revision } });
   assert(removal.status === 200, 'Recognition package removal failed');

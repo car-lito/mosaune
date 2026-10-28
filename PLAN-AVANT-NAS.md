@@ -1,3 +1,9 @@
+## Étape 0.0.40 — ensembles de composants
+
+Préparer, désactiver et retirer en lot les composants déjà extraits de Films, Séries et Musique : aperçu, transaction unique, révision/empreinte, conservation des remplaçants et des composants partagés. Recettes déclaratives embarquées, sans nouveau processus au repos. Cela ne constitue pas encore trois familles médias complètes : écrans et services intégrés restent à extraire. [Guide](ESSAYER-LES-ENSEMBLES-040.md) · [Checklist pondérée : environ 60 %](AVANCEMENT-EXTENSIONS.md).
+
+- [x] C-MEDIA-02d — Gestion groupée transactionnelle des composants existants, prévisualisation et protection des composants communs. C-MEDIA-02 reste ouvert pour les familles complètes.
+
 ## Critère de sortie confirmé — 21 octobre 2026
 
 Avant le NAS, le noyau conserve les services communs (comptes, permissions, chargement, transactions et composition UI) ; toutes les fonctions médias doivent venir d’extensions réellement installables et retirables. Une séparation de fichiers source ou un interrupteur ne suffit pas. Les lecteurs personnalisés viennent après ce découpage.

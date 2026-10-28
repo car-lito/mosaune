@@ -1,0 +1,5 @@
+[
+ {"id":"films","name":"Films","slots":["films","catalogue-films","detail-information","detail-header","detail-experience"]},
+ {"id":"series","name":"Séries","slots":["series","catalogue-series","detail-series","detail-information","detail-header","detail-experience"]},
+ {"id":"music","name":"Musique","slots":["music","audiotags","catalogue-music","detail-information","detail-header","detail-experience"]}
+]

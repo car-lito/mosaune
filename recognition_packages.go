@@ -266,48 +266,7 @@ func (c *catalog) changeRecognition(ctx context.Context, kind, operation string,
 		return err
 	}
 	defer tx.Rollback()
-	store := registry.SQLStore{DB: tx}
-	if operation == "install" {
-		factoryKind := ""
-		for _, k := range extractionKinds {
-			d, _ := modules.Descriptor(k)
-			if d.ID == id {
-				factoryKind = k
-			}
-		}
-		if factoryKind == "" {
-			return errors.New("Réimportez le fichier pour réinstaller ce module externe.")
-		}
-		_, err = installRecognition(ctx, tx, factoryKind, expected)
-	} else {
-		if err = tx.QueryRowContext(ctx, `SELECT kind FROM recognition_packages WHERE id=?`, id).Scan(&kind); err != nil {
-			return err
-		}
-		if operation == "select" {
-			s, e := store.Load(ctx)
-			if e != nil {
-				return e
-			}
-			if s.Revision != expected {
-				return registry.ErrConflict
-			}
-			entry, ok := registryEntryFor(s, id)
-			if !ok || !entry.Enabled {
-				return errors.New("Activez le module avant de le choisir pour les scans.")
-			}
-			// Advance the shared revision for a choice change too: an old tab
-			// cannot subsequently overwrite this decision with a stale revision.
-			_, err = store.Commit(ctx, expected, registry.Change{Operation: "enable", ID: id})
-			if err == nil {
-				_, err = tx.ExecContext(ctx, `INSERT INTO recognition_selection(kind,id) VALUES(?,?) ON CONFLICT(kind) DO UPDATE SET id=excluded.id`, kind, id)
-			}
-		} else {
-			_, err = store.Commit(ctx, expected, registry.Change{Operation: operation, ID: id})
-		}
-		if err == nil && operation == "remove" {
-			_, err = tx.ExecContext(ctx, `DELETE FROM recognition_packages WHERE id=?`, id)
-		}
-	}
+	kind, err = changeRecognitionTx(ctx, tx, id, operation, expected)
 	if err != nil {
 		return err
 	}
@@ -338,6 +297,7 @@ func (c *catalog) cancelRecognitionID(id string) {
 }
 
 func (c *catalog) recognitionPackageRoutes(mux *secureMux) {
+	c.mediaSetRoutes(mux)
 	c.recognitionImportRoutes(mux)
 	c.audioTagsRoutes(mux)
 	mux.HandleFunc("GET /api/v1/recognition-packages", func(w http.ResponseWriter, r *http.Request) {
@@ -366,4 +326,56 @@ func (c *catalog) recognitionPackageRoutes(mux *secureMux) {
 		}
 		sendJSON(w, 200, map[string]bool{"ok": true})
 	})
+}
+
+// Caller owns the lifecycle lock and transaction. Cancellation happens only after commit.
+func changeRecognitionTx(ctx context.Context, tx *sql.Tx, id, operation string, expected int64) (string, error) {
+	var kind string
+	var err error
+	store := registry.SQLStore{DB: tx}
+	if operation == "install" {
+		factoryKind := ""
+		for _, k := range extractionKinds {
+			d, _ := modules.Descriptor(k)
+			if d.ID == id {
+				factoryKind = k
+			}
+		}
+		if factoryKind == "" {
+			return kind, errors.New("Réimportez le fichier pour réinstaller ce module externe.")
+		}
+		_, err = installRecognition(ctx, tx, factoryKind, expected)
+	} else {
+		if err = tx.QueryRowContext(ctx, `SELECT kind FROM recognition_packages WHERE id=?`, id).Scan(&kind); err != nil {
+			return kind, err
+		}
+		if operation == "select" {
+			s, e := store.Load(ctx)
+			if e != nil {
+				return kind, e
+			}
+			if s.Revision != expected {
+				return kind, registry.ErrConflict
+			}
+			entry, ok := registryEntryFor(s, id)
+			if !ok || !entry.Enabled {
+				return kind, errors.New("Activez le module avant de le choisir pour les scans.")
+			}
+			// Advance the shared revision for a choice change too: an old tab
+			// cannot subsequently overwrite this decision with a stale revision.
+			_, err = store.Commit(ctx, expected, registry.Change{Operation: "enable", ID: id})
+			if err == nil {
+				_, err = tx.ExecContext(ctx, `INSERT INTO recognition_selection(kind,id) VALUES(?,?) ON CONFLICT(kind) DO UPDATE SET id=excluded.id`, kind, id)
+			}
+		} else {
+			_, err = store.Commit(ctx, expected, registry.Change{Operation: operation, ID: id})
+		}
+		if err == nil && operation == "remove" {
+			_, err = tx.ExecContext(ctx, `DELETE FROM recognition_packages WHERE id=?`, id)
+		}
+	}
+	if err != nil {
+		return kind, err
+	}
+	return kind, nil
 }
