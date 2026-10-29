@@ -79,3 +79,7 @@ Les paramètres suivent le thème du compte. La connexion reste native avant ide
 ## Pour les développeurs de Mosaune
 
 theme/default.json contient les valeurs natives, theme/contract.json la liste typée. Ajouter un élément visuel implique de déclarer son réglage et de le consommer dans le composant, avec une valeur par défaut. scripts/build-theme.mjs génère la feuille native au démarrage du build Vite ; theme.go produit les variables des paquets avec le même contrat. Le test Go compare les deux rendus. web/src/theme.test.mjs contrôle les styles CSS/Svelte pour éviter de réintroduire des couleurs, polices ou arrondis codés directement dans les composants.
+
+## Écrans de collection remplaçables (0.0.42)
+
+Voir [le contrat, les exemples et les limites](ESSAYER-LES-ECRANS-042.md). Les écrans fournis utilisent le même format déclaratif que les paquets communautaires.

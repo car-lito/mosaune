@@ -192,6 +192,10 @@ func (c *catalog) extensionRoutes(mux *secureMux) {
 			return
 		}
 		if in.Enabled {
+			if e = c.checkUIScreenConflicts(r.Context(), p.Manifest); e != nil {
+				problem(w, 409, e.Error())
+				return
+			}
 			if e = validateExtension(p.Manifest); e != nil {
 				problem(w, 400, e.Error())
 				return

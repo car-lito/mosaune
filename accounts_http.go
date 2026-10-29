@@ -131,6 +131,9 @@ func (c *catalog) accountRoutes(mux *secureMux) {
 			}
 			if r.Method == "POST" {
 				_, e = tx.ExecContext(r.Context(), `INSERT INTO accounts VALUES(?,?,?,?)`, a.ID, a.Name, hash, string(raw))
+				if e == nil {
+					e = grantSuppliedScreens(r.Context(), tx, a.ID)
+				}
 			} else {
 				_, e = tx.ExecContext(r.Context(), `UPDATE accounts SET name=?,data=? WHERE id=?`, a.Name, string(raw), a.ID)
 				if e == nil && hash != "" {

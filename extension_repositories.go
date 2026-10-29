@@ -207,11 +207,17 @@ func bundledRepositoryArchive() ([]byte, error) {
 		raw  []byte
 	}{
 		{repositoryIndexFile, index},
-		{"README.md", []byte("# Exemple de dépôt Mosaune\n\nPaquets de démonstration : Ambre et TMDB. Aucun réglage, compte ou secret.\n\nDans un dépôt GitHub public, placez mosaune-repository.json et le dossier packages à la racine. Dans Mosaune 0.0.20 ou plus : Réglages → Extensions → À télécharger → Gérer les dépôts GitHub. Ajoutez l'adresse https://github.com/VOTRE-COMPTE/VOTRE-DEPOT. Laissez la référence vide pour la branche par défaut.\n\nL'empreinte sha256 de chaque fiche est celle du fichier ZIP complet. Ne modifiez pas un paquet sans mettre à jour sa fiche. TMDB reste signé par la clé de développement du projet, sans autoriser d'autres signatures. Les deux versions TMDB ont les mêmes fonctions : elles servent à tester les mises à jour et le retour arrière.\n")},
+		{"README.md", []byte("# Exemple de dépôt Mosaune\n\nPaquets inclus : thèmes, pages, écrans médias et fournisseur TMDB. Aucun réglage, compte ou secret.\n\nDans un dépôt GitHub public, placez mosaune-repository.json et le dossier packages à la racine. Dans Mosaune 0.0.20 ou plus : Réglages → Extensions → À télécharger → Gérer les dépôts GitHub. Ajoutez l'adresse https://github.com/VOTRE-COMPTE/VOTRE-DEPOT. Laissez la référence vide pour la branche par défaut.\n\nL'empreinte sha256 de chaque fiche est celle du fichier ZIP complet. Ne modifiez pas un paquet sans mettre à jour sa fiche. TMDB reste signé par la clé de développement du projet, sans autoriser d'autres signatures. Les deux versions TMDB ont les mêmes fonctions : elles servent à tester les mises à jour et le retour arrière.\n")},
 		{"packages/ambre.mosaune.zip", bundledThemeArchive()},
 		{"packages/salon.mosaune.zip", uiExampleArchive()},
 		{"packages/tmdb-0.4.0.mosaune.zip", providerExample},
 		{"packages/tmdb-0.4.1.mosaune.zip", providerUpdateExample},
+	}
+	for _, p := range append(screenPackages(), screenExamplePackage()) {
+		files = append(files, struct {
+			name string
+			raw  []byte
+		}{screenArchivePath(p), screenArchive(p)})
 	}
 	var out bytes.Buffer
 	z := zip.NewWriter(&out)
@@ -236,6 +242,10 @@ func bundledRepository() extensionRepository {
 	var pages extensionManifest
 	_ = json.Unmarshal(exampleUIPages, &pages)
 	entries = append(entries, repositoryEntry{ID: pages.ID, Name: pages.Name, Publisher: pages.Publisher, Description: pages.Description, Version: pages.Version, Kind: "pages", MinCore: pages.MinCore, Path: "packages/salon.mosaune.zip", SHA256: packageformat.Hash(uiExampleArchive())})
+	for _, p := range append(screenPackages(), screenExamplePackage()) {
+		m := p.Manifest
+		entries = append(entries, repositoryEntry{ID: m.ID, Name: m.Name, Publisher: m.Publisher, Description: m.Description, Version: m.Version, Kind: "pages", MinCore: m.MinCore, Path: screenArchivePath(p), SHA256: packageformat.Hash(screenArchive(p))})
+	}
 	for _, raw := range [][]byte{providerExample, providerUpdateExample} {
 		p, err := packageformat.Parse(raw, trustedProviderKey(), version)
 		if err != nil {
@@ -282,6 +292,12 @@ func (c *catalog) repositoryPackage(ctx context.Context, repo extensionRepositor
 	var raw []byte
 	var err error
 	if repo.Bundled {
+		for _, p := range append(screenPackages(), screenExamplePackage()) {
+			if screenArchivePath(p) == entry.Path {
+				raw = screenArchive(p)
+				break
+			}
+		}
 		switch entry.Path {
 		case "packages/salon.mosaune.zip":
 			raw = uiExampleArchive()

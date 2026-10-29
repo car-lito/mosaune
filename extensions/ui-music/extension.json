@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "id": "org.mosaune.screens.music",
+  "name": "Écrans · Musique",
+  "publisher": "Mosaune",
+  "version": "1.0.0",
+  "description": "Pages et rangées personnalisables. Les services et données des médias sont conservés si cette interface est retirée.",
+  "family": "interface",
+  "minCore": "0.0.42",
+  "api": 3,
+  "requires": [
+    "ui.pages.v1"
+  ],
+  "permissions": [],
+  "pages": [
+    {
+      "id": "music",
+      "screen": "music",
+      "label": "Musique",
+      "icon": "music",
+      "placement": "main",
+      "kinds": [
+        "music"
+      ],
+      "blocks": [
+        {
+          "type": "feed",
+          "source": "resume",
+          "view": "music",
+          "title": "Reprendre le fil",
+          "text": "Là où vous vous êtes arrêté."
+        },
+        {
+          "type": "feed",
+          "source": "recent",
+          "view": "music",
+          "title": "Dans votre collection",
+          "display": "spotlight"
+        },
+        {
+          "type": "feed",
+          "source": "recent",
+          "view": "music",
+          "title": "À portée d’oreille",
+          "text": "Les albums de votre collection."
+        },
+        {
+          "type": "feed",
+          "source": "favorites",
+          "view": "music",
+          "title": "Vos disques de cœur"
+        },
+        {
+          "type": "feed",
+          "source": "watchlist",
+          "view": "music",
+          "title": "Pour une prochaine écoute"
+        },
+        {
+          "type": "feed",
+          "source": "remote",
+          "view": "music",
+          "title": "À l’horizon, côté musique",
+          "text": "Éditions annoncées pour les artistes de vos albums identifiés ou favoris.",
+          "provider": "musicbrainz",
+          "shelf": "upcoming"
+        }
+      ]
+    }
+  ],
+  "theme": {}
+}

@@ -18,7 +18,7 @@
  <div class="extension-card-body">
  <h3>Gérer les composants ensemble</h3>
  <p>Les composants déjà séparés peuvent être préparés ou retirés en une seule opération. Vos extensions de remplacement restent choisies. Un aperçu détaille chaque changement avant confirmation.</p>
- <p>Les composants de fiches communs restent installés lors du retrait d’un ensemble. La navigation, les lecteurs et certains services sont encore intégrés : ces commandes ne retirent pas encore toute la rubrique.</p>
+ <p>Les composants de fiches communs restent installés lors du retrait d’un ensemble. Les écrans se gèrent séparément dans les paquets « Écrans ». Les lecteurs et certains services sont encore intégrés : ces commandes ne retirent pas toute la famille média.</p>
  {#if error}<p class="form-error" role="alert">{error}</p>{/if}
  {#if notice}<p class="extension-notice" role="status">{notice}</p>{/if}
  {#if current}

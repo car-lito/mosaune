@@ -1,3 +1,7 @@
+## 0.0.42 — écrans médias distribués en extensions
+
+Quatre paquets fournissent Accueil/listes, Films, Séries et Musique. Les rangées sont déclarées dans leurs manifestes ; l’ancien Dashboard monolithique est retiré. Les pages peuvent disparaître et être remplacées par un paquet externe, avec contrôle des conflits et droits par compte. Cinéma compact est un exemple disponible dans le dépôt inclus. Provisionnement unique au schéma 27, conservation des données et accès aux réglages même sans écran actif. Services métiers et lecteurs restent à extraire.
+
 ## 0.0.41 — 29 octobre 2026
 
 Pages et menus d’extensions via ui.pages.v1 : composition déclarative, collections et raccourcis, navigation et paramètres communs, accès par compte, retrait effectif des routes, dépôt/import et exemple Salon personnel. Les thèmes existants habillent les composants. Correction du scénario Docker 0.0.40 qui réactivait Musique avant de tester à tort la persistance des tags désactivés. [Guide et limites](ESSAYER-LES-PAGES-041.md).

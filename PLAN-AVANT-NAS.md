@@ -1,3 +1,9 @@
+## Étape 0.0.42 — écrans médias remplaçables
+
+- [x] Distribuer les six écrans de collection dans des paquets déclaratifs ; remplacer leur composition sans modifier le noyau.
+- [x] Refuser les conflits de rubrique, conserver les droits et le retrait au redémarrage, fournir un remplacement installable.
+- [ ] Raccorder ces interfaces aux familles complètes et poursuivre l’extraction des services, profils et formulaires.
+
 ## Étape 0.0.41 — pages et menus déclaratifs
 
 - [x] C-UI-01 — Un paquet ajoute des pages, des menus et des rubriques de paramètres sans modifier le routeur. Import/dépôts, droits, désactivation, mise à jour et retrait ; exemple Salon personnel.

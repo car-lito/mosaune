@@ -233,7 +233,7 @@ func TestExtensionsLifecycleAndPermissions(t *testing.T) {
 		t.Fatal("uninstall retained choice", a)
 	}
 	var count int
-	_ = c.db.QueryRow("SELECT COUNT(*) FROM extension_grants").Scan(&count)
+	_ = c.db.QueryRow("SELECT COUNT(*) FROM extension_grants WHERE extension_id=?", next.Manifest.ID).Scan(&count)
 	if count != 0 {
 		t.Fatal("orphan grants")
 	}

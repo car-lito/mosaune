@@ -178,6 +178,11 @@ try {
   const preparedTags=JSON.parse((await request('/api/v1/audio-tags',{headers:auth})).text);
   assert(preparedTags.enabled,'Music preparation did not enable tags');
   assert((await request('/api/v1/audio-tags',{method:'POST',headers:auth,body:{operation:'disable',revision:preparedTags.revision}})).status===200,'Tag disable before restart failed');
+  const uiPackages=JSON.parse((await request('/api/v1/extensions',{headers:auth})).text).packages;
+  const filmScreen=uiPackages.find(p=>p.manifest.id==='org.mosaune.screens.films');assert(filmScreen?.enabled,'Supplied film screen missing');
+  const uiBefore=JSON.parse((await request('/api/v1/ui/navigation',{headers:auth})).text);assert(uiBefore.some(p=>p.screen==='films'&&p.owner===filmScreen.manifest.id),'Film screen not registered');
+  assert((await request('/api/v1/extensions/'+filmScreen.manifest.id,{method:'DELETE',headers:auth,body:{checksum:filmScreen.checksum}})).status===204,'Screen removal failed');
+  assert((await request('/api/v1/ui/pages/'+filmScreen.manifest.id+'/films',{headers:auth})).status===404,'Removed screen still accessible');
   const packages = JSON.parse((await request('/api/v1/recognition-packages', { headers: auth })).text);
   const removal = await request('/api/v1/recognition-packages/films', { method: 'POST', headers: auth, body: { operation: 'remove', revision: packages.revision } });
   assert(removal.status === 200, 'Recognition package removal failed');
@@ -191,6 +196,8 @@ try {
   const persisted = JSON.parse((await request('/api/v1/library', { timeout:60000, headers: { Cookie: login.headers['set-cookie'][0].split(';')[0] } })).text);
   assert(persisted.items.length === fixtures.length, 'Catalogue lost after restart');
   const restartedAuth = { Cookie: login.headers['set-cookie'][0].split(';')[0], Origin: origin, 'X-Mosaune-Token': JSON.parse(login.text).token };
+  const uiAfter=JSON.parse((await request('/api/v1/ui/navigation',{headers:restartedAuth})).text);
+  assert(!uiAfter.some(p=>p.screen==='films')&&uiAfter.some(p=>p.screen==='music')&&uiAfter.some(p=>p.id==='extensions'),'Screen lifecycle or recovery lost after restart');
   const tagsAfter=JSON.parse((await request('/api/v1/audio-tags',{headers:restartedAuth})).text);assert(tagsAfter.installed&&!tagsAfter.enabled,'Audio tags disabled state lost');
   const cachedCover=await request('/api/v1/artwork/'+music.metadata.imageId,{headers:restartedAuth});assert(cachedCover.status===200,'Cached artwork lost after disabling and restart');
   const removed = JSON.parse((await request('/api/v1/recognition-packages', { headers: restartedAuth })).text);

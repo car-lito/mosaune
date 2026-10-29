@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "id": "org.mosaune.screens.home",
+  "name": "Écrans · Accueil et listes",
+  "publisher": "Mosaune",
+  "version": "1.0.0",
+  "description": "Pages et rangées personnalisables. Les services et données des médias sont conservés si cette interface est retirée.",
+  "family": "interface",
+  "minCore": "0.0.42",
+  "api": 3,
+  "requires": [
+    "ui.pages.v1"
+  ],
+  "permissions": [],
+  "pages": [
+    {
+      "id": "home",
+      "screen": "home",
+      "label": "Accueil",
+      "icon": "home",
+      "placement": "main",
+      "blocks": [
+        {
+          "type": "feed",
+          "source": "resume",
+          "view": "home",
+          "title": "Reprendre le fil",
+          "text": "Là où vous vous êtes arrêté."
+        },
+        {
+          "type": "feed",
+          "source": "recent",
+          "view": "home",
+          "title": "Dans votre collection",
+          "display": "spotlight"
+        },
+        {
+          "type": "feed",
+          "source": "recent",
+          "view": "films",
+          "title": "Films dans votre collection",
+          "text": "Les derniers ajouts en premier."
+        },
+        {
+          "type": "feed",
+          "source": "remote",
+          "view": "films",
+          "title": "En ce moment au cinéma",
+          "text": "Sélection TMDB · gardez les titres qui vous tentent.",
+          "provider": "tmdb",
+          "shelf": "now_playing"
+        },
+        {
+          "type": "feed",
+          "source": "recent",
+          "view": "series",
+          "title": "Vos séries, épisode après épisode",
+          "text": "Les derniers ajouts en premier."
+        },
+        {
+          "type": "feed",
+          "source": "recent",
+          "view": "music",
+          "title": "À portée d’oreille",
+          "text": "Les albums de votre collection."
+        },
+        {
+          "type": "feed",
+          "source": "remote",
+          "view": "films",
+          "title": "Bientôt sur grand écran",
+          "text": "Dates annoncées · elles peuvent évoluer.",
+          "provider": "tmdb",
+          "shelf": "upcoming"
+        },
+        {
+          "type": "feed",
+          "source": "remote",
+          "view": "music",
+          "title": "À l’horizon, côté musique",
+          "text": "Éditions annoncées pour les artistes de vos albums identifiés ou favoris.",
+          "provider": "musicbrainz",
+          "shelf": "upcoming"
+        }
+      ],
+      "heading": "Qu’est-ce qui vous tente ?"
+    },
+    {
+      "id": "watchlist",
+      "screen": "watchlist",
+      "label": "Ma liste",
+      "icon": "bookmark",
+      "placement": "personal",
+      "blocks": [
+        {
+          "type": "feed",
+          "source": "watchlist",
+          "view": "home",
+          "title": "À voir / À écouter",
+          "display": "grid"
+        }
+      ],
+      "heading": "À garder pour plus tard."
+    },
+    {
+      "id": "favorites",
+      "screen": "favorites",
+      "label": "Favoris",
+      "icon": "heart",
+      "placement": "personal",
+      "blocks": [
+        {
+          "type": "feed",
+          "source": "favorites",
+          "view": "home",
+          "title": "Favoris",
+          "display": "grid"
+        }
+      ],
+      "heading": "Les histoires qui restent."
+    }
+  ],
+  "theme": {}
+}

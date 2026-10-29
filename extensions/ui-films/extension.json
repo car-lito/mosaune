@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "id": "org.mosaune.screens.films",
+  "name": "Écrans · Films",
+  "publisher": "Mosaune",
+  "version": "1.0.0",
+  "description": "Pages et rangées personnalisables. Les services et données des médias sont conservés si cette interface est retirée.",
+  "family": "interface",
+  "minCore": "0.0.42",
+  "api": 3,
+  "requires": [
+    "ui.pages.v1"
+  ],
+  "permissions": [],
+  "pages": [
+    {
+      "id": "films",
+      "screen": "films",
+      "label": "Films",
+      "icon": "films",
+      "placement": "main",
+      "kinds": [
+        "films"
+      ],
+      "blocks": [
+        {
+          "type": "feed",
+          "source": "resume",
+          "view": "films",
+          "title": "Reprendre le fil",
+          "text": "Là où vous vous êtes arrêté."
+        },
+        {
+          "type": "feed",
+          "source": "recent",
+          "view": "films",
+          "title": "Dans votre collection",
+          "display": "spotlight"
+        },
+        {
+          "type": "feed",
+          "source": "recent",
+          "view": "films",
+          "title": "Films dans votre collection",
+          "text": "Les derniers ajouts en premier."
+        },
+        {
+          "type": "feed",
+          "source": "remote",
+          "view": "films",
+          "title": "En ce moment au cinéma",
+          "text": "Sélection TMDB · gardez les titres qui vous tentent.",
+          "provider": "tmdb",
+          "shelf": "now_playing"
+        },
+        {
+          "type": "feed",
+          "source": "favorites",
+          "view": "films",
+          "title": "Vos valeurs sûres"
+        },
+        {
+          "type": "feed",
+          "source": "watchlist",
+          "view": "films",
+          "title": "Vos prochaines séances"
+        },
+        {
+          "type": "feed",
+          "source": "remote",
+          "view": "films",
+          "title": "Bientôt sur grand écran",
+          "text": "Dates annoncées · elles peuvent évoluer.",
+          "provider": "tmdb",
+          "shelf": "upcoming"
+        }
+      ]
+    }
+  ],
+  "theme": {}
+}

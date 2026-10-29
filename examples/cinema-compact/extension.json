@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "id": "atelier.cinema-compact",
+  "name": "Cinéma compact",
+  "publisher": "Atelier Mosaune",
+  "version": "1.0.0",
+  "description": "Exemple de remplacement de la rubrique Films : les films locaux en grille, puis les favoris. Aucun appel de découverte.",
+  "family": "interface",
+  "minCore": "0.0.42",
+  "api": 3,
+  "requires": [
+    "ui.pages.v1"
+  ],
+  "permissions": [],
+  "pages": [
+    {
+      "id": "films",
+      "screen": "films",
+      "label": "Cinéma",
+      "icon": "films",
+      "placement": "main",
+      "kinds": [
+        "films"
+      ],
+      "blocks": [
+        {
+          "type": "feed",
+          "source": "recent",
+          "view": "films",
+          "display": "grid",
+          "title": "Tous mes films"
+        },
+        {
+          "type": "feed",
+          "source": "favorites",
+          "view": "films",
+          "title": "Mes favoris"
+        }
+      ],
+      "heading": "Tout votre cinéma."
+    }
+  ],
+  "theme": {}
+}

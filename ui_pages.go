@@ -9,24 +9,31 @@ import (
 	"errors"
 	"net/http"
 	"regexp"
+	"sort"
 	"strings"
 )
 
 // UI documents are data, never executable markup. The host owns routes,
 // authentication, rendering and all media operations.
 type uiBlock struct {
-	Type   string   `json:"type"`
-	Title  string   `json:"title,omitempty"`
-	Text   string   `json:"text,omitempty"`
-	Target string   `json:"target,omitempty"`
-	View   string   `json:"view,omitempty"`
-	Facts  []uiFact `json:"facts,omitempty"`
+	Source   string   `json:"source,omitempty"`
+	Display  string   `json:"display,omitempty"`
+	Provider string   `json:"provider,omitempty"`
+	Shelf    string   `json:"shelf,omitempty"`
+	Type     string   `json:"type"`
+	Title    string   `json:"title,omitempty"`
+	Text     string   `json:"text,omitempty"`
+	Target   string   `json:"target,omitempty"`
+	View     string   `json:"view,omitempty"`
+	Facts    []uiFact `json:"facts,omitempty"`
 }
 type uiFact struct {
 	Label string `json:"label"`
 	Value string `json:"value"`
 }
 type uiPage struct {
+	Screen      string    `json:"screen,omitempty"`
+	Heading     string    `json:"heading,omitempty"`
 	ID          string    `json:"id"`
 	Label       string    `json:"label"`
 	Description string    `json:"description,omitempty"`
@@ -70,11 +77,27 @@ func validateUIPages(m extensionManifest) error {
 		return fail
 	}
 	seen := map[string]bool{}
+	screens := map[string]bool{}
 	for _, p := range m.Pages {
 		if !uiLocalID.MatchString(p.ID) || seen[p.ID] || p.Owner != "" || strings.TrimSpace(p.Label) == "" || len(p.Label) > 80 || len(p.Description) > 600 || len(p.Blocks) > 32 {
 			return fail
 		}
 		seen[p.ID] = true
+		if (p.Screen != "" || p.Heading != "") && compareExtensionVersions(m.MinCore, "0.0.42") < 0 {
+			return fail
+		}
+		if len(p.Heading) > 120 {
+			return fail
+		}
+		if p.Screen != "" {
+			if !uiViewKnown(p.Screen) || screens[p.Screen] || p.Admin || p.Placement == "settings" || p.Placement == "hidden" {
+				return fail
+			}
+			screens[p.Screen] = true
+			if uiKindKnown(p.Screen) && (len(p.Kinds) != 1 || p.Kinds[0] != p.Screen) {
+				return fail
+			}
+		}
 		if p.Placement != "main" && p.Placement != "personal" && p.Placement != "settings" && p.Placement != "hidden" {
 			return fail
 		}
@@ -90,11 +113,26 @@ func validateUIPages(m extensionManifest) error {
 			}
 			kinds[k] = true
 		}
+		remoteFeeds := map[string]bool{}
 		for _, b := range p.Blocks {
+			if b.Source == "remote" {
+				key := b.Provider + ":" + b.View + ":" + b.Shelf
+				if remoteFeeds[key] || len(remoteFeeds) >= 4 {
+					return fail
+				}
+				remoteFeeds[key] = true
+			}
 			if len(b.Title) > 120 || len(b.Text) > 4000 || len(b.Facts) > 24 {
 				return fail
 			}
+			if b.Type != "feed" && (b.Source != "" || b.Display != "" || b.Provider != "" || b.Shelf != "") {
+				return fail
+			}
 			switch b.Type {
+			case "feed":
+				if compareExtensionVersions(m.MinCore, "0.0.42") < 0 || !validUIFeed(b) {
+					return fail
+				}
 			case "text":
 				if b.Target != "" || b.View != "" || len(b.Facts) > 0 {
 					return fail
@@ -213,7 +251,7 @@ func (c *catalog) activeUIPages(ctx context.Context, allowed func(string) bool) 
 				if b.Type == "link" && !uiTargetAllowed(ctx, b.Target, m.Pages, allowed) {
 					continue
 				}
-				if b.Type == "collection" && uiKindKnown(b.View) && (!allowed(b.View) || !canKind(ctx, b.View)) {
+				if (b.Type == "collection" || b.Type == "feed") && uiKindKnown(b.View) && (!allowed(b.View) || !canKind(ctx, b.View)) {
 					continue
 				}
 				blocks = append(blocks, b)
@@ -222,7 +260,26 @@ func (c *catalog) activeUIPages(ctx context.Context, allowed func(string) bool) 
 			out = append(out, p)
 		}
 	}
-	return out, rows.Err()
+	if e = rows.Err(); e != nil {
+		return nil, e
+	}
+	claims := map[string]bool{}
+	for _, p := range out {
+		if p.Screen != "" {
+			claims[p.Screen] = true
+		}
+	}
+	for i := range out {
+		filtered := []uiBlock{}
+		for _, b := range out[i].Blocks {
+			if b.Type == "link" && uiViewKnown(b.Target) && !claims[b.Target] {
+				continue
+			}
+			filtered = append(filtered, b)
+		}
+		out[i].Blocks = filtered
+	}
+	return out, nil
 }
 func (c *catalog) uiRoutes(mux *secureMux, allowed func(string) bool) {
 	mux.HandleFunc("GET /api/v1/ui/navigation", func(w http.ResponseWriter, r *http.Request) {
@@ -233,7 +290,7 @@ func (c *catalog) uiRoutes(mux *secureMux, allowed func(string) bool) {
 		}
 		nav := []uiPage{}
 		for _, p := range uiBuiltins() {
-			if uiAllowed(r.Context(), p, allowed) {
+			if !uiViewKnown(p.ID) && uiAllowed(r.Context(), p, allowed) {
 				nav = append(nav, p)
 			}
 		}
@@ -243,6 +300,7 @@ func (c *catalog) uiRoutes(mux *secureMux, allowed func(string) bool) {
 				nav = append(nav, p)
 			}
 		}
+		sort.SliceStable(nav, func(i, j int) bool { return uiNavigationOrder(nav[i]) < uiNavigationOrder(nav[j]) })
 		sendJSON(w, 200, nav)
 	})
 	mux.HandleFunc("GET /api/v1/ui/pages/{owner}/{page}", func(w http.ResponseWriter, r *http.Request) {
