@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 28 octobre 2026 · étape 0.0.40.
+État du 29 octobre 2026 · étape 0.0.41.
 
-**Environ 60 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 63 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -11,10 +11,10 @@ La référence est exigeante : une fonction doit pouvoir être installée, désa
 | Moteur, contrats, registre et isolation | 20 % | 90 % | 18 points |
 | Installation, dépendances et gestion des ensembles | 20 % | 60 % | 12 points |
 | Extraction des comportements Films/Séries/Musique | 25 % | 72 % | 18 points |
-| Thèmes et contributions d’interface | 15 % | 60 % | 9 points |
+| Thèmes et contributions d’interface | 15 % | 80 % | 12 points |
 | Fournisseurs et connecteurs indépendants | 10 % | 30 % | 3 points |
 | Validation finale d’un noyau vide et d’une installation complète par extensions | 10 % | 0 % | 0 point |
-| **Total estimé** | **100 %** | | **60 points** |
+| **Total estimé** | **100 %** | | **63 points** |
 
 ## Checklist
 
@@ -57,7 +57,9 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [x] Contrat de thème avec variables, variantes et composants communs.
 - [x] Cartes d’extensions, fiches de réglages, recherche et présentation extensible des résultats.
 - [x] Rendu des fiches à partir de contributions contrôlées, avec les thèmes.
-- [ ] Navigation, pages, menus, réglages et traductions enregistrés par les extensions sans modifier les routes centrales.
+- [x] Pages déclaratives installables : menus principaux/personnels et rubriques de paramètres, textes, informations, raccourcis et collections ; import et dépôts, droits par compte, activation/retrait.
+- [x] Menus existants servis par le même registre de descriptions, sans liste de rubriques codée dans le composant principal.
+- [ ] Extraire les écrans historiques dans les familles complètes ; généraliser formulaires persistants, traductions et compositions avancées.
 - [x] Paquet TMDB pilote et désactivation réelle de ses accès en ligne.
 - [ ] Achever l’indépendance de TMDB, supprimer sa substitution intégrée et généraliser l’interface fournisseur.
 - [ ] Extraire MusicBrainz et ses services associés.

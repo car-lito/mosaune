@@ -76,7 +76,7 @@ func (c *catalog) extensionRepositoryRoutes(mux *secureMux) {
 			if err = json.Unmarshal([]byte(raw), &m); err != nil {
 				break
 			}
-			installed = append(installed, installedVersion{m.ID, m.Version, "theme"})
+			installed = append(installed, installedVersion{m.ID, m.Version, uiPackageKind(m)})
 		}
 		if err == nil {
 			err = rows.Err()

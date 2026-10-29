@@ -1,3 +1,5 @@
+Pour ajouter des pages et des menus sans compiler de programme : [contrat ui.pages.v1 et exemple Salon personnel](ESSAYER-LES-PAGES-041.md).
+
 # Créer un thème pour Mosaune — contrat v2
 
 Client web Mosaune 0.0.15. Un thème est un fichier JSON déclaratif : il fournit des valeurs, les composants Mosaune les utilisent. Le thème natif utilise le même mécanisme. JSON permet une validation stricte avec les outils déjà présents ; aucun moteur YAML ni CSS libre n’est nécessaire.

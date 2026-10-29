@@ -324,6 +324,9 @@ func themeForManifest(m extensionManifest) extensionTheme {
 	return m.Theme
 }
 func themePreviewFor(m extensionManifest) map[string]map[string]string {
+	if m.API == 3 {
+		return nil
+	}
 	t := mergeTheme(themeForManifest(m))
 	out := map[string]map[string]string{"light": {}, "dark": {}}
 	for k, token := range map[string]string{"canvas": "app.background", "ink": "app.color", "muted": "text.action.color", "accent": "button.primary.background"} {

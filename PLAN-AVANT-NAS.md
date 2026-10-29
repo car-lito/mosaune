@@ -1,3 +1,10 @@
+## Étape 0.0.41 — pages et menus déclaratifs
+
+- [x] C-UI-01 — Un paquet ajoute des pages, des menus et des rubriques de paramètres sans modifier le routeur. Import/dépôts, droits, désactivation, mise à jour et retrait ; exemple Salon personnel.
+- [ ] C-UI-02 — Migrer les écrans métiers restants, puis formulaires persistants, traductions et compositions avancées.
+
+[Essayer les pages](ESSAYER-LES-PAGES-041.md). Cette étape ne termine pas les familles médias complètes.
+
 ## Étape 0.0.40 — ensembles de composants
 
 Préparer, désactiver et retirer en lot les composants déjà extraits de Films, Séries et Musique : aperçu, transaction unique, révision/empreinte, conservation des remplaçants et des composants partagés. Recettes déclaratives embarquées, sans nouveau processus au repos. Cela ne constitue pas encore trois familles médias complètes : écrans et services intégrés restent à extraire. [Guide](ESSAYER-LES-ENSEMBLES-040.md) · [Checklist pondérée : environ 60 %](AVANCEMENT-EXTENSIONS.md).

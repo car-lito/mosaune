@@ -32,6 +32,7 @@ type extensionManifest struct {
 	API         int            `json:"api"`
 	Requires    []string       `json:"requires"`
 	Permissions []string       `json:"permissions"`
+	Pages       []uiPage       `json:"pages,omitempty"`
 	Theme       extensionTheme `json:"theme"`
 }
 type extensionTheme struct {
@@ -120,8 +121,8 @@ func colorContrast(a, b string) float64 {
 	return (x + .05) / (y + .05)
 }
 func validateExtension(m extensionManifest) error {
-	if m.Schema != 1 || (m.API != 1 && m.API != 2) || m.Family != "interface" {
-		return errors.New("Type ou API non pris en charge : thèmes déclaratifs v1 et v2 uniquement.")
+	if m.Schema != 1 || (m.API != 1 && m.API != 2 && m.API != 3) || m.Family != "interface" {
+		return errors.New("Type ou API non pris en charge : thèmes v1/v2 ou pages déclaratives v3.")
 	}
 	if len(m.ID) > 80 || !extensionID.MatchString(m.ID) || strings.HasPrefix(m.ID, "mosaune.") {
 		return errors.New("Identifiant invalide ou réservé à Mosaune.")
@@ -131,6 +132,12 @@ func validateExtension(m extensionManifest) error {
 	}
 	if !extensionVersion.MatchString(m.Version) || !extensionVersion.MatchString(m.MinCore) || compareExtensionVersions(m.MinCore, version) > 0 {
 		return errors.New("Version invalide ou version de Mosaune trop ancienne pour ce paquet.")
+	}
+	if m.API == 3 {
+		return validateUIPages(m)
+	}
+	if len(m.Pages) != 0 {
+		return errors.New("Les pages nécessitent l’API 3.")
 	}
 	if len(m.Requires) != 1 || m.Requires[0] != fmt.Sprintf("ui.theme.v%d", m.API) {
 		return errors.New("Le paquet doit demander la capacité ui.theme correspondant à son API.")
@@ -238,7 +245,7 @@ func (c *catalog) extensionAppearance(ctx context.Context) (extensionAppearance,
 	if e != nil {
 		return a, p, e
 	}
-	if !p.Enabled {
+	if !p.Enabled || p.Manifest.API == 3 {
 		return a, p, nil
 	}
 	if e = validateExtension(p.Manifest); e != nil {

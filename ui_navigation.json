@@ -1,0 +1,119 @@
+[
+  {
+    "id": "home",
+    "label": "Accueil",
+    "icon": "home",
+    "placement": "main"
+  },
+  {
+    "id": "films",
+    "label": "Films",
+    "icon": "films",
+    "placement": "main",
+    "kinds": [
+      "films"
+    ]
+  },
+  {
+    "id": "series",
+    "label": "Séries",
+    "icon": "series",
+    "placement": "main",
+    "kinds": [
+      "series"
+    ]
+  },
+  {
+    "id": "music",
+    "label": "Musique",
+    "icon": "music",
+    "placement": "main",
+    "kinds": [
+      "music"
+    ]
+  },
+  {
+    "id": "watchlist",
+    "label": "Ma liste",
+    "icon": "bookmark",
+    "placement": "personal"
+  },
+  {
+    "id": "favorites",
+    "label": "Favoris",
+    "icon": "heart",
+    "placement": "personal"
+  },
+  {
+    "id": "playlists",
+    "label": "Playlists",
+    "icon": "queue",
+    "placement": "personal",
+    "kinds": [
+      "music"
+    ]
+  },
+  {
+    "id": "requests",
+    "label": "Demandes",
+    "icon": "server",
+    "placement": "personal",
+    "kinds": [
+      "films",
+      "series"
+    ]
+  },
+  {
+    "id": "account",
+    "label": "Mon compte",
+    "description": "Mot de passe et apparence de votre espace.",
+    "admin": false,
+    "placement": "settings"
+  },
+  {
+    "id": "users",
+    "label": "Utilisateurs",
+    "description": "Comptes, invitations et permissions.",
+    "admin": true,
+    "placement": "settings"
+  },
+  {
+    "id": "extensions",
+    "label": "Extensions",
+    "description": "Paquets installés et thèmes personnels.",
+    "admin": false,
+    "placement": "settings"
+  },
+  {
+    "id": "libraries",
+    "label": "Bibliothèques",
+    "description": "Les dossiers qui composent votre collection.",
+    "admin": true,
+    "placement": "settings"
+  },
+  {
+    "id": "metadata",
+    "label": "Métadonnées",
+    "description": "Fournisseurs, affiches et suivi de l’identification.",
+    "admin": true,
+    "placement": "settings"
+  },
+  {
+    "id": "downloads",
+    "label": "Téléchargements",
+    "description": "Vos services et les destinations de vos demandes.",
+    "admin": true,
+    "placement": "settings",
+    "kinds": [
+      "films",
+      "series"
+    ]
+  },
+  {
+    "id": "server",
+    "label": "Serveur",
+    "description": "Informations de cette installation et essais ponctuels.",
+    "admin": true,
+    "placement": "settings"
+  }
+]

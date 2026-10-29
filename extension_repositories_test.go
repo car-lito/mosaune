@@ -37,7 +37,7 @@ func TestRepositoryExportCanBePublishedUnchanged(t *testing.T) {
 		}
 		files[f.Name] = data
 	}
-	if len(files) != 5 || len(files["README.md"]) == 0 {
+	if len(files) != 6 || len(files["README.md"]) == 0 {
 		t.Fatal("incomplete export")
 	}
 	index, err := parseRepositoryIndex(files[repositoryIndexFile])
@@ -111,7 +111,7 @@ func TestRepositoryCatalogDownloadAndPermissions(t *testing.T) {
 	index := bundledRepository().Index
 	index.Name = "Public fixture"
 	indexRaw, _ := json.Marshal(index)
-	files := map[string][]byte{repositoryIndexFile: indexRaw, "packages/ambre.mosaune.zip": bundledThemeArchive(), "packages/tmdb-0.4.0.mosaune.zip": providerExample, "packages/tmdb-0.4.1.mosaune.zip": providerUpdateExample}
+	files := map[string][]byte{repositoryIndexFile: indexRaw, "packages/ambre.mosaune.zip": bundledThemeArchive(), "packages/salon.mosaune.zip": uiExampleArchive(), "packages/tmdb-0.4.0.mosaune.zip": providerExample, "packages/tmdb-0.4.1.mosaune.zip": providerUpdateExample}
 	calls := 0
 	status := 200
 	networkError := false
@@ -179,7 +179,7 @@ func TestRepositoryCatalogDownloadAndPermissions(t *testing.T) {
 		t.Fatal("bad refresh", w.Code)
 	}
 	old, err := c.repository(context.Background(), repo.ID)
-	if err != nil || old.Index.Name != index.Name || len(old.Index.Packages) != 3 {
+	if err != nil || old.Index.Name != index.Name || len(old.Index.Packages) != len(index.Packages) {
 		t.Fatal("previous lost", old, err)
 	}
 	for _, failure := range []int{403, 404, 429, 500, 302} {

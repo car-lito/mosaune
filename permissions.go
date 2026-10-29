@@ -43,7 +43,7 @@ func (c *catalog) authorize(pattern string, r *http.Request) bool {
 	id := r.PathValue("id")
 	read := r.Method == "GET" || r.Method == "HEAD"
 	switch pattern {
-	case "GET /api/v1/extensions", "GET /api/v1/extensions/appearance", "GET /api/v1/extensions/theme.css", "PUT /api/v1/account/extension-theme":
+	case "GET /api/v1/ui/navigation", "GET /api/v1/ui/pages/{owner}/{page}", "GET /api/v1/extensions", "GET /api/v1/extensions/appearance", "GET /api/v1/extensions/theme.css", "PUT /api/v1/account/extension-theme":
 		return true // The handlers scope packages, preferences and CSS to this account.
 	case "GET /api/v1/status", "GET /api/v1/library", "GET /api/v1/metadata/providers", "GET /api/v1/discovery/library", "PUT /api/v1/account/preferences", "PUT /api/v1/account/password":
 		return true

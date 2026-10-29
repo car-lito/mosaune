@@ -124,7 +124,7 @@ func parseRepositoryIndex(raw []byte) (repositoryIndex, error) {
 	}
 	seen := map[string]bool{}
 	for _, p := range index.Packages {
-		if !extensionID.MatchString(p.ID) || len(p.ID) > 100 || !extensionVersion.MatchString(p.Version) || !extensionVersion.MatchString(p.MinCore) || (p.Kind != "theme" && p.Kind != "provider" && p.Kind != "recognition" && p.Kind != "audio-tags" && p.Kind != "catalogue" && p.Kind != "detail-list" && p.Kind != "detail-sections" && p.Kind != "detail-header" && p.Kind != "detail-experience") || strings.TrimSpace(p.Name) == "" || len(p.Name) > 100 || strings.TrimSpace(p.Publisher) == "" || len(p.Publisher) > 100 || len(p.Description) > 1000 || !repositoryPath(p.Path) || !strings.HasSuffix(p.Path, ".zip") || !repositoryHash.MatchString(p.SHA256) {
+		if !extensionID.MatchString(p.ID) || len(p.ID) > 100 || !extensionVersion.MatchString(p.Version) || !extensionVersion.MatchString(p.MinCore) || (p.Kind != "pages" && p.Kind != "theme" && p.Kind != "provider" && p.Kind != "recognition" && p.Kind != "audio-tags" && p.Kind != "catalogue" && p.Kind != "detail-list" && p.Kind != "detail-sections" && p.Kind != "detail-header" && p.Kind != "detail-experience") || strings.TrimSpace(p.Name) == "" || len(p.Name) > 100 || strings.TrimSpace(p.Publisher) == "" || len(p.Publisher) > 100 || len(p.Description) > 1000 || !repositoryPath(p.Path) || !strings.HasSuffix(p.Path, ".zip") || !repositoryHash.MatchString(p.SHA256) {
 			return index, errors.New("Une fiche du catalogue est incomplète ou non valide.")
 		}
 		key := p.ID + "@" + p.Version
@@ -209,6 +209,7 @@ func bundledRepositoryArchive() ([]byte, error) {
 		{repositoryIndexFile, index},
 		{"README.md", []byte("# Exemple de dépôt Mosaune\n\nPaquets de démonstration : Ambre et TMDB. Aucun réglage, compte ou secret.\n\nDans un dépôt GitHub public, placez mosaune-repository.json et le dossier packages à la racine. Dans Mosaune 0.0.20 ou plus : Réglages → Extensions → À télécharger → Gérer les dépôts GitHub. Ajoutez l'adresse https://github.com/VOTRE-COMPTE/VOTRE-DEPOT. Laissez la référence vide pour la branche par défaut.\n\nL'empreinte sha256 de chaque fiche est celle du fichier ZIP complet. Ne modifiez pas un paquet sans mettre à jour sa fiche. TMDB reste signé par la clé de développement du projet, sans autoriser d'autres signatures. Les deux versions TMDB ont les mêmes fonctions : elles servent à tester les mises à jour et le retour arrière.\n")},
 		{"packages/ambre.mosaune.zip", bundledThemeArchive()},
+		{"packages/salon.mosaune.zip", uiExampleArchive()},
 		{"packages/tmdb-0.4.0.mosaune.zip", providerExample},
 		{"packages/tmdb-0.4.1.mosaune.zip", providerUpdateExample},
 	}
@@ -232,6 +233,9 @@ func bundledRepository() extensionRepository {
 	var theme extensionManifest
 	_ = json.Unmarshal(exampleThemeV2, &theme)
 	entries := []repositoryEntry{{ID: theme.ID, Name: theme.Name, Publisher: theme.Publisher, Description: theme.Description, Version: theme.Version, Kind: "theme", MinCore: theme.MinCore, Path: "packages/ambre.mosaune.zip", SHA256: packageformat.Hash(bundledThemeArchive())}}
+	var pages extensionManifest
+	_ = json.Unmarshal(exampleUIPages, &pages)
+	entries = append(entries, repositoryEntry{ID: pages.ID, Name: pages.Name, Publisher: pages.Publisher, Description: pages.Description, Version: pages.Version, Kind: "pages", MinCore: pages.MinCore, Path: "packages/salon.mosaune.zip", SHA256: packageformat.Hash(uiExampleArchive())})
 	for _, raw := range [][]byte{providerExample, providerUpdateExample} {
 		p, err := packageformat.Parse(raw, trustedProviderKey(), version)
 		if err != nil {
@@ -279,6 +283,8 @@ func (c *catalog) repositoryPackage(ctx context.Context, repo extensionRepositor
 	var err error
 	if repo.Bundled {
 		switch entry.Path {
+		case "packages/salon.mosaune.zip":
+			raw = uiExampleArchive()
 		case "packages/ambre.mosaune.zip":
 			raw = bundledThemeArchive()
 		case "packages/tmdb-0.4.0.mosaune.zip":
@@ -327,6 +333,9 @@ func (c *catalog) repositoryPackage(ctx context.Context, repo extensionRepositor
 			return nil, err
 		}
 		m := p.Manifest
+		if (m.API == 3) != (entry.Kind == "pages") {
+			return nil, errors.New("Le rôle des pages ne correspond pas au catalogue.")
+		}
 		actual = repositoryEntry{ID: m.ID, Version: m.Version, Name: m.Name, Publisher: m.Publisher, MinCore: m.MinCore, Description: m.Description}
 	}
 	if actual.ID != entry.ID || actual.Version != entry.Version || actual.Name != entry.Name || actual.Publisher != entry.Publisher || actual.MinCore != entry.MinCore || actual.Description != entry.Description {

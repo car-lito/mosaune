@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "id": "atelier.salon",
+  "name": "Salon personnel",
+  "publisher": "Atelier Mosaune",
+  "version": "1.0.0",
+  "description": "Un espace personnel composé de pages, de collections et de raccourcis. Exemple modifiable sans programmer.",
+  "family": "interface",
+  "minCore": "0.0.41",
+  "api": 3,
+  "requires": [
+    "ui.pages.v1"
+  ],
+  "permissions": [],
+  "pages": [
+    {
+      "id": "salon",
+      "label": "Mon salon",
+      "icon": "home",
+      "placement": "main",
+      "description": "Vos collections, réunies à votre façon.",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Un espace à composer",
+          "text": "Cette page vient d’une extension. Ses rubriques et ses raccourcis sont définis dans un simple fichier JSON."
+        },
+        {
+          "type": "link",
+          "title": "Le carnet du salon",
+          "target": "page:carnet"
+        },
+        {
+          "type": "link",
+          "title": "Mes favoris",
+          "target": "favorites"
+        },
+        {
+          "type": "collection",
+          "view": "music"
+        }
+      ]
+    },
+    {
+      "id": "carnet",
+      "label": "Le carnet",
+      "placement": "hidden",
+      "blocks": [
+        {
+          "type": "facts",
+          "title": "À propos de cet espace",
+          "facts": [
+            {
+              "label": "Présentation",
+              "value": "Les couleurs, les polices et les arrondis suivent votre thème."
+            },
+            {
+              "label": "Personnalisation",
+              "value": "Modifiez le fichier de description pour composer vos propres pages."
+            }
+          ]
+        },
+        {
+          "type": "link",
+          "title": "Retour au salon",
+          "target": "page:salon"
+        }
+      ]
+    },
+    {
+      "id": "reglages",
+      "label": "Mon salon",
+      "description": "Présentation de l’extension et accès aux collections.",
+      "icon": "home",
+      "placement": "settings",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Votre espace personnel",
+          "text": "Ces pages sont accessibles aux comptes autorisés par l’administrateur."
+        },
+        {
+          "type": "link",
+          "title": "Ouvrir le salon",
+          "target": "page:salon"
+        }
+      ]
+    }
+  ]
+}

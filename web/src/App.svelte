@@ -7,7 +7,14 @@
  import AccountSettings from './AccountSettings.svelte';import {permitted,type Account} from './accounts';
  export let user:Account;export let onlogout:()=>void;export let sessionEnded:()=>void;export let accountChanged:(a:Account)=>void;
   import Icon from './Icon.svelte';
-  import LibraryManager from './LibraryManager.svelte';import {settingsSections} from './settings';
+  import LibraryManager from './LibraryManager.svelte';import ExtensionPage from './ExtensionPage.svelte';
+ import {pageKey as uiPageKey,type UIPage} from './ui-pages';
+ let navigation:UIPage[]=[];let uiRevision=0;let externalPage:{owner:string;id:string}|null=null;let externalTitle='';let navigationRequest=0;
+ async function refreshNavigation(){const request=++navigationRequest;try{const r=await fetch('/api/v1/ui/navigation');if(!r.ok)throw Error('navigation');const data:UIPage[]=await r.json();if(request!==navigationRequest)return;navigation=data;if(settingsTab.startsWith('extension:')&&!data.some(p=>p.placement==='settings'&&uiPageKey(p)===settingsTab))settingsTab='extensions';uiRevision++;}catch{if(request===navigationRequest){navigation=[];uiRevision++;}}}
+ function openUI(p:UIPage){if(!p.owner){if(p.placement==='settings'){navigate('settings');settingsTab=p.id;}else navigate(p.id as View);return;}externalTitle=p.label;if(p.placement==='settings'){navigate('settings');settingsTab=uiPageKey(p);}else{navigate('home');externalPage={owner:p.owner,id:p.id};}}
+ function uiNavigate(target:string,owner:string){if(target.startsWith('page:')){navigate('home');externalPage={owner,id:target.slice(5)};return;}const item=navigation.find(p=>!p.owner&&(p.placement==='settings'?'settings:'+p.id:p.id)===target);if(item)openUI(item);}
+ $: settingsSections=navigation.filter(p=>p.placement==='settings');
+ $: settingsPage=settingsSections.find(p=>uiPageKey(p)===settingsTab&&p.owner);
  let settingsTab='account';
   import MediaPlayer from './MediaPlayer.svelte';
   import MediaCollection from './MediaCollection.svelte';
@@ -27,12 +34,12 @@
 
   type View = Kind | 'home' | 'watchlist' | 'favorites' | 'playlists' | 'settings' | 'requests';
  type Page = {type:'content';card:Card}|{type:'person';provider:string;id:string;name:string};
- let page:Page|null=null;let backStack:{view:View;page:Page|null}[]=[];let works:Work[]=[];let pageKey=0;
- async function openCard(card:Card){backStack=[...backStack,{view,page}];view=card.kind;page={type:'content',card};pageKey++;window.scrollTo({top:0});}
- function openPerson(provider:string,p:Contributor){backStack=[...backStack,{view,page}];page={type:'person',provider,id:p.id,name:p.name};pageKey++;window.scrollTo({top:0});}
+ let page:Page|null=null;let backStack:{view:View;page:Page|null;externalPage:{owner:string;id:string}|null}[]=[];let works:Work[]=[];let pageKey=0;
+ async function openCard(card:Card){backStack=[...backStack,{view,page,externalPage}];externalPage=null;view=card.kind;page={type:'content',card};pageKey++;window.scrollTo({top:0});}
+ function openPerson(provider:string,p:Contributor){backStack=[...backStack,{view,page,externalPage}];externalPage=null;page={type:'person',provider,id:p.id,name:p.name};pageKey++;window.scrollTo({top:0});}
  function playAlbum(card:Card){const tracks=card.group?.entries??entries.filter(e=>card.work?.localIds.includes(e.id));playMusic([...tracks].sort(compareCatalogueEntries));}
  function openArtist(name:string){openPerson('',{id:'',name});}
- function back(){const previous=backStack.pop();backStack=[...backStack];page=previous?.page??null;view=previous?.view??'home';pageKey++;window.scrollTo({top:0});}
+ function back(){const previous=backStack.pop();backStack=[...backStack];page=previous?.page??null;view=previous?.view??'home';externalPage=previous?.externalPage??null;pageKey++;window.scrollTo({top:0});}
  function updateWork(work:Work){works=works.some(w=>w.id===work.id)?works.map(w=>w.id===work.id?work:w):[...works,work];}
  async function refreshWorks(){const r=await fetch('/api/v1/discovery/library');if(r.ok)works=await r.json();}
  async function mark(entry:Entry,completed:boolean){if(!permitted(entry,"play")){libraryError="Modification de progression non autorisée.";return}try{if(active?.id===entry.id){closePlayer();await tick();}await waitForProgress(entry.id);const r=await fetch('/api/v1/media/'+entry.id+'/state',{method:'PATCH',headers:{'Content-Type':'application/json','X-Mosaune-Token':status?.token??''},body:JSON.stringify({completed,revision:entry.revision})});if(!r.ok)throw new Error((await r.json()).error);await refreshLibrary();}catch(e){libraryError=e instanceof Error?e.message:'État non enregistré.';}}
@@ -83,7 +90,7 @@
       if(data.user.id!==user.id){sessionEnded();return;}
  status = data;
  const pr=await fetch('/api/v1/metadata/providers');if(pr.ok)providers=await pr.json();
-      await refreshLibrary();await checkArrivals();
+      await refreshLibrary();await refreshNavigation();await checkArrivals();
     } catch { connectionError = true; status = null; }
     finally { loading = false; }
   }
@@ -93,8 +100,8 @@
     catch { musicMessage = 'Ce navigateur ne permet pas de conserver la file d’écoute.'; }
     void connect();
     void refreshAppearance();
-    const extensionTimer=setInterval(()=>{if(!document.hidden){void refreshAppearance();void refreshProviders();}},30000);
-    const extensionRefresh=()=>{void refreshAppearance();void refreshProviders();};
+    const extensionTimer=setInterval(()=>{if(!document.hidden){void refreshAppearance();void refreshProviders();void refreshNavigation();}},30000);
+    const extensionRefresh=()=>{void refreshAppearance();void refreshProviders();void refreshNavigation();};
     const catalogueRefresh=()=>{page=null;backStack=[];void refreshLibrary().catch(()=>{});};
  window.addEventListener('mosaune:catalogue-changed',catalogueRefresh);
  window.addEventListener('mosaune:extensions-changed',extensionRefresh);
@@ -103,7 +110,7 @@
     return () => {window.removeEventListener('mosaune:catalogue-changed',catalogueRefresh);clearInterval(extensionTimer);window.removeEventListener('mosaune:extensions-changed',extensionRefresh);window.removeEventListener('focus',extensionRefresh);clearInterval(arrivalTimer);entries.filter(e => !e.libraryId).forEach(e => URL.revokeObjectURL(e.url));};
   });
 
-  function navigate(next: View) {view=next;page=null;backStack=[];query='';notice='';pageKey++;window.scrollTo({top:0});}
+  function navigate(next: View) {externalPage=null;view=next;page=null;backStack=[];query='';notice='';pageKey++;window.scrollTo({top:0});}
   function discoverEntry(entry: Entry) {inspected=null;const group=groupMedia(entries).find(g=>g.entries.some(e=>e.id===entry.id));if(group)void openCard(groupCard(group));}
   async function choose(kind: Kind) {
     importKind = kind;
@@ -212,19 +219,18 @@
   }
   function size(bytes: number) { return bytes >= 1024 ** 3 ? `${(bytes / 1024 ** 3).toFixed(1)} Go` : `${(bytes / 1024 ** 2).toFixed(1)} Mo`; }
 </script>
-<svelte:head><title>{page?.type==='content'?page.card.title:page?.type==='person'?page.name:labels[view]} · Mosaune</title>{#if appearanceLink(extensionAppearance)}<link rel="stylesheet" href={appearanceLink(extensionAppearance)}/>{/if}</svelte:head>
+<svelte:head><title>{externalPage?externalTitle:page?.type==='content'?page.card.title:page?.type==='person'?page.name:labels[view]} · Mosaune</title>{#if appearanceLink(extensionAppearance)}<link rel="stylesheet" href={appearanceLink(extensionAppearance)}/>{/if}</svelte:head>
 <div class="app-shell experience-shell" data-extension-theme={extensionAppearance.stamp} data-ui-section={view} class:with-player={active}>
  <aside class="sidebar"><a class="brand" href="#accueil" onclick={()=>navigate('home')} aria-label="Mosaune, accueil"><span class="brand-mark"><span></span><span></span><span></span></span><span>Mosaune<small>LE GOÛT DES HISTOIRES</small></span></a>
- <div class="nav-caption">VOTRE ESPACE</div><nav aria-label="Navigation principale"><button class:current={view==='home'} onclick={()=>navigate('home')}><Icon name="home"/>Accueil</button>{#each kinds as kind}<button class:current={view===kind} onclick={()=>navigate(kind)}><Icon name={kind}/>{labels[kind]}</button>{/each}</nav>
- <div class="nav-caption secondary-caption">VOS ENVIES</div><nav aria-label="Vos listes"><button class:current={view==='watchlist'} onclick={()=>navigate('watchlist')}><Icon name="bookmark"/>Ma liste</button><button class:current={view==='favorites'} onclick={()=>navigate('favorites')}><Icon name="heart"/>Favoris</button>{#if kinds.includes('music')}<button class:current={view==='playlists'} onclick={()=>navigate('playlists')}><Icon name="queue"/>Playlists</button>{/if}{#if kinds.includes('films')||kinds.includes('series')}<button class:current={view==='requests'} onclick={()=>navigate('requests')}><Icon name="server"/>Demandes</button>{/if}</nav>
- <div class="sidebar-bottom"><div class="account-identity"><strong>{user.name}</strong><button class="text-action" onclick={onlogout}>Se déconnecter</button></div><button class="settings-nav" class:current={view==='settings'} onclick={()=>navigate('settings')}><Icon name="settings"/>Réglages</button><div class="server-card"><Icon name="server"/><div><strong>Votre collection, chez vous</strong><span>{connectionError?'Serveur inaccessible':loading?'Connexion…':'Connecté à cet ordinateur'}</span></div></div><div class="version">PROJET MOSAUNE <span>v{status?.version??'0.0.40'}</span></div></div></aside>
- <main id="main" class:settings-main={view==='settings'}><header class="topbar experience-topbar"><div class="page-navigation">{#if page}<button class="icon-button" aria-label="Revenir à la page précédente" onclick={back}>←</button>{/if}<span>{labels[view]}</span></div>{#if status}<SearchBox {works} {entries} {providers} {kinds} context={view} token={status.token} open={openCard}/>{/if}{#if kinds.includes('music')}<button class="queue-toggle" aria-label="Ouvrir la file d’écoute" aria-expanded={queueOpen} onclick={()=>queueOpen=!queueOpen}><Icon name="queue"/><span>{musicQueue.items.length}</span></button>{/if}</header>
+ {#each [{id:'main',label:'VOTRE ESPACE',aria:'Navigation principale'},{id:'personal',label:'VOS ENVIES',aria:'Vos listes'}] as group}<div class="nav-caption" class:secondary-caption={group.id==='personal'}>{group.label}</div><nav aria-label={group.aria}>{#each navigation.filter(p=>p.placement===group.id) as item(uiPageKey(item))}<button class:current={item.owner?externalPage?.owner===item.owner&&externalPage?.id===item.id:!externalPage&&view===item.id} onclick={()=>openUI(item)}><Icon name={item.icon||'home'}/>{item.label}</button>{/each}</nav>{/each}
+ <div class="sidebar-bottom"><div class="account-identity"><strong>{user.name}</strong><button class="text-action" onclick={onlogout}>Se déconnecter</button></div><button class="settings-nav" class:current={view==='settings'} onclick={()=>navigate('settings')}><Icon name="settings"/>Réglages</button><div class="server-card"><Icon name="server"/><div><strong>Votre collection, chez vous</strong><span>{connectionError?'Serveur inaccessible':loading?'Connexion…':'Connecté à cet ordinateur'}</span></div></div><div class="version">PROJET MOSAUNE <span>v{status?.version??'0.0.41'}</span></div></div></aside>
+ <main id="main" class:settings-main={view==='settings'}><header class="topbar experience-topbar"><div class="page-navigation">{#if page}<button class="icon-button" aria-label="Revenir à la page précédente" onclick={back}>←</button>{/if}<span>{externalPage?externalTitle:labels[view]}</span></div>{#if status}<SearchBox {works} {entries} {providers} {kinds} context={view} token={status.token} open={openCard}/>{/if}{#if kinds.includes('music')}<button class="queue-toggle" aria-label="Ouvrir la file d’écoute" aria-expanded={queueOpen} onclick={()=>queueOpen=!queueOpen}><Icon name="queue"/><span>{musicQueue.items.length}</span></button>{/if}</header>
  {#if connectionError}<div class="connection-warning" role="alert">Le serveur ne répond pas. <button onclick={connect}>Réessayer</button></div>{/if}
  {#each catalogueWarnings as warning}<p class="extension-notice" role="status">{warning}</p>{/each}
  {#if libraryError}<p class="playback-error" role="alert">{libraryError}</p>{/if}
  <div hidden={view!=='settings'} class="settings-page"><div class="page-heading"><span class="eyebrow">FAITES COMME CHEZ VOUS</span><h1>Paramètres</h1><p>Un espace pour chaque réglage de Mosaune.</p></div>
- <div class="settings-layout"><nav class="settings-navigation" aria-label="Rubriques des paramètres">{#each settingsSections.filter(s=>(!s.admin||user.admin)&&(!s.video||kinds.includes('films')||kinds.includes('series'))) as section}<button aria-current={settingsTab===section.id?'page':undefined} class:selected={settingsTab===section.id} onclick={()=>{settingsTab=section.id;document.querySelector('.settings-content')?.scrollTo({top:0});}}><strong>{section.label}</strong><small>{section.description}</small></button>{/each}</nav>
- <div class="settings-content">{#if status}
+ <div class="settings-layout"><nav class="settings-navigation" aria-label="Rubriques des paramètres">{#each settingsSections as section}<button aria-current={settingsTab===uiPageKey(section)?'page':undefined} class:selected={settingsTab===uiPageKey(section)} onclick={()=>{settingsTab=uiPageKey(section);document.querySelector('.settings-content')?.scrollTo({top:0});}}><strong>{section.label}</strong><small>{section.description}</small></button>{/each}</nav>
+ <div class="settings-content">{#if status}{#if settingsPage?.owner}<ExtensionPage owner={settingsPage.owner} id={settingsPage.id} {entries} {works} {kinds} open={openCard} {playAlbum} navigate={uiNavigate} revision={uiRevision}/>{/if}
  {#if settingsTab==='extensions'}<ExtensionSettings {user} token={status.token} refresh={refreshLibrary} openSettings={id=>{settingsTab=id;document.querySelector('.settings-content')?.scrollTo({top:0});}}/>{/if}
  {#if settingsTab==='account'}<AccountSettings {user} token={status.token} changed={accountChanged} logout={onlogout}/>{/if}
  {#if user.admin&&settingsTab==='users'}<AccountSettings admin {user} token={status.token} {libraries} changed={accountChanged} logout={sessionEnded}/>{/if}
@@ -235,7 +241,8 @@
  {/if}{/if}</div></div></div>
  {#if status&&kinds.includes('music')}<PlaylistManager show={view==='playlists'} token={status.token} {entries} bind:pending={playlistPending} play={playMusic} append={appendMusic}/>{/if}
  {#if status&&view==='requests'}<DownloadRequests token={status.token} refresh={refreshLibrary} open={openCard} admin={user.admin} settings={()=>{settingsTab='downloads';navigate('settings');}}/>{/if}
- {#if status&&!loading&&view!=='settings'&&view!=='playlists'&&view!=='requests'}{#key pageKey}{#if page?.type==='content'}<ContentPage card={page.card} {entries} {works} {providers} token={status.token} {play} enqueue={appendMusic} playlist={tracks=>playlistPending=tracks} inspect={entry=>{if(permitted(entry,"edit"))inspected=entry;else libraryError="Vous n’avez pas la permission de modifier cette fiche."}} open={openCard} person={openPerson} artist={openArtist} changed={updateWork} refresh={refreshLibrary} {mark}/>{:else if page?.type==='person'}<PersonPage provider={page.provider} id={page.id} name={page.name} {entries} token={status.token} open={openCard}/>{:else}<Dashboard {playAlbum} {view} {entries} {works} {providers} {kinds} token={status.token} open={openResume} {play} {mark} settings={()=>navigate('settings')}/>{/if}{/key}{/if}
+ {#if status&&externalPage}<ExtensionPage owner={externalPage.owner} id={externalPage.id} {entries} {works} {kinds} open={openCard} {playAlbum} navigate={uiNavigate} revision={uiRevision} titleChanged={title=>externalTitle=title}/>{/if}
+ {#if status&&!loading&&!externalPage&&view!=='settings'&&view!=='playlists'&&view!=='requests'}{#key pageKey}{#if page?.type==='content'}<ContentPage card={page.card} {entries} {works} {providers} token={status.token} {play} enqueue={appendMusic} playlist={tracks=>playlistPending=tracks} inspect={entry=>{if(permitted(entry,"edit"))inspected=entry;else libraryError="Vous n’avez pas la permission de modifier cette fiche."}} open={openCard} person={openPerson} artist={openArtist} changed={updateWork} refresh={refreshLibrary} {mark}/>{:else if page?.type==='person'}<PersonPage provider={page.provider} id={page.id} name={page.name} {entries} token={status.token} open={openCard}/>{:else}<Dashboard {playAlbum} {view} {entries} {works} {providers} {kinds} token={status.token} open={openResume} {play} {mark} settings={()=>navigate('settings')}/>{/if}{/key}{/if}
  <footer><span>Projet Mosaune</span><span>Le cinéma. Les albums. Et toutes vos envies.</span></footer>
  {#if providers.length}<details class="credits"><summary>Sources des informations</summary>{#each providers as p}<p><a href={p.website} target="_blank" rel="noreferrer">{p.name}</a> — {p.attribution}</p>{#if p.id==='tmdb'}<img class="tmdb-logo" src="/tmdb-logo.svg" alt="TMDB"/>{/if}{/each}</details>{/if}
  </main>

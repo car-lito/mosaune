@@ -50,6 +50,7 @@ func libraryRoutes(mux *secureMux, c *catalog, modules []module) string {
 		}
 		return false
 	}
+	c.uiRoutes(mux, allowed)
 	detailListRoutes(mux, c, allowed)
 	detailSectionsRoutes(mux, c, allowed)
 	detailHeaderRoutes(mux, c, allowed)

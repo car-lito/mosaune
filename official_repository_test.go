@@ -66,14 +66,14 @@ func TestOfficialRepositoryOfflineRefreshAndPersistence(t *testing.T) {
 		t.Fatal(w.Code, w.Body.String())
 	}
 	loaded := read()
-	if loaded.UpdatedAt == 0 || len(loaded.Index.Packages) != 3 || calls != 1 {
+	if loaded.UpdatedAt == 0 || len(loaded.Index.Packages) != len(index.Packages) || calls != 1 {
 		t.Fatal("first refresh not saved", loaded, calls)
 	}
 	offline = true
 	if w := admin.request("POST", endpoint+"/refresh", nil); w.Code != 400 {
 		t.Fatal(w.Code)
 	}
-	if r := read(); r.UpdatedAt != loaded.UpdatedAt || r.Index.Name != index.Name || len(r.Index.Packages) != 3 {
+	if r := read(); r.UpdatedAt != loaded.UpdatedAt || r.Index.Name != index.Name || len(r.Index.Packages) != len(index.Packages) {
 		t.Fatal("cache lost offline", r)
 	}
 	if w := admin.request("DELETE", endpoint, nil); w.Code != 400 {

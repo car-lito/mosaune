@@ -287,7 +287,7 @@ func (c *catalog) extensionRoutes(mux *secureMux) {
 				return
 			}
 			p, e := c.extension(r.Context(), in.ID)
-			if e != nil || !p.Enabled || c.extensionSafeMode {
+			if e != nil || !p.Enabled || p.Manifest.API == 3 || c.extensionSafeMode {
 				problem(w, 409, "Ce thème n’est pas actif.")
 				return
 			}

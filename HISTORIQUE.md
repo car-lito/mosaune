@@ -1,3 +1,7 @@
+## 0.0.41 — 29 octobre 2026
+
+Pages et menus d’extensions via ui.pages.v1 : composition déclarative, collections et raccourcis, navigation et paramètres communs, accès par compte, retrait effectif des routes, dépôt/import et exemple Salon personnel. Les thèmes existants habillent les composants. Correction du scénario Docker 0.0.40 qui réactivait Musique avant de tester à tort la persistance des tags désactivés. [Guide et limites](ESSAYER-LES-PAGES-041.md).
+
 # 0.0.40 — Ensembles de composants médias
 
 - Gestion groupée de Films, Séries et Musique avec aperçu détaillé et application atomique.

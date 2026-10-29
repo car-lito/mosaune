@@ -174,6 +174,10 @@ try {
   await mediaSetAction('prepare');
   const readySet=JSON.parse((await request('/api/v1/media-sets',{headers:auth})).text).sets.find(s=>s.id==='music');
   assert(readySet.steps.length===0&&readySet.blockers.length===0,'Music set not restored');
+  // Preparing Music deliberately re-enabled tags. Disable again before checking persistence.
+  const preparedTags=JSON.parse((await request('/api/v1/audio-tags',{headers:auth})).text);
+  assert(preparedTags.enabled,'Music preparation did not enable tags');
+  assert((await request('/api/v1/audio-tags',{method:'POST',headers:auth,body:{operation:'disable',revision:preparedTags.revision}})).status===200,'Tag disable before restart failed');
   const packages = JSON.parse((await request('/api/v1/recognition-packages', { headers: auth })).text);
   const removal = await request('/api/v1/recognition-packages/films', { method: 'POST', headers: auth, body: { operation: 'remove', revision: packages.revision } });
   assert(removal.status === 200, 'Recognition package removal failed');

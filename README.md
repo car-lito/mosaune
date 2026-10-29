@@ -1,4 +1,4 @@
-Dernière étape : [gestion groupée des composants médias — 0.0.40](ESSAYER-LES-ENSEMBLES-040.md). [Checklist du découpage : environ 60 %](AVANCEMENT-EXTENSIONS.md).
+Dernière étape : [pages et menus d’extensions — 0.0.41](ESSAYER-LES-PAGES-041.md). [Checklist du découpage : environ 63 %](AVANCEMENT-EXTENSIONS.md).
 
 # Mosaune
 
@@ -6,7 +6,7 @@ Dernière étape : [gestion groupée des composants médias — 0.0.40](ESSAYER-
 
 Un espace pour vos films, séries et musiques, hébergé chez vous. Mosaune réunit une bibliothèque locale, des fiches enrichies et la découverte de contenus dans une interface commune. Le projet privilégie un serveur léger en Go et une architecture extensible.
 
-**Prototype 0.0.40 — développement actif.** Reconnaissance, tags audio, catalogues, saisons, descriptions, en-têtes et comportements des fiches sont exécutés dans des extensions installables et remplaçables. Les familles médias complètes, fournisseurs/connecteurs restants et lecteurs restent à terminer avant le premier essai NAS. HTTPS direct et images Docker amd64/arm64 sont préparés pour les essais ; ce n’est pas encore la bêta. [Plan avant le NAS](PLAN-AVANT-NAS.md).
+**Prototype 0.0.41 — développement actif.** Reconnaissance, tags audio, catalogues, saisons, descriptions, en-têtes et comportements des fiches sont exécutés dans des extensions installables et remplaçables. Les familles médias complètes, fournisseurs/connecteurs restants et lecteurs restent à terminer avant le premier essai NAS. HTTPS direct et images Docker amd64/arm64 sont préparés pour les essais ; ce n’est pas encore la bêta. [Plan avant le NAS](PLAN-AVANT-NAS.md).
 
 ## Déjà disponible
 
