@@ -73,6 +73,9 @@ try {
   const ca = readFileSync(join(certDirectory, 'server.crt'));
   function request(path, { method = 'GET', body, headers = {}, timeout = 10000 } = {}) {
     const started = Date.now();
+    const payload = body === undefined ? undefined : Buffer.isBuffer(body) ? body : Buffer.from(JSON.stringify(body));
+    // DELETE does not infer chunked transfer: explicitly frame every request body.
+    if (payload !== undefined) headers = { ...headers, "Content-Length": payload.length };
     return new Promise((resolve, reject) => {
       // Verify the actual TLS destination even when testing a forged HTTP Host.
       // Node otherwise derives the TLS server name from that injected header.
@@ -86,7 +89,7 @@ try {
         });
       });
       req.on('error', reject); req.on('timeout', () => req.destroy(new Error(`${method} ${path} exceeded ${timeout} ms`)));
-      req.end(body === undefined ? undefined : Buffer.isBuffer(body) ? body : JSON.stringify(body));
+      req.end(payload);
     });
   }
   async function ready() {
