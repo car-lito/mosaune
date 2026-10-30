@@ -1,3 +1,5 @@
+**0.0.44 :** TMDB utilise uniquement son module de traitement, avec pause persistante et aucun moteur natif de remplacement. [Essayer et comprendre la migration](ESSAYER-TMDB-044.md).
+
 **Étape 0.0.43 :** [catalogue, profils et affiches dans TMDB 0.5.0](ESSAYER-TMDB-043.md).
 
 Dernière étape : [écrans médias remplaçables — 0.0.42](ESSAYER-LES-ECRANS-042.md). [Checklist du découpage : environ 65 %](AVANCEMENT-EXTENSIONS.md).

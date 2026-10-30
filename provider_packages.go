@@ -234,6 +234,7 @@ func (p *tmdbProvider) installPackage(ctx context.Context, pack packageformat.Pa
 		p.extension.engine = nil
 	}
 	p.extension.enabled = enabled
+	p.setModuleAvailable(enabled)
 	if enabled {
 		p.extension.engine = candidate
 		keep = true
@@ -242,7 +243,7 @@ func (p *tmdbProvider) installPackage(ctx context.Context, pack packageformat.Pa
 }
 func (p *tmdbProvider) removePackage(ctx context.Context, checksum string) error {
 	// Closing the engine cancels its current work; credentials and media belong
-	// to the shared native TMDB provider/catalogue and must not be deleted.
+	// to the shared host settings/catalogue and must not be deleted.
 	p.extension.mu.Lock()
 	defer p.extension.mu.Unlock()
 	tx, err := p.db.BeginTx(ctx, nil)
@@ -276,6 +277,7 @@ func (p *tmdbProvider) removePackage(ctx context.Context, checksum string) error
 		return err
 	}
 	p.extension.enabled = false
+	p.setModuleAvailable(false)
 	if p.extension.engine != nil {
 		_ = p.extension.engine.Close()
 		p.extension.engine = nil

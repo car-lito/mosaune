@@ -15,12 +15,6 @@ import (
 )
 
 func (p *tmdbProvider) activeDetails(ctx context.Context, secret string, s MetadataSelection) (Metadata, error) {
-	p.extension.mu.Lock()
-	enabled := p.extension.enabled && (p.extension.blocked == nil || !p.extension.blocked())
-	p.extension.mu.Unlock()
-	if !enabled {
-		return p.detailsNative(ctx, secret, s)
-	}
 	selection := video.Selection{ID: s.ID, Kind: s.Kind, Season: s.Season, Episode: s.Episode, Language: appLanguage}
 	id, err := strconv.Atoi(s.ID)
 	if selection.Validate() != nil || err != nil || id <= 0 || id > 2147483647 {
@@ -31,9 +25,6 @@ func (p *tmdbProvider) activeDetails(ctx context.Context, secret string, s Metad
 		return Metadata{}, err
 	}
 	defer release()
-	if engine == nil {
-		return p.detailsNative(ctx, secret, s)
-	}
 	payload, _ := json.Marshal(selection)
 	used := map[string]bool{}
 	var requiredErr error

@@ -28,16 +28,21 @@ func (p *tmdbProvider) AcquisitionID(ctx context.Context, secret, kind, id strin
 	if kind == "films" {
 		return n, nil
 	}
-	var out struct {
-		TVDB int `json:"tvdb_id"`
-	}
-	if err = p.get(ctx, secret, "/tv/"+id+"/external_ids", nil, &out); err != nil {
-		return 0, err
-	}
-	if out.TVDB <= 0 {
-		return 0, errors.New("TMDB ne fournit pas d’identifiant TVDB pour cette série. Aucune demande envoyée.")
-	}
-	return out.TVDB, nil
+	return providerResult(ctx, p, func(ctx context.Context) (int, error) {
+		if e := p.moduleReady(); e != nil {
+			return 0, e
+		}
+		var out struct {
+			TVDB int `json:"tvdb_id"`
+		}
+		if err = p.get(ctx, secret, "/tv/"+id+"/external_ids", nil, &out); err != nil {
+			return 0, err
+		}
+		if out.TVDB <= 0 {
+			return 0, errors.New("TMDB ne fournit pas d’identifiant TVDB pour cette série. Aucune demande envoyée.")
+		}
+		return out.TVDB, nil
+	})
 }
 
 type arrConfig struct {

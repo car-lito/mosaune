@@ -1,3 +1,7 @@
+## 0.0.44 — suppression du moteur TMDB historique
+
+Recherche, fiches et catalogue utilisent uniquement le module. Suppression des parseurs natifs dupliqués, migration unique du choix historique, pause persistante et arrêt sans substitution après retrait ou en mode de secours. Les appels tardifs sont annulés avant enregistrement ; l’identification interrompue reste en attente. Le module fourni et les services hôtes restent à extraire complètement. [Parcours d’essai](ESSAYER-TMDB-044.md).
+
 ## 0.0.43 — catalogue vidéo dans le module TMDB
 
 TMDB 0.5.0 traite la découverte, les suggestions, les sélections d’accueil, les profils et les affiches alternatives dans son programme WASI. Contrat borné, requête de service contrôlée, réponses validées et refus de substitution silencieuse pour les anciens paquets. Paquet signé fourni au catalogue, guide utilisateur et tests de révocation. Le mode intégré historique demeure explicitement sélectionnable ; l’indépendance complète reste ouverte.

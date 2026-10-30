@@ -138,13 +138,11 @@ func changeTMDBAccess(t *testing.T, p *tmdbProvider, allow bool) {
 }
 func TestServiceAuthorizationRevokesBothEnginesAndLateResults(t *testing.T) {
 	for _, wasm := range []bool{false, true} {
-		t.Run(map[bool]string{false: "native", true: "wasm"}[wasm], func(t *testing.T) {
+		t.Run(map[bool]string{false: "supplied", true: "installed"}[wasm], func(t *testing.T) {
 			c, _ := testCatalog(t)
 			p := c.provider("tmdb").(*tmdbProvider)
 			ctx := testContext(context.Background())
-			if err := p.setExtension(ctx, wasm); err != nil {
-				t.Fatal(err)
-			}
+			useTMDBModuleFixture(t, p, wasm)
 			entered := make(chan context.Context, 1)
 			release := make(chan struct{})
 			defer close(release)

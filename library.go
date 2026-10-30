@@ -218,6 +218,10 @@ func openCatalog(dir string) (*catalog, error) {
 		db.Close()
 		return nil, err
 	}
+	if err = migrateTMDBModuleOnly(db); err != nil {
+		db.Close()
+		return nil, err
+	}
 	reader, e := sql.Open("sqlite", filepath.Join(dir, "mosaune.db"))
 	if e != nil {
 		db.Close()
@@ -249,6 +253,7 @@ func openCatalog(dir string) (*catalog, error) {
 	}
 	p.extension.blocked = func() bool { return c.extensionSafeMode }
 	_ = db.QueryRow(`SELECT enabled FROM provider_runtime WHERE id='tmdb'`).Scan(&p.extension.enabled)
+	p.setModuleAvailable(p.extension.enabled)
 	return c, nil
 }
 

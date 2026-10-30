@@ -41,10 +41,13 @@ func migrateProviderRuntime(db *sql.DB) error {
 func (p *tmdbProvider) extensionStatus() map[string]bool {
 	active := providerEnabled(p)
 	available := providerAvailable(p)
+	p.state.mu.Lock()
+	access := !p.state.accessDenied
+	p.state.mu.Unlock()
 	p.extension.mu.Lock()
 	defer p.extension.mu.Unlock()
 	blocked := p.extension.blocked != nil && p.extension.blocked()
-	return map[string]bool{"enabled": p.extension.enabled, "providerEnabled": active, "effective": available && p.extension.enabled && !blocked, "loaded": p.extension.engine != nil, "safeMode": blocked, "serviceAccess": available}
+	return map[string]bool{"enabled": p.extension.enabled, "providerEnabled": active, "effective": available && p.extension.enabled && !blocked, "loaded": p.extension.engine != nil, "safeMode": blocked, "serviceAccess": access}
 }
 func (p *tmdbProvider) setExtension(ctx context.Context, enabled bool) error {
 	p.extension.mu.Lock()
@@ -69,6 +72,7 @@ func (p *tmdbProvider) setExtension(ctx context.Context, enabled bool) error {
 		}
 	}
 	p.extension.enabled = enabled
+	p.setModuleAvailable(enabled)
 	if !enabled && p.extension.engine != nil {
 		_ = p.extension.engine.Close()
 		p.extension.engine = nil
@@ -85,12 +89,6 @@ func (p *tmdbProvider) closeExtension() {
 	}
 }
 func (p *tmdbProvider) activeSearch(ctx context.Context, secret string, q MetadataQuery) ([]MetadataCandidate, error) {
-	p.extension.mu.Lock()
-	enabled := p.extension.enabled && (p.extension.blocked == nil || !p.extension.blocked())
-	p.extension.mu.Unlock()
-	if !enabled {
-		return p.searchNative(ctx, secret, q)
-	}
 	query := metadata.Query{Kind: q.Kind, Title: q.Title, Year: q.Year, Language: appLanguage}
 	if err := query.Validate(); err != nil || (q.Kind != "films" && q.Kind != "series") {
 		return nil, errors.New("Recherche invalide.")
@@ -100,9 +98,6 @@ func (p *tmdbProvider) activeSearch(ctx context.Context, secret string, q Metada
 		return nil, err
 	}
 	defer release()
-	if engine == nil {
-		return p.searchNative(ctx, secret, q)
-	}
 	payload, _ := json.Marshal(query)
 	var serviceErr error
 	used := false
@@ -125,7 +120,7 @@ func (p *tmdbProvider) activeSearch(ctx context.Context, secret string, q Metada
 		return nil, serviceErr
 	}
 	if err != nil {
-		return nil, errors.New("Recherche interrompue ou moteur TMDB expérimental indisponible. Réessayez ou désactivez-le dans les paramètres.")
+		return nil, errors.New("Recherche interrompue ou moteur TMDB expérimental indisponible. Vérifiez son activation dans les extensions.")
 	}
 	if result.Response.Error != nil {
 		return nil, errors.New("L’extension TMDB n’a pas pu terminer cette recherche.")
@@ -208,7 +203,7 @@ func tmdbExtensionRoutes(mux *secureMux, c *catalog) {
 	})
 }
 
-// A shared lease serializes Search and Details and returns to native mode if disabled while waiting.
+// A shared lease serializes module calls. No native implementation exists.
 func (p *tmdbProvider) extensionEngine(ctx context.Context) (*runtime.Engine, func(), error) {
 	select {
 	case p.extension.gate <- struct{}{}:
@@ -220,7 +215,7 @@ func (p *tmdbProvider) extensionEngine(ctx context.Context) (*runtime.Engine, fu
 	if !p.extension.enabled || (p.extension.blocked != nil && p.extension.blocked()) {
 		p.extension.mu.Unlock()
 		release()
-		return nil, func() {}, nil
+		return nil, nil, errProviderModuleUnavailable
 	}
 	if p.extension.engine == nil {
 		engine, err := p.effectiveEngine(ctx)
@@ -230,7 +225,7 @@ func (p *tmdbProvider) extensionEngine(ctx context.Context) (*runtime.Engine, fu
 			}
 			p.extension.mu.Unlock()
 			release()
-			return nil, nil, errors.New("Le moteur TMDB expérimental ne démarre pas. Vous pouvez le désactiver dans les paramètres.")
+			return nil, nil, errors.New("Le module TMDB ne démarre pas. Vérifiez ou restaurez son paquet dans les extensions.")
 		}
 		p.extension.engine = engine
 	}
@@ -238,4 +233,24 @@ func (p *tmdbProvider) extensionEngine(ctx context.Context) (*runtime.Engine, fu
 	p.extension.mu.Unlock()
 
 	return engine, release, nil
+}
+
+// Host services remain bounded and cannot bypass a paused module or safe mode.
+func (p *tmdbProvider) moduleReady() error {
+	p.extension.mu.Lock()
+	defer p.extension.mu.Unlock()
+	if !p.extension.enabled || p.extension.blocked != nil && p.extension.blocked() {
+		return errProviderModuleUnavailable
+	}
+	return nil
+}
+func (p *tmdbProvider) setModuleAvailable(available bool) {
+	p.state.mu.Lock()
+	defer p.state.mu.Unlock()
+	p.state.moduleUnavailable = !available
+	if !available {
+		for _, cancel := range p.state.calls {
+			cancel(errProviderModuleUnavailable)
+		}
+	}
 }

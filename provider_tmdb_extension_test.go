@@ -67,8 +67,8 @@ func TestTMDBExtensionCatalogBridge(t *testing.T) {
 		t.Fatal("cache lost")
 	}
 	result, err = p.Search(ctx, "fixture-token", q)
-	if err != nil || len(result) != 1 || calls != 2 {
-		t.Fatal("native fallback", result, calls, err)
+	if err == nil || len(result) != 0 || calls != 2 {
+		t.Fatal("disabled module fallback", result, calls, err)
 	}
 }
 
@@ -143,8 +143,8 @@ func TestTMDBRuntimeMigrationManualChoiceAndRestart(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := reopened.provider("tmdb").(*tmdbProvider)
-	if p.extensionStatus()["enabled"] {
-		t.Fatal("migration opted user in")
+	if !p.extensionStatus()["enabled"] {
+		t.Fatal("legacy engine was not migrated")
 	}
 	backups, _ := filepath.Glob(filepath.Join(dir, "mosaune-before-extensions-*.db"))
 	if len(backups) != 1 {

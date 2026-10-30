@@ -96,24 +96,15 @@ func decodeTMDBCatalogue(raw json.RawMessage, op string, q videocatalog.Query) (
 	}
 	return result, nil
 }
-func (p *tmdbProvider) catalogueExtension(ctx context.Context, secret, op string, q videocatalog.Query) (videocatalog.Result, bool, error) {
+func (p *tmdbProvider) catalogueExtension(ctx context.Context, secret, op string, q videocatalog.Query) (videocatalog.Result, error) {
 	if _, _, err := tmdbCatalogueRequest(op, q); err != nil {
-		return videocatalog.Result{}, true, err
-	}
-	p.extension.mu.Lock()
-	selected := p.extension.enabled
-	p.extension.mu.Unlock()
-	if !selected {
-		return videocatalog.Result{}, false, nil
+		return videocatalog.Result{}, err
 	}
 	engine, release, err := p.extensionEngine(ctx)
 	if err != nil {
-		return videocatalog.Result{}, true, err
+		return videocatalog.Result{}, err
 	}
 	defer release()
-	if engine == nil {
-		return videocatalog.Result{}, true, errors.New("Le module TMDB a été désactivé ou bloqué. Aucun autre moteur n’a été utilisé.")
-	}
 	raw, _ := json.Marshal(q)
 	used := false
 	var serviceErr error
@@ -132,13 +123,13 @@ func (p *tmdbProvider) catalogueExtension(ctx context.Context, secret, op string
 			return body, serviceErr
 		}})
 	if serviceErr != nil {
-		return videocatalog.Result{}, true, serviceErr
+		return videocatalog.Result{}, serviceErr
 	}
 	if err != nil || result.Response.Error != nil {
-		return videocatalog.Result{}, true, errors.New("Cette fonction nécessite le module TMDB 0.5.0 ou supérieur en état de fonctionner. Mettez-le à jour dans Extensions. Aucun autre moteur n’a été utilisé.")
+		return videocatalog.Result{}, errors.New("Cette fonction nécessite le module TMDB 0.5.0 ou supérieur en état de fonctionner. Mettez-le à jour dans Extensions. Aucun autre moteur n’a été utilisé.")
 	}
 	out, err := decodeTMDBCatalogue(result.Response.Result, op, q)
-	return out, true, err
+	return out, err
 }
 func catalogueMetadata(i videocatalog.Item) Metadata {
 	return Metadata{Title: i.Title, Year: i.Year, Overview: i.Overview, ReleaseDate: i.ReleaseDate, ArtworkRef: i.ArtworkRef, Provider: "tmdb", ProviderID: i.ID, MatchState: "matched"}
@@ -151,24 +142,15 @@ func cataloguePage(r videocatalog.Result) DiscoveryPage {
 	return out
 }
 func (p *tmdbProvider) activeDiscover(ctx context.Context, secret string, q DiscoveryQuery) (DiscoveryPage, error) {
-	r, used, e := p.catalogueExtension(ctx, secret, "discover", videocatalog.Query{Kind: q.Kind, Text: q.Query, ID: q.Seed, Page: q.Page, Language: appLanguage})
-	if used {
-		return cataloguePage(r), e
-	}
-	return p.discoverNative(ctx, secret, q)
+	r, e := p.catalogueExtension(ctx, secret, "discover", videocatalog.Query{Kind: q.Kind, Text: q.Query, ID: q.Seed, Page: q.Page, Language: appLanguage})
+	return cataloguePage(r), e
 }
 func (p *tmdbProvider) activeShelf(ctx context.Context, secret, shelf, kind string) (DiscoveryPage, error) {
-	r, used, e := p.catalogueExtension(ctx, secret, "shelf", videocatalog.Query{Kind: kind, Shelf: shelf, Page: 1, Language: appLanguage, Region: "BE"})
-	if used {
-		return cataloguePage(r), e
-	}
-	return p.shelfNative(ctx, secret, shelf, kind)
+	r, e := p.catalogueExtension(ctx, secret, "shelf", videocatalog.Query{Kind: kind, Shelf: shelf, Page: 1, Language: appLanguage, Region: "BE"})
+	return cataloguePage(r), e
 }
 func (p *tmdbProvider) activeProfile(ctx context.Context, secret, id string, page int) (PersonProfile, error) {
-	r, used, e := p.catalogueExtension(ctx, secret, "profile", videocatalog.Query{ID: id, Page: page, Language: appLanguage})
-	if !used {
-		return p.profileNative(ctx, secret, id, page)
-	}
+	r, e := p.catalogueExtension(ctx, secret, "profile", videocatalog.Query{ID: id, Page: page, Language: appLanguage})
 	if e != nil {
 		return PersonProfile{}, e
 	}
@@ -183,10 +165,7 @@ func (p *tmdbProvider) activePosters(ctx context.Context, secret string, s Metad
 	if language == "" {
 		language = appLanguage
 	}
-	r, used, e := p.catalogueExtension(ctx, secret, "posters", videocatalog.Query{Kind: s.Kind, ID: s.ID, Page: 1, Language: language})
-	if !used {
-		return p.postersNative(ctx, secret, s, language)
-	}
+	r, e := p.catalogueExtension(ctx, secret, "posters", videocatalog.Query{Kind: s.Kind, ID: s.ID, Page: 1, Language: language})
 	if e != nil {
 		return nil, e
 	}

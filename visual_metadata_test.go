@@ -20,6 +20,7 @@ func visualResponse(status int, body string) *http.Response {
 
 func TestVisualTMDBSeasonsPortraitsAndTrailers(t *testing.T) {
 	p := newTMDBProvider(nil)
+	t.Cleanup(p.closeExtension)
 	fallback := false
 	p.client = &http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		switch r.URL.Path {
@@ -57,14 +58,6 @@ func TestVisualTMDBSeasonsPortraitsAndTrailers(t *testing.T) {
 	profile, err := p.Profile(testContext(context.Background()), "fixture", "7", 1)
 	if err != nil || !strings.Contains(profile.Image, "face.jpg") {
 		t.Fatal(profile, err)
-	}
-	unsafe := selectTrailers([]tmdbVideo{{Site: "YouTube", Type: "Trailer", Key: "../bad"}}, "fr")
-	if len(unsafe) != 0 {
-		t.Fatal(unsafe)
-	}
-	dubbed := selectTrailers([]tmdbVideo{{Site: "YouTube", Type: "Trailer", Key: "abcdefghijk", Name: "Bande annonce VOSTFR", Language: "fr", Official: true}, {Site: "YouTube", Type: "Trailer", Key: "lmnopqrstuv", Name: "Bande annonce VF", Language: "fr"}}, "fr")
-	if dubbed[0].Name != "Bande annonce VF" {
-		t.Fatal("VF should precede subtitled trailers", dubbed)
 	}
 }
 

@@ -1,3 +1,10 @@
+## Étape 0.0.44
+
+- [x] Retirer le moteur TMDB historique et conserver une seule implémentation des recherches/fiches/catalogues dans le module.
+- [x] Migrer le choix historique sans réactiver un fournisseur désactivé ni un accès refusé ; conserver les paquets installés.
+- [x] Pause/retrait persistants, réponses tardives refusées et mode de secours sans substitution.
+- [ ] Achever la distribution indépendante et les services hôtes TMDB, puis les autres fournisseurs et connecteurs.
+
 ## Étape 0.0.43 — catalogue vidéo TMDB
 
 - [x] Exécuter découverte, suggestions, sélections, profils et choix d’affiches dans le paquet signé TMDB ; contrôler services et résultats, refuser le retour silencieux pour un ancien paquet choisi.

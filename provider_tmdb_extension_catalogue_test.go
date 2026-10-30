@@ -101,10 +101,10 @@ func TestTMDBCatalogueOldPackageAndSafeModeNeverFallback(t *testing.T) {
 		t.Fatal("safe-mode fallback", e, calls)
 	}
 	c.extensionSafeMode = false
-	// Explicit legacy selection remains supported until the provider lifecycle migration.
+	// A disabled module has no native substitute.
 	_ = p.setExtension(ctx, false)
-	if _, e = p.Shelf(ctx, "fixture", "upcoming", "films"); e != nil || calls != 1 {
-		t.Fatal("explicit legacy mode", e, calls)
+	if _, e = p.Shelf(ctx, "fixture", "upcoming", "films"); e == nil || calls != 0 {
+		t.Fatal("disabled module bypass", e, calls)
 	}
 }
 func TestTMDBCatalogueGrantAndResultBoundaries(t *testing.T) {

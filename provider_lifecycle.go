@@ -8,17 +8,20 @@ import (
 	"sync"
 )
 
+var errProviderModuleUnavailable = errors.New("Module fournisseur indisponible. Activez ou réinstallez son paquet dans Extensions ; aucun moteur de remplacement n’est utilisé.")
+
 var errProviderDisabled = errors.New("Fournisseur désactivé. Les informations déjà enregistrées restent disponibles.")
 
 // Optional host-owned lifecycle, independent of the provider's execution engine.
 // A lease covers a whole operation, including persistence of its result.
 type providerLifecycle struct {
-	changes      sync.Mutex
-	mu           sync.Mutex
-	disabled     bool
-	accessDenied bool
-	next         uint64
-	calls        map[uint64]context.CancelCauseFunc
+	changes           sync.Mutex
+	mu                sync.Mutex
+	disabled          bool
+	accessDenied      bool
+	moduleUnavailable bool
+	next              uint64
+	calls             map[uint64]context.CancelCauseFunc
 }
 type lifecycleProvider interface{ lifecycle() *providerLifecycle }
 type providerLease struct{ owner *providerLifecycle }
@@ -29,7 +32,7 @@ func providerAvailable(p MetadataProvider) bool {
 		s := managed.lifecycle()
 		s.mu.Lock()
 		defer s.mu.Unlock()
-		return !s.disabled && !s.accessDenied
+		return !s.disabled && !s.accessDenied && !s.moduleUnavailable
 	}
 	return true
 }
@@ -60,6 +63,9 @@ func beginProvider(ctx context.Context, p MetadataProvider) (context.Context, fu
 	if s.accessDenied {
 		return ctx, func() {}, errProviderAccessDenied
 	}
+	if s.moduleUnavailable {
+		return ctx, func() {}, errProviderModuleUnavailable
+	}
 	if ctx.Err() != nil {
 		return ctx, func() {}, context.Cause(ctx)
 	}
@@ -89,6 +95,10 @@ func providerCommit(ctx context.Context) (func(), error) {
 		if lease.owner.accessDenied {
 			lease.owner.mu.Unlock()
 			return func() {}, errProviderAccessDenied
+		}
+		if lease.owner.moduleUnavailable {
+			lease.owner.mu.Unlock()
+			return func() {}, errProviderModuleUnavailable
 		}
 		return lease.owner.mu.Unlock, nil
 	}

@@ -214,6 +214,7 @@ func TestDiscoveryGuardsAndProviderFailure(t *testing.T) {
 func TestTMDBDiscoveryPaginationAndCache(t *testing.T) {
 	c, _ := testCatalog(t)
 	p := newTMDBProvider(c.db)
+	t.Cleanup(p.closeExtension)
 	requests := 0
 	p.client = &http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		requests++

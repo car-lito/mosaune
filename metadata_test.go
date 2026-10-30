@@ -111,6 +111,7 @@ func (f transportFunc) RoundTrip(r *http.Request) (*http.Response, error) { retu
 func TestTMDBContractCacheAndErrors(t *testing.T) {
 	c, _ := testCatalog(t)
 	p := newTMDBProvider(c.db)
+	t.Cleanup(p.closeExtension)
 	calls := 0
 	p.client.Transport = transportFunc(func(r *http.Request) (*http.Response, error) {
 		calls++

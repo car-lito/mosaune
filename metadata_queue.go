@@ -210,7 +210,7 @@ func (c *catalog) metadataStep(ctx context.Context, allowed func(string) bool) t
 	run, cancel := context.WithTimeout(ctx, 40*time.Second)
 	defer cancel()
 	err = c.identifyQueued(run, m, providers[m.Kind])
-	if ctx.Err() != nil || errors.Is(err, errProviderDisabled) || errors.Is(err, errProviderAccessDenied) {
+	if ctx.Err() != nil || (errors.Is(err, errProviderDisabled) || errors.Is(err, errProviderModuleUnavailable)) || errors.Is(err, errProviderAccessDenied) {
 		return time.Second
 	} // Interrupted work stays pending, never a permanent error.
 	if err != nil {

@@ -146,6 +146,7 @@ func setupAcquisition(t *testing.T, kind string) (*catalog, http.Handler, string
 		}))
 		t.Cleanup(tmdb.Close)
 		p := newTMDBProvider(c.db)
+		t.Cleanup(p.closeExtension)
 		p.apiBase = tmdb.URL
 		c.providers = []MetadataProvider{p}
 		if err := c.setProviderCredential(context.Background(), "tmdb", "fixture-tmdb-token-123456"); err != nil {

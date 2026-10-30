@@ -6,12 +6,11 @@ import (
 	"io"
 	video "mosaune/extensionkit/capabilities/video/v1"
 	"net/http"
-	"reflect"
 	"strings"
 	"testing"
 )
 
-func TestTMDBExtensionRichDetailsParity(t *testing.T) {
+func TestTMDBExtensionRichDetails(t *testing.T) {
 	c, _ := testCatalog(t)
 	p := c.provider("tmdb").(*tmdbProvider)
 	ctx := context.Background()
@@ -26,20 +25,21 @@ func TestTMDBExtensionRichDetailsParity(t *testing.T) {
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: make(http.Header)}, nil
 	})
 	for _, s := range []MetadataSelection{{Kind: "films", ID: "42"}, {Kind: "series", ID: "42"}, {Kind: "series", ID: "42", Season: 1, Episode: 2}} {
-		want, err := p.detailsNative(ctx, "fixture-only", s)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err = p.setExtension(ctx, true); err != nil {
-			t.Fatal(err)
-		}
 		got, err := p.Details(ctx, "fixture-only", s)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !reflect.DeepEqual(got, want) {
-			t.Fatalf("native/extension mismatch\ngot %#v\nwant %#v", got, want)
+		if got.Provider != "tmdb" || got.ProviderID != "42" || got.Runtime != 123 || got.Rating != 7.2 || got.VoteCount != 52 || got.Tagline != "Une aventure" || len(got.Genres) != 1 || got.Genres[0] != "Aventure" || got.DetailVersion != 2 {
+			t.Fatalf("rich fields lost: %#v", got)
 		}
+		if s.Episode > 0 {
+			if got.Title != "Le deuxième épisode" || got.Overview != "Résumé épisode" || got.Season != 1 || got.Episode != 2 {
+				t.Fatalf("episode fields: %#v", got)
+			}
+		} else if got.Title != "Le Voyage" || got.Year != 2024 {
+			t.Fatalf("title/year: %#v", got)
+		}
+
 		if !p.extensionStatus()["loaded"] {
 			t.Fatal("extension not executed")
 		}

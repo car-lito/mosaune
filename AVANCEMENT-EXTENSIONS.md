@@ -1,6 +1,6 @@
 # Vers un Mosaune entièrement extensible
 
-État du 30 octobre 2026 · étape 0.0.43.
+État du 30 octobre 2026 · étape 0.0.44.
 
 **Environ 67 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
@@ -63,7 +63,8 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [ ] Relier ces interfaces aux familles médias complètes ; extraire profils et formulaires, généraliser traductions et compositions avancées.
 - [x] Paquet TMDB pilote et désactivation réelle de ses accès en ligne.
 - [x] TMDB 0.5.0 : découverte, suggestions, sélections, profils et affiches alternatives dans le programme installé ; anciens paquets refusés pour ces fonctions sans substitution silencieuse.
-- [ ] Achever l’indépendance de TMDB, supprimer sa substitution intégrée et généraliser l’interface fournisseur.
+- [x] Supprimer le moteur TMDB natif dupliqué : module obligatoire, pause et désinstallation persistantes sans substitution automatique.
+- [ ] Achever l’indépendance de TMDB : distribution du module fourni, transport/configuration et interface fournisseur générique.
 - [ ] Extraire MusicBrainz et ses services associés.
 - [ ] Extraire Radarr et Sonarr derrière le même contrat de demandes/suivi.
 

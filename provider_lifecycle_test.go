@@ -14,7 +14,7 @@ import (
 
 func TestTMDBDisableAllCapabilitiesAndEngines(t *testing.T) {
 	for _, wasm := range []bool{false, true} {
-		t.Run(map[bool]string{false: "native", true: "wasm"}[wasm], func(t *testing.T) {
+		t.Run(map[bool]string{false: "supplied", true: "installed"}[wasm], func(t *testing.T) {
 			c, _ := testCatalog(t)
 			p := c.provider("tmdb").(*tmdbProvider)
 			ctx := context.Background()
@@ -23,9 +23,7 @@ func TestTMDBDisableAllCapabilitiesAndEngines(t *testing.T) {
 				calls.Add(1)
 				return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"results":[{"id":42,"title":"Voyage"}]}`)), Header: make(http.Header)}, nil
 			})}
-			if err := p.setExtension(ctx, wasm); err != nil {
-				t.Fatal(err)
-			}
+			useTMDBModuleFixture(t, p, wasm)
 			q := MetadataQuery{Kind: "films", Title: "Voyage"}
 			if rows, err := p.Search(ctx, "fixture", q); err != nil || len(rows) != 1 {
 				t.Fatal(rows, err)
@@ -64,11 +62,11 @@ func TestTMDBDisableAllCapabilitiesAndEngines(t *testing.T) {
 			if calls.Load() != before {
 				t.Fatal("disabled provider contacted network")
 			}
-			if p.extensionStatus()["loaded"] || p.extensionStatus()["enabled"] != wasm {
+			if p.extensionStatus()["loaded"] || !p.extensionStatus()["enabled"] {
 				t.Fatal("engine memory/preference")
 			}
 			// Engine selection, safe mode and cached responses cannot reactivate a provider.
-			if err := p.setExtension(ctx, !wasm); err != nil {
+			if err := p.setExtension(ctx, true); err != nil {
 				t.Fatal(err)
 			}
 			c.extensionSafeMode = true
@@ -106,9 +104,7 @@ func TestTMDBDisableInterruptsWorkerWithoutCountingFailure(t *testing.T) {
 			if e := c.setProviderCredential(ctx, "tmdb", "fixture-token-123456789"); e != nil {
 				t.Fatal(e)
 			}
-			if e := p.setExtension(ctx, wasm); e != nil {
-				t.Fatal(e)
-			}
+			useTMDBModuleFixture(t, p, wasm)
 			entered := make(chan struct{}, 1)
 			p.client = &http.Client{Transport: tmdbFixtureTransport(func(r *http.Request) (*http.Response, error) {
 				entered <- struct{}{}
@@ -174,19 +170,26 @@ func TestTMDBDisableCancelsLateResultsAndPersistence(t *testing.T) {
 	case <-time.After(5 * time.Second):
 		t.Fatal("request did not start")
 	}
-	if e := p.setProviderEnabled(ctx, false); e != nil {
-		t.Fatal(e)
-	}
+	disabled := make(chan error, 1)
+	go func() { disabled <- p.setProviderEnabled(ctx, false) }()
 	select {
 	case <-request.Done():
 	case <-time.After(time.Second):
 		t.Fatal("request not cancelled")
 	}
+	// The WASI engine waits for its in-flight service to leave before freeing memory.
+	release <- struct{}{}
+	select {
+	case e := <-disabled:
+		if e != nil {
+			t.Fatal(e)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("disable stuck")
+	}
 	if e := p.setProviderEnabled(ctx, true); e != nil {
 		t.Fatal(e)
 	}
-	// Release the deliberately uncooperative transport after reactivation.
-	release <- struct{}{}
 	select {
 	case e := <-result:
 		if !errors.Is(e, errProviderDisabled) {

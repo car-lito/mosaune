@@ -190,6 +190,7 @@ func TestMusicBrainzContractsAndCache(t *testing.T) {
 
 func TestTMDBRichDetailsShelfAndProfile(t *testing.T) {
 	p := newTMDBProvider(nil)
+	t.Cleanup(p.closeExtension)
 	p.client = &http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		body := ""
 		switch r.URL.Path {
