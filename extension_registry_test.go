@@ -261,6 +261,7 @@ func TestProviderRegistryAtomicInstallAndRollback(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	removeTMDBPackageFixture(t, p)
 	if err = p.installPackage(ctx, first, "", false); err != nil {
 		t.Fatal(err)
 	}
@@ -328,7 +329,7 @@ func TestProviderRegistryMigrationPreservesLegacyChoice(t *testing.T) {
 	}
 	// Recreate a version-14 installation, without running a package during migration.
 	removeRecognitionForLegacyFixture(t, c)
-	if _, err = c.db.Exec(`INSERT INTO provider_packages(id,archive,checksum) VALUES('tmdb',?,?); INSERT INTO provider_runtime(id,enabled) VALUES('tmdb',1) ON CONFLICT(id) DO UPDATE SET enabled=1; DROP TABLE extension_registry_state;PRAGMA user_version=14;`, pack.Archive, pack.Checksum); err != nil {
+	if _, err = c.db.Exec(`DELETE FROM provider_packages WHERE id='tmdb'; INSERT INTO provider_packages(id,archive,checksum) VALUES('tmdb',?,?); INSERT INTO provider_runtime(id,enabled) VALUES('tmdb',1) ON CONFLICT(id) DO UPDATE SET enabled=1; DROP TABLE extension_registry_state;PRAGMA user_version=14;`, pack.Archive, pack.Checksum); err != nil {
 		t.Fatal(err)
 	}
 	c.close()

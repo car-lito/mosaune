@@ -318,6 +318,7 @@ func TestServiceAuthorizationRestartRollbackAndImages(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	removeTMDBPackageFixture(t, p)
 	if err = p.installPackage(ctx, first, "", false); err != nil {
 		t.Fatal(err)
 	}

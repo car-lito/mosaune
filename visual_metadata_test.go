@@ -19,7 +19,8 @@ func visualResponse(status int, body string) *http.Response {
 }
 
 func TestVisualTMDBSeasonsPortraitsAndTrailers(t *testing.T) {
-	p := newTMDBProvider(nil)
+	c, _ := testCatalog(t)
+	p := newTMDBProvider(c.db)
 	t.Cleanup(p.closeExtension)
 	fallback := false
 	p.client = &http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {

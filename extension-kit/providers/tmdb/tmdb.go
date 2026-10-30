@@ -1,4 +1,4 @@
-// Package tmdb embeds the first bundled executable provider. The installer
+// Package tmdb describes the signed TMDB provider package. The installer
 // does not accept arbitrary executable packages yet.
 package tmdb
 
@@ -12,9 +12,6 @@ import (
 	"mosaune/extensionkit/packageformat"
 	"mosaune/extensionkit/protocol"
 )
-
-//go:embed provider.wasm
-var Code []byte
 
 //go:embed settings.json
 var settingsJSON []byte

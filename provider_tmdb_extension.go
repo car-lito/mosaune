@@ -19,12 +19,13 @@ import (
 // The bundled module and signed TMDB releases use this host adapter.
 // Untrusted community code remains excluded until process budgets are ready.
 type tmdbExtension struct {
-	key     ed25519.PublicKey
-	mu      sync.Mutex
-	enabled bool
-	engine  *runtime.Engine
-	gate    chan struct{}
-	blocked func() bool
+	key       ed25519.PublicKey
+	mu        sync.Mutex
+	installed bool
+	enabled   bool
+	engine    *runtime.Engine
+	gate      chan struct{}
+	blocked   func() bool
 }
 
 func migrateProviderRuntime(db *sql.DB) error {
@@ -47,11 +48,14 @@ func (p *tmdbProvider) extensionStatus() map[string]bool {
 	p.extension.mu.Lock()
 	defer p.extension.mu.Unlock()
 	blocked := p.extension.blocked != nil && p.extension.blocked()
-	return map[string]bool{"enabled": p.extension.enabled, "providerEnabled": active, "effective": available && p.extension.enabled && !blocked, "loaded": p.extension.engine != nil, "safeMode": blocked, "serviceAccess": access}
+	return map[string]bool{"installed": p.extension.installed, "enabled": p.extension.enabled, "providerEnabled": active, "effective": available && p.extension.enabled && !blocked, "loaded": p.extension.engine != nil, "safeMode": blocked, "serviceAccess": access}
 }
 func (p *tmdbProvider) setExtension(ctx context.Context, enabled bool) error {
 	p.extension.mu.Lock()
 	defer p.extension.mu.Unlock()
+	if enabled && !p.extension.installed {
+		return errors.New("Le paquet TMDB est absent. Réinstallez-le depuis le catalogue des extensions.")
+	}
 	if enabled && p.extension.blocked != nil && p.extension.blocked() {
 		return errors.New("Le mode de secours empêche l’activation des extensions.")
 	}
@@ -212,7 +216,7 @@ func (p *tmdbProvider) extensionEngine(ctx context.Context) (*runtime.Engine, fu
 	}
 	release := func() { <-p.extension.gate }
 	p.extension.mu.Lock()
-	if !p.extension.enabled || (p.extension.blocked != nil && p.extension.blocked()) {
+	if !p.extension.installed || !p.extension.enabled || (p.extension.blocked != nil && p.extension.blocked()) {
 		p.extension.mu.Unlock()
 		release()
 		return nil, nil, errProviderModuleUnavailable
@@ -239,7 +243,7 @@ func (p *tmdbProvider) extensionEngine(ctx context.Context) (*runtime.Engine, fu
 func (p *tmdbProvider) moduleReady() error {
 	p.extension.mu.Lock()
 	defer p.extension.mu.Unlock()
-	if !p.extension.enabled || p.extension.blocked != nil && p.extension.blocked() {
+	if !p.extension.installed || !p.extension.enabled || p.extension.blocked != nil && p.extension.blocked() {
 		return errProviderModuleUnavailable
 	}
 	return nil

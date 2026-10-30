@@ -1,3 +1,5 @@
+**0.0.45 :** le module TMDB de démarrage est désormais installé depuis son archive signée dans provider_packages et le registre, une seule fois (schéma 29). effectiveEngine charge exclusivement le paquet installé ; aucun programme fourni de remplacement. Retrait, absence persistante et réinstallation explicite suivent le même cycle que les imports. Les archives du catalogue inclus restent disponibles hors ligne. [Migration et limites](../ESSAYER-TMDB-045.md).
+
 # Paquets de fournisseurs — pilote 0.0.19
 
 ## Archive et confiance

@@ -224,6 +224,7 @@ func TestConfigurationMigrationAndSharedOwner(t *testing.T) {
 		t.Fatal(err)
 	}
 	p := c.provider("tmdb").(*tmdbProvider)
+	removeTMDBPackageFixture(t, p)
 	if err = p.installPackage(ctx, pack, "", false); err != nil {
 		t.Fatal(err)
 	}
@@ -275,6 +276,7 @@ func TestConfigurationFailureRollsBackPackageAndRegistry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	removeTMDBPackageFixture(t, p)
 	p.extension.key = pub
 	signed := func(example []byte, title string) packageformat.Package {
 		t.Helper()
@@ -295,6 +297,7 @@ func TestConfigurationFailureRollsBackPackageAndRegistry(t *testing.T) {
 	}
 	first := signed(providerExample, "Before")
 	next := signed(providerUpdateExample, "After")
+	removeTMDBPackageFixture(t, p)
 	if err = p.installPackage(ctx, first, "", false); err != nil {
 		t.Fatal(err)
 	}

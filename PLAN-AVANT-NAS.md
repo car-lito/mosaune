@@ -1,3 +1,9 @@
+## Étape 0.0.45
+
+- [x] Distribuer TMDB comme un paquet signé installé une fois, sans exécution directe d’un module embarqué de remplacement.
+- [x] Retrait persistant, activation refusée sans réinstallation et migration respectant les choix antérieurs.
+- [ ] Extraire les services hôtes TMDB (transport, configuration, identifiants Sonarr), puis MusicBrainz et connecteurs.
+
 ## Étape 0.0.44
 
 - [x] Retirer le moteur TMDB historique et conserver une seule implémentation des recherches/fiches/catalogues dans le module.

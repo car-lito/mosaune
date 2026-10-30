@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-// These signed examples are also standalone deliverables. Installed bytes come
-// from the administrator's upload, never from selecting an embedded version.
+// These signed archives are standalone deliverables. Version 0.5.0 is provisioned
+// once for a fresh installation; runtime execution only reads the installed archive.
 //
 //go:embed packages/tmdb-0.4.0.mosaune.zip
 var providerExample []byte

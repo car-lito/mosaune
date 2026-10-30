@@ -26,7 +26,11 @@ type tmdbProvider struct {
 }
 
 func newTMDBProvider(db *sql.DB) *tmdbProvider {
-	return &tmdbProvider{extension: tmdbExtension{enabled: true, gate: make(chan struct{}, 1)}, db: db, apiBase: "https://api.themoviedb.org/3", imageBase: "https://image.tmdb.org/t/p/w500", client: &http.Client{Timeout: 10 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return errors.New("redirection refusée") }}}
+	installed := false
+	if db != nil {
+		_ = db.QueryRow("SELECT EXISTS(SELECT 1 FROM provider_packages WHERE id='tmdb')").Scan(&installed)
+	}
+	return &tmdbProvider{state: providerLifecycle{moduleUnavailable: !installed}, extension: tmdbExtension{installed: installed, enabled: installed, gate: make(chan struct{}, 1)}, db: db, apiBase: "https://api.themoviedb.org/3", imageBase: "https://image.tmdb.org/t/p/w500", client: &http.Client{Timeout: 10 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return errors.New("redirection refusée") }}}
 }
 func (p *tmdbProvider) Info() ProviderInfo {
 	return ProviderInfo{ID: "tmdb", Name: "TMDB", ContractVersion: 1, Kinds: []string{"films", "series"}, RequiresCredential: true, NetworkHosts: []string{"api.themoviedb.org", "image.tmdb.org", "i.ytimg.com"}, Attribution: "This product uses the TMDB API but is not endorsed or certified by TMDB.", Website: "https://www.themoviedb.org"}

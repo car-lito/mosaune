@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 30 octobre 2026 · étape 0.0.44.
+État du 30 octobre 2026 · étape 0.0.45.
 
-**Environ 67 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 68 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -12,9 +12,9 @@ La référence est exigeante : une fonction doit pouvoir être installée, désa
 | Installation, dépendances et gestion des ensembles | 20 % | 60 % | 12 points |
 | Extraction des comportements Films/Séries/Musique | 25 % | 72 % | 18 points |
 | Thèmes et contributions d’interface | 15 % | 90 % | 13,5 points |
-| Fournisseurs et connecteurs indépendants | 10 % | 50 % | 5 points |
+| Fournisseurs et connecteurs indépendants | 10 % | 60 % | 6 points |
 | Validation finale d’un noyau vide et d’une installation complète par extensions | 10 % | 0 % | 0 point |
-| **Total estimé** | **100 %** | | **66,5 points, arrondis à 67 %** |
+| **Total estimé** | **100 %** | | **67,5 points, arrondis à 68 %** |
 
 ## Checklist
 
@@ -64,7 +64,8 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [x] Paquet TMDB pilote et désactivation réelle de ses accès en ligne.
 - [x] TMDB 0.5.0 : découverte, suggestions, sélections, profils et affiches alternatives dans le programme installé ; anciens paquets refusés pour ces fonctions sans substitution silencieuse.
 - [x] Supprimer le moteur TMDB natif dupliqué : module obligatoire, pause et désinstallation persistantes sans substitution automatique.
-- [ ] Achever l’indépendance de TMDB : distribution du module fourni, transport/configuration et interface fournisseur générique.
+- [x] Distribuer le module TMDB fourni comme un paquet signé installé ; aucun retour implicite après retrait ni activation sans réinstallation.
+- [ ] Achever l’indépendance de TMDB : transport/configuration, identifiants Sonarr et interface fournisseur générique.
 - [ ] Extraire MusicBrainz et ses services associés.
 - [ ] Extraire Radarr et Sonarr derrière le même contrat de demandes/suivi.
 

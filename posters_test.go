@@ -180,7 +180,8 @@ func TestUnidentifiedPosterAndSharedImageCleanup(t *testing.T) {
 	}
 }
 func TestTMDBPosterOrderingAndFiltering(t *testing.T) {
-	p := newTMDBProvider(nil)
+	c, _ := testCatalog(t)
+	p := newTMDBProvider(c.db)
 	t.Cleanup(p.closeExtension)
 	p.client = &http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		if r.URL.Path != "/3/movie/42/images" || r.URL.Query().Get("language") != "" {

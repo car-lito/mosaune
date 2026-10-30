@@ -21,6 +21,7 @@ func TestTMDBCatalogueInstalledPackageAllOperations(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
+	removeTMDBPackageFixture(t, p)
 	if e = p.installPackage(ctx, pack, "", false); e != nil {
 		t.Fatal(e)
 	}
@@ -89,6 +90,7 @@ func TestTMDBCatalogueOldPackageAndSafeModeNeverFallback(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
+	removeTMDBPackageFixture(t, p)
 	if e = p.installPackage(ctx, old, "", false); e != nil {
 		t.Fatal(e)
 	}

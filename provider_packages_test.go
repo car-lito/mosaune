@@ -33,6 +33,7 @@ func TestProviderPackageInstallUpdateFailureRollbackAndRemoval(t *testing.T) {
 	admin.enter("setup", map[string]string{"name": "Admin", "password": accountTestPassword, "code": c.auth.code})
 	p := c.provider("tmdb").(*tmdbProvider)
 	pub, key, _ := ed25519.GenerateKey(rand.Reader)
+	removeTMDBPackageFixture(t, p)
 	p.extension.key = pub
 	resign := func(example []byte, changedVersion string) f.Package {
 		t.Helper()

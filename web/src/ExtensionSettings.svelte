@@ -14,13 +14,13 @@
  export let user:Account;export let token:string;
  export let refresh:()=>Promise<void>;export let openSettings:(id:string)=>void;
  let tab:'installed'|'available'='installed';let selected='';let filter='';let heading:HTMLElement;
- let runtime:{serviceAccess?:boolean;providerEnabled:boolean;enabled:boolean;effective:boolean;loaded:boolean;safeMode:boolean}|null=null;
+ let runtime:{installed:boolean;serviceAccess?:boolean;providerEnabled:boolean;enabled:boolean;effective:boolean;loaded:boolean;safeMode:boolean}|null=null;
  let providerPackage:ProviderPackageState|null=null;
  async function providerInstalled(){await load();tab='installed';await show('tmdb');notice='Paquet fournisseur installé. Vos fiches et votre connexion sont conservées.';}
  async function repositoryInstalled(kind:string,id:string){if(kind==='detail-list'||kind==='detail-sections'||kind==='detail-header'||kind==='detail-experience')window.dispatchEvent(new Event('mosaune:detail-changed'));if(kind==='catalogue')window.dispatchEvent(new Event('mosaune:catalogue-changed'));await load();tab='installed';await show(kind==='provider'?'tmdb':(kind==='recognition'||kind==='audio-tags'||((kind==='detail-list'||kind==='detail-sections'||kind==='detail-header'||kind==='detail-experience')||kind==='catalogue'))?'recognition.'+id:id);notice='Paquet installé. Retrouvez ses réglages ci-dessous.';}
  $: selectedPackage=packages.find(p=>p.manifest.id===selected);
  $: selectedNative=native.find(p=>p.id===selected);
- $: tmdbStatus=!runtime?.providerEnabled?'Désactivé':runtime.safeMode?'Mode de secours':!runtime.enabled?'Module en pause':runtime.serviceAccess===false?'Accès en ligne retiré':'Actif';
+ $: tmdbStatus=runtime&&!runtime.installed?'Non installé':!runtime?.providerEnabled?'Désactivé':runtime.safeMode?'Mode de secours':!runtime.enabled?'Module en pause':runtime.serviceAccess===false?'Accès en ligne retiré':'Actif';
  $: visiblePackages=packages.filter(p=>(p.manifest.name+' '+p.manifest.description).toLocaleLowerCase().includes(filter.toLocaleLowerCase()));
  async function show(id:string){selected=id;editing='';removing='';await tick();heading?.focus();heading?.closest('.settings-content')?.scrollTo({top:0});}
  async function back(){const previous=selected;selected='';editing='';removing='';await tick();document.getElementById('extension-card-'+previous)?.focus();}
@@ -71,8 +71,8 @@
  </div></article>
  {:else if selected==='tmdb' && user.admin && runtime}
   <p>Fournisseur de métadonnées pour les films et séries. Les recherches, fiches, suggestions, profils et affiches alternatives sont traités par le module. Mosaune contrôle ses accès réseau et conserve vos données.</p>
-  <div class="extension-native-choice"><div><strong>TMDB · {tmdbStatus}</strong><p>Ce réglage arrête toutes les recherches, suggestions et récupérations d’images de TMDB, effectuées par le module. Vos données et votre clé sont conservées.</p></div><button class="secondary" role="switch" aria-label="Activer TMDB" aria-checked={runtime.providerEnabled} disabled={busy} onclick={toggleProvider}>{runtime.providerEnabled?'Désactiver TMDB':'Activer TMDB'}</button></div>
-  <details class="extension-import"><summary>Module de traitement</summary><p>{runtime.enabled?'Module activé':'Module en pause'}. {runtime.safeMode?'Le mode de secours suspend les appels TMDB.':''} Mosaune ne contient plus de moteur TMDB de remplacement. Activer le module conserve les réglages du fournisseur et ses autorisations.</p><button class="secondary" disabled={busy||runtime.safeMode&&!runtime.enabled} onclick={toggleRuntime}>{runtime.enabled?'Mettre le module en pause':providerPackage?.package?'Activer le module installé':'Activer le module fourni'}</button></details>
+  <div class="extension-native-choice"><div><strong>TMDB · {tmdbStatus}</strong><p>Ce réglage arrête toutes les recherches, suggestions et récupérations d’images de TMDB, effectuées par le module. Vos données et votre clé sont conservées.</p></div><button class="secondary" role="switch" aria-label="Activer TMDB" aria-checked={runtime.providerEnabled} disabled={busy||!runtime.installed} onclick={toggleProvider}>{runtime.providerEnabled?'Désactiver TMDB':'Activer TMDB'}</button></div>
+  <details class="extension-import"><summary>Module de traitement</summary><p>{!runtime.installed?'Paquet absent':runtime.enabled?'Module activé':'Module en pause'}. {runtime.safeMode?'Le mode de secours suspend les appels TMDB.':''} Mosaune ne contient plus de moteur TMDB de remplacement. Activer le module conserve les réglages du fournisseur et ses autorisations.</p><button class="secondary" disabled={busy||!runtime.installed||runtime.safeMode&&!runtime.enabled} onclick={toggleRuntime}>{runtime.enabled?'Mettre le module en pause':runtime.installed?'Activer le module installé':'Réinstallation nécessaire'}</button></details>
   <ProviderPackagePanel {token} state={providerPackage} changed={load} browse={()=>{tab='available';void show('')}}/>
   {#key providerPackage?.package?.checksum}<ExtensionConfiguration id="mosaune.tmdb-search" {token} refresh={async()=>{await load();await refresh();}}/>{/key}
  {:else if selected==='audio-tags' && user.admin}
@@ -105,7 +105,7 @@
    {#if loading}<p role="status">Chargement des extensions…</p>{/if}
    <div class="extension-grid">
     {#if user.admin}<RecognitionPackages {token} refreshKey={recognitionRefresh} {filter} select={kind=>show('recognition.'+kind)}/>{/if}
-    {#if user.admin&&runtime&&matches('TMDB métadonnées films séries',filter)}<ExtensionCard id="tmdb" name="TMDB" family="Métadonnées · expérimental" description="Recherche, fiches, découverte, profils et affiches, avec le moteur d’extensions." status={tmdbStatus} enabled={runtime.providerEnabled} disabled={busy} toggle={toggleProvider} open={()=>show('tmdb')}/>{/if}
+    {#if user.admin&&runtime&&matches('TMDB métadonnées films séries',filter)}<ExtensionCard id="tmdb" name="TMDB" family="Métadonnées · expérimental" description="Recherche, fiches, découverte, profils et affiches, avec le moteur d’extensions." status={tmdbStatus} enabled={runtime.installed&&runtime.providerEnabled} disabled={busy||!runtime.installed} toggle={toggleProvider} open={()=>show('tmdb')}/>{/if}
     {#each visiblePackages as p (p.manifest.id)}<ExtensionCard id={p.manifest.id} name={p.manifest.name} family={p.manifest.api===3?'Interface · pages et menus':'Interface · thème'} description={p.manifest.description} status={appearance.safeMode?'Suspendu':p.enabled?'Actif':'Désactivé'} enabled={p.enabled} disabled={busy||appearance.safeMode&&!p.enabled} toggle={user.admin?()=>toggle(p):undefined} open={()=>show(p.manifest.id)}/>{/each}
     {#if user.admin}{#each native.filter(p=>matches(p.name+' '+p.description,filter)) as item}<ExtensionCard id={item.id} name={item.name} family={item.family} description={item.description} status="Intégré" open={()=>show(item.id)}/>{/each}{/if}
    </div>

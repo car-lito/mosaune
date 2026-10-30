@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"io"
 	"mosaune/extensionkit/packageformat"
@@ -19,6 +20,7 @@ func useTMDBModuleFixture(t *testing.T, p *tmdbProvider, installed bool) {
 		if e != nil {
 			t.Fatal(e)
 		}
+		removeTMDBPackageFixture(t, p)
 		if e = p.installPackage(ctx, pack, "", false); e != nil {
 			t.Fatal(e)
 		}
@@ -74,7 +76,14 @@ func TestTMDBModulePauseAndRemovalSurviveRestart(t *testing.T) {
 			t.Fatal(e)
 		}
 	}
-	// Explicitly re-enable the supplied WASI module; safe mode still blocks all remote paths.
+	// Activation alone cannot restore removed code; reinstall explicitly first.
+	if e = p.setExtension(ctx, true); e == nil {
+		t.Fatal("activation restored removed package")
+	}
+	if e = p.installPackage(ctx, pack, "", false); e != nil {
+		t.Fatal(e)
+	}
+	// Safe mode still blocks all remote paths.
 	if e = p.setExtension(ctx, true); e != nil {
 		t.Fatal(e)
 	}
@@ -110,6 +119,7 @@ func TestTMDBModuleMigrationPreservesProviderDenial(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	removeTMDBPackageFixture(t, p)
 	if err = p.installPackage(ctx, pack, "", false); err != nil {
 		t.Fatal(err)
 	}
@@ -187,5 +197,20 @@ func TestTMDBModulePauseRejectsLateResponse(t *testing.T) {
 	var count int
 	if e := c.db.QueryRow("SELECT COUNT(*) FROM provider_cache WHERE provider='tmdb'").Scan(&count); e != nil || count != 0 {
 		t.Fatal("late cache", count, e)
+	}
+}
+
+// Exercise the public lifecycle to arrange a genuinely empty installation slot.
+func removeTMDBPackageFixture(t *testing.T, p *tmdbProvider) {
+	t.Helper()
+	pack, e := p.installedPackage(context.Background())
+	if e == sql.ErrNoRows {
+		return
+	}
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = p.removePackage(context.Background(), pack.Checksum); e != nil {
+		t.Fatal(e)
 	}
 }

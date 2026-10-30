@@ -191,6 +191,10 @@ try {
   assert(removal.status === 200, 'Recognition package removal failed');
   const tmdbPause=await request('/api/v1/metadata/tmdb-runtime',{method:'PUT',headers:auth,body:{enabled:false}});
   assert(tmdbPause.status===200&&!JSON.parse(tmdbPause.text).effective,'TMDB module pause failed');
+  const tmdbPackage=JSON.parse((await request('/api/v1/provider-packages/tmdb',{headers:auth})).text).package;
+  assert(tmdbPackage?.manifest.module.version==='0.5.0','Starter TMDB package not installed');
+  const tmdbRemove=await request('/api/v1/provider-packages/tmdb',{method:'DELETE',headers:auth,body:{checksum:tmdbPackage.checksum}});
+  assert(tmdbRemove.status===204,'TMDB package removal failed');
   docker(['stop', '--time', '15', id]);
   assert(JSON.parse(docker(['inspect', id]))[0].State.ExitCode === 0, 'SIGTERM did not stop cleanly');
   docker(['start', id]); await ready();
@@ -202,7 +206,9 @@ try {
   assert(persisted.items.length === fixtures.length, 'Catalogue lost after restart');
   const restartedAuth = { Cookie: login.headers['set-cookie'][0].split(';')[0], Origin: origin, 'X-Mosaune-Token': JSON.parse(login.text).token };
   const tmdbAfter=JSON.parse((await request('/api/v1/metadata/tmdb-runtime',{headers:restartedAuth})).text);
-  assert(!tmdbAfter.enabled&&!tmdbAfter.effective&&tmdbAfter.providerEnabled,'TMDB module pause lost or provider preference changed');
+  assert(!tmdbAfter.installed&&!tmdbAfter.enabled&&!tmdbAfter.effective&&tmdbAfter.providerEnabled,'TMDB module pause lost or provider preference changed');
+  const absentActivation=await request('/api/v1/metadata/tmdb-runtime',{method:'PUT',headers:restartedAuth,body:{enabled:true}});
+  assert(absentActivation.status===400,'Removed TMDB package was silently reactivated');
   const uiAfter=JSON.parse((await request('/api/v1/ui/navigation',{headers:restartedAuth})).text);
   assert(!uiAfter.some(p=>p.screen==='films')&&uiAfter.some(p=>p.screen==='music')&&uiAfter.some(p=>p.id==='extensions'),'Screen lifecycle or recovery lost after restart');
   const tagsAfter=JSON.parse((await request('/api/v1/audio-tags',{headers:restartedAuth})).text);assert(tagsAfter.installed&&!tagsAfter.enabled,'Audio tags disabled state lost');

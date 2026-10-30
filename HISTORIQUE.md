@@ -1,3 +1,14 @@
+## 0.0.45 — distribution du module TMDB
+
+Validation locale : 173 tests serveur, 33 tests interface, kit et analyses Go, Svelte sans erreur ni avertissement, trois exécutables Windows/Linux amd64/Linux ARM64. Parcours HTTP sur un vrai serveur Windows temporaire : retrait, redémarrage, activation refusée sans paquet, réinstallation puis activation. Vérifications conteneurs déléguées à GitHub Actions ; aucun déploiement NAS.
+
+- Provisionnement unique du paquet signé de démarrage dans le stockage et le registre communs ; exécution uniquement du paquet installé, suppression du module WASI de remplacement.
+- Retrait persistant et activation impossible sans paquet ; réinstallation explicite par import ou catalogue, puis activation distincte.
+- Migration schéma 29 conservant versions existantes, désactivation, refus réseau et réglages. Ancien module absent et en pause laissé absent.
+- Interface distinguant paquet absent, installé et en pause ; guide ESSAYER-TMDB-045.md.
+- Correction d’un test d’association musicale révélé sur Linux : vérifier la date conservée de chaque fichier, sans supposer un horodatage identique entre deux fichiers.
+- Adaptateur réseau/configuration et identifiants Sonarr encore dans le noyau ; aucune revendication d’indépendance complète du fournisseur.
+
 ## 0.0.44 — suppression du moteur TMDB historique
 
 Recherche, fiches et catalogue utilisent uniquement le module. Suppression des parseurs natifs dupliqués, migration unique du choix historique, pause persistante et arrêt sans substitution après retrait ou en mode de secours. Les appels tardifs sont annulés avant enregistrement ; l’identification interrompue reste en attente. Le module fourni et les services hôtes restent à extraire complètement. [Parcours d’essai](ESSAYER-TMDB-044.md).

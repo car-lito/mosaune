@@ -27,7 +27,10 @@ func TestExperienceProgressAndAlbumAssociation(t *testing.T) {
 	if items[0].AddedAt == 0 {
 		t.Fatal("missing added date")
 	}
-	added := items[0].AddedAt
+	added := map[string]int64{}
+	for _, item := range items {
+		added[item.ID] = item.AddedAt
+	}
 	for i, item := range items {
 		if err = c.saveMetadata(ctx, item, Metadata{Title: []string{"Premier", "Second"}[i], Album: "Album", AlbumArtist: "Artiste", Artist: "Invité", Track: i + 1, Disc: 1, Provider: "tags"}); err != nil {
 			t.Fatal(err)
@@ -74,7 +77,7 @@ func TestExperienceProgressAndAlbumAssociation(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, item := range getItems(t, c) {
-		if item.Metadata.Provider != "tags" || item.Metadata.Artist != "Invité" || item.WorkID != id || item.AddedAt != added {
+		if item.Metadata.Provider != "tags" || item.Metadata.Artist != "Invité" || item.WorkID != id || item.AddedAt != added[item.ID] {
 			t.Fatal("lost original metadata / association", item)
 		}
 	}
@@ -189,7 +192,8 @@ func TestMusicBrainzContractsAndCache(t *testing.T) {
 }
 
 func TestTMDBRichDetailsShelfAndProfile(t *testing.T) {
-	p := newTMDBProvider(nil)
+	c, _ := testCatalog(t)
+	p := newTMDBProvider(c.db)
 	t.Cleanup(p.closeExtension)
 	p.client = &http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		body := ""

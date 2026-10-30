@@ -158,7 +158,7 @@ func (p *tmdbProvider) effectiveEngine(ctx context.Context) (*runtime.Engine, er
 	if err != sql.ErrNoRows {
 		return nil, errors.New("Paquet installé illisible. Utilisez le mode de secours ou restaurez le fournisseur.")
 	}
-	return prepareProviderEngine(ctx, bundled.Descriptor(), bundled.Code, false)
+	return nil, errors.New("Le paquet TMDB est absent. Réinstallez-le depuis le catalogue des extensions.")
 }
 
 // Installation is serialized with activation and calls. Preparation happens
@@ -233,6 +233,7 @@ func (p *tmdbProvider) installPackage(ctx context.Context, pack packageformat.Pa
 		_ = p.extension.engine.Close()
 		p.extension.engine = nil
 	}
+	p.extension.installed = true
 	p.extension.enabled = enabled
 	p.setModuleAvailable(enabled)
 	if enabled {
@@ -265,8 +266,8 @@ func (p *tmdbProvider) removePackage(ctx context.Context, checksum string) error
 	if err = removeRegisteredProvider(ctx, tx); err != nil {
 		return err
 	}
-	// The bundled provider still owns these settings after removing its optional
-	// implementation package. Only an owner with no remaining consumer is removed.
+	// The host connection adapter still consumes these settings. Preserve consent
+	// and credentials until that remaining consumer has itself been extracted.
 	if err = (configuration.SQLStore{DB: tx}).Register(ctx, tmdbConfigurationOwner, bundled.Settings()); err != nil {
 		return err
 	}
@@ -276,6 +277,7 @@ func (p *tmdbProvider) removePackage(ctx context.Context, checksum string) error
 	if err = tx.Commit(); err != nil {
 		return err
 	}
+	p.extension.installed = false
 	p.extension.enabled = false
 	p.setModuleAvailable(false)
 	if p.extension.engine != nil {
