@@ -64,7 +64,7 @@ func (m Manifest) Validate(core string) error {
 	// The first installed adapter is TMDB. Arbitrary domains, storage schemas and
 	// executable community packages are not enabled by this pilot.
 	d := m.Descriptor
-	if d.ID != "mosaune.tmdb-search" || len(d.Dependencies) != 0 || len(d.Capabilities) != 3 || len(d.Services) != 1 || d.Services[0].Name != "tmdb.api.v1" || len(d.Services[0].Operations) != 1 || d.Services[0].Operations[0] != "get" {
+	if d.ID != "mosaune.tmdb-search" || len(d.Dependencies) != 0 || (len(d.Capabilities) != 3 && len(d.Capabilities) != 4) || len(d.Services) != 1 || d.Services[0].Name != "tmdb.api.v1" || len(d.Services[0].Operations) != 1 || d.Services[0].Operations[0] != "get" {
 		return invalid
 	}
 	caps := map[string]bool{}
@@ -72,6 +72,9 @@ func (m Manifest) Validate(core string) error {
 		caps[c] = true
 	}
 	if !caps["metadata.search.v1"] || !caps["metadata.video-details.v1"] || !caps[HealthCapability] {
+		return invalid
+	}
+	if len(d.Capabilities) == 4 && (!caps["metadata.video-catalog.v1"] || Compare(m.MinCore, "0.0.43") < 0) {
 		return invalid
 	}
 	if len(m.Settings.Fields) != 1 {

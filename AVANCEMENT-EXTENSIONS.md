@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 29 octobre 2026 · étape 0.0.42.
+État du 30 octobre 2026 · étape 0.0.43.
 
-**Environ 65 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 67 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -12,9 +12,9 @@ La référence est exigeante : une fonction doit pouvoir être installée, désa
 | Installation, dépendances et gestion des ensembles | 20 % | 60 % | 12 points |
 | Extraction des comportements Films/Séries/Musique | 25 % | 72 % | 18 points |
 | Thèmes et contributions d’interface | 15 % | 90 % | 13,5 points |
-| Fournisseurs et connecteurs indépendants | 10 % | 30 % | 3 points |
+| Fournisseurs et connecteurs indépendants | 10 % | 50 % | 5 points |
 | Validation finale d’un noyau vide et d’une installation complète par extensions | 10 % | 0 % | 0 point |
-| **Total estimé** | **100 %** | | **64,5 points, arrondis à 65 %** |
+| **Total estimé** | **100 %** | | **66,5 points, arrondis à 67 %** |
 
 ## Checklist
 
@@ -62,6 +62,7 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [x] Accueil, Films, Séries, Musique, Ma liste et Favoris : composition distribuée en paquets d’interface, retrait des menus, remplacement externe et réinstallation.
 - [ ] Relier ces interfaces aux familles médias complètes ; extraire profils et formulaires, généraliser traductions et compositions avancées.
 - [x] Paquet TMDB pilote et désactivation réelle de ses accès en ligne.
+- [x] TMDB 0.5.0 : découverte, suggestions, sélections, profils et affiches alternatives dans le programme installé ; anciens paquets refusés pour ces fonctions sans substitution silencieuse.
 - [ ] Achever l’indépendance de TMDB, supprimer sa substitution intégrée et généraliser l’interface fournisseur.
 - [ ] Extraire MusicBrainz et ses services associés.
 - [ ] Extraire Radarr et Sonarr derrière le même contrat de demandes/suivi.

@@ -14,7 +14,7 @@ var youtubeKey = regexp.MustCompile(`^[a-zA-Z0-9_-]{11}$`)
 func tmdbLight(item tmdbItem) Metadata {
 	return Metadata{Title: truncate(item.title(), 500), Year: item.year(), Overview: truncate(item.Overview, 8000), Provider: "tmdb", ProviderID: strconv.Itoa(item.ID), ArtworkRef: item.Poster, ReleaseDate: item.ReleaseDate, MatchState: "matched"}
 }
-func (p *tmdbProvider) activeShelf(ctx context.Context, secret, shelf, kind string) (DiscoveryPage, error) {
+func (p *tmdbProvider) shelfNative(ctx context.Context, secret, shelf, kind string) (DiscoveryPage, error) {
 	page := DiscoveryPage{Items: []Metadata{}, Page: 1, Pages: 1}
 	endpoint := ""
 	if kind == "films" && (shelf == "now_playing" || shelf == "upcoming") {
@@ -38,7 +38,7 @@ func (p *tmdbProvider) activeShelf(ctx context.Context, secret, shelf, kind stri
 	}
 	return page, nil
 }
-func (p *tmdbProvider) activeProfile(ctx context.Context, secret, id string, page int) (PersonProfile, error) {
+func (p *tmdbProvider) profileNative(ctx context.Context, secret, id string, page int) (PersonProfile, error) {
 	out := PersonProfile{ID: id, Page: page, Works: []discoveryWork{}}
 	number, err := strconv.Atoi(id)
 	if err != nil || number <= 0 || number > 2147483647 {

@@ -24,7 +24,7 @@ func run() error {
 	create := flag.Bool("create-key", false, "create a new key only if absent")
 	out := flag.String("out", "", "package path")
 	codePath := flag.String("code", "", "Wasm program path")
-	v := flag.String("version", "0.4.0", "provider version")
+	v := flag.String("version", "0.5.0", "provider version")
 	flag.Parse()
 	if *keyPath == "" || *public == "" {
 		return fmt.Errorf("key and public paths required")
@@ -74,7 +74,7 @@ func run() error {
 	}
 	d := tmdb.Descriptor()
 	d.Version = *v
-	m := packageformat.Manifest{Schema: 1, Name: "TMDB", Publisher: "Mosaune", Description: "Recherche et fiches de films, séries et épisodes. Programme indépendant du serveur Mosaune.", MinCore: "0.0.19", Adapter: "tmdb.v1", Descriptor: d, Settings: tmdb.Settings()}
+	m := packageformat.Manifest{Schema: 1, Name: "TMDB", Publisher: "Mosaune", Description: "Recherche, fiches, découverte, profils et affiches alternatives de films et séries. Programme indépendant du serveur Mosaune.", MinCore: "0.0.43", Adapter: "tmdb.v1", Descriptor: d, Settings: tmdb.Settings()}
 	data, err := packageformat.Create(m, code, key)
 	if err != nil {
 		return err

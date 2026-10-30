@@ -1,4 +1,4 @@
-param([string]$Go='go',[Parameter(Mandatory=$true)][string]$Key,[string]$Version='0.4.0',[switch]$NewSigningKey)
+param([string]$Go='go',[Parameter(Mandatory=$true)][string]$Key,[string]$Version='0.5.0',[switch]$NewSigningKey)
 $ErrorActionPreference='Stop'
 $goCommand=(Get-Command $Go).Source
 $projectRoot=Split-Path -Parent $PSScriptRoot

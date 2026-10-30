@@ -12,7 +12,7 @@ import (
 )
 
 func fixture() f.Manifest {
-	return f.Manifest{Schema: 1, Name: "TMDB", Publisher: "Mosaune", Description: "Fixture", MinCore: "0.0.19", Adapter: "tmdb.v1", Descriptor: tmdb.Descriptor(), Settings: tmdb.Settings()}
+	return f.Manifest{Schema: 1, Name: "TMDB", Publisher: "Mosaune", Description: "Fixture", MinCore: "0.0.43", Adapter: "tmdb.v1", Descriptor: tmdb.Descriptor(), Settings: tmdb.Settings()}
 }
 func archive(t *testing.T, m f.Manifest, code []byte, key ed25519.PrivateKey, extra string) []byte {
 	t.Helper()
@@ -45,34 +45,34 @@ func TestSignedPackagesValidateBeforeExecution(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	pack, e := f.Parse(raw, pub, "0.0.19")
+	pack, e := f.Parse(raw, pub, "0.0.43")
 	if e != nil || pack.Checksum == "" || !bytes.Equal(pack.Code, code) {
 		t.Fatal(pack, e)
 	}
-	if _, e = f.Parse(raw, other, "0.0.19"); e == nil {
+	if _, e = f.Parse(raw, other, "0.0.43"); e == nil {
 		t.Fatal("unknown signer")
 	}
 	if _, e = f.Parse(raw, pub, "0.0.18"); e == nil {
 		t.Fatal("old core")
 	}
 	for _, extra := range []string{"../escape", "provider.wasm", "directory/"} {
-		if _, e = f.Parse(archive(t, fixture(), code, key, extra), pub, "0.0.19"); e == nil {
+		if _, e = f.Parse(archive(t, fixture(), code, key, extra), pub, "0.0.43"); e == nil {
 			t.Fatal("extra path", extra)
 		}
 	}
-	for _, mutate := range []func(*f.Manifest){func(m *f.Manifest) { m.Adapter = "arbitrary.v1" }, func(m *f.Manifest) { m.Descriptor.Services[0].Operations = []string{"delete"} }, func(m *f.Manifest) { m.Settings.Fields[0].ID = "anotherSecret" }, func(m *f.Manifest) { m.Descriptor.Capabilities = []string{"system.health.v1"} }, func(m *f.Manifest) { m.MinCore = "999.0.0" }} {
+	for _, mutate := range []func(*f.Manifest){func(m *f.Manifest) { m.MinCore = "0.0.42" }, func(m *f.Manifest) { m.Descriptor.Capabilities[2] = "unapproved.service.v1" }, func(m *f.Manifest) { m.Adapter = "arbitrary.v1" }, func(m *f.Manifest) { m.Descriptor.Services[0].Operations = []string{"delete"} }, func(m *f.Manifest) { m.Settings.Fields[0].ID = "anotherSecret" }, func(m *f.Manifest) { m.Descriptor.Capabilities = []string{"system.health.v1"} }, func(m *f.Manifest) { m.MinCore = "999.0.0" }} {
 		m := fixture()
 		mutate(&m)
-		if _, e = f.Parse(archive(t, m, code, key, ""), pub, "0.0.19"); e == nil {
+		if _, e = f.Parse(archive(t, m, code, key, ""), pub, "0.0.43"); e == nil {
 			t.Fatal("unsupported signed declaration")
 		}
 	}
-	if _, e = f.Parse(archive(t, fixture(), make([]byte, f.MaxCode+1), key, ""), pub, "0.0.19"); e == nil {
+	if _, e = f.Parse(archive(t, fixture(), make([]byte, f.MaxCode+1), key, ""), pub, "0.0.43"); e == nil {
 		t.Fatal("compressed bomb")
 	}
 	corrupted := append([]byte{}, raw...)
 	corrupted[len(corrupted)/2] ^= 1
-	if _, e = f.Parse(corrupted, pub, "0.0.19"); e == nil {
+	if _, e = f.Parse(corrupted, pub, "0.0.43"); e == nil {
 		t.Fatal("tampering accepted")
 	}
 }

@@ -10,8 +10,8 @@
 <section class="extension-import provider-package-import" aria-busy={busy}>
  <span class="eyebrow">LES FOURNISSEURS</span><h3>Installer un fournisseur</h3>
  <p>Le premier paquet TMDB s’installe sans remplacer Mosaune. Une mise à jour est testée avant de remplacer la version actuelle.</p>
- <div class="extension-actions"><a class="text-action" href="/api/v1/provider-packages/example" download>Télécharger TMDB 0.4.0</a><a class="text-action" href="/api/v1/provider-packages/example?update=1" download>Télécharger la mise à jour 0.4.1</a></div>
- <p>Commencez par la 0.4.0, puis importez la 0.4.1 pour essayer la mise à jour et la restauration.</p>
+ <div class="extension-actions"><a class="text-action" href="/api/v1/provider-packages/example?catalogue=1" download>Télécharger TMDB 0.5.0</a><a class="text-action" href="/api/v1/provider-packages/example" download>Télécharger TMDB 0.4.0</a><a class="text-action" href="/api/v1/provider-packages/example?update=1" download>Télécharger la mise à jour 0.4.1</a></div>
+ <p>La 0.5.0 prend aussi en charge la découverte, les profils et les affiches alternatives. Les anciennes versions restent disponibles pour tester la restauration.</p>
  <label class="extension-file">Paquet fournisseur à vérifier<input bind:this={input} type="file" accept=".zip,application/zip" disabled={busy} onchange={inspect}/></label>
  <small>Ce pilote accepte les paquets TMDB signés par la clé de développement Mosaune. Les autres fournisseurs et clés communautaires ne sont pas encore pris en charge.</small>
  {#if preview}{@const m=preview.package.manifest}<div class="extension-preview"><span class="extension-tag">Signature et compatibilité vérifiées</span><h3>{m.name} · {preview.previousVersion?preview.previousVersion+' → ':''}{m.module.version}</h3><p>{m.description}</p><dl><dt>Signature reconnue</dt><dd>{preview.signer}</dd><dt>Compatibilité</dt><dd>Mosaune {m.minCore} ou plus</dd><dt>Dépendance</dt><dd>Adaptateur TMDB de Mosaune · films et séries</dd><dt>Empreinte</dt><dd class="extension-hash">{preview.package.checksum}</dd></dl>

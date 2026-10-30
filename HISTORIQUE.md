@@ -1,3 +1,7 @@
+## 0.0.43 — catalogue vidéo dans le module TMDB
+
+TMDB 0.5.0 traite la découverte, les suggestions, les sélections d’accueil, les profils et les affiches alternatives dans son programme WASI. Contrat borné, requête de service contrôlée, réponses validées et refus de substitution silencieuse pour les anciens paquets. Paquet signé fourni au catalogue, guide utilisateur et tests de révocation. Le mode intégré historique demeure explicitement sélectionnable ; l’indépendance complète reste ouverte.
+
 ## 0.0.42 — écrans médias distribués en extensions
 
 Quatre paquets fournissent Accueil/listes, Films, Séries et Musique. Les rangées sont déclarées dans leurs manifestes ; l’ancien Dashboard monolithique est retiré. Les pages peuvent disparaître et être remplacées par un paquet externe, avec contrôle des conflits et droits par compte. Cinéma compact est un exemple disponible dans le dépôt inclus. Provisionnement unique au schéma 27, conservation des données et accès aux réglages même sans écran actif. Services métiers et lecteurs restent à extraire.

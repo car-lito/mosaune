@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	metadata "mosaune/extensionkit/capabilities/metadata/v1"
 	video "mosaune/extensionkit/capabilities/video/v1"
+	catalog "mosaune/extensionkit/capabilities/videocatalog/v1"
 	"mosaune/extensionkit/configuration"
 	"mosaune/extensionkit/packageformat"
 	"mosaune/extensionkit/protocol"
@@ -30,5 +31,5 @@ func Settings() configuration.Schema {
 }
 
 func Descriptor() protocol.Descriptor {
-	return protocol.Descriptor{ID: "mosaune.tmdb-search", Version: "0.4.0", Capabilities: []string{metadata.SearchCapability, video.DetailsCapability, packageformat.HealthCapability}, Services: []protocol.ServiceRequirement{{Name: "tmdb.api.v1", Operations: []string{"get"}}}}
+	return protocol.Descriptor{ID: "mosaune.tmdb-search", Version: "0.5.0", Capabilities: []string{metadata.SearchCapability, video.DetailsCapability, catalog.Capability, packageformat.HealthCapability}, Services: []protocol.ServiceRequirement{{Name: "tmdb.api.v1", Operations: []string{"get"}}}}
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	metadata "mosaune/extensionkit/capabilities/metadata/v1"
 	video "mosaune/extensionkit/capabilities/video/v1"
+	catalog "mosaune/extensionkit/capabilities/videocatalog/v1"
 	"mosaune/extensionkit/protocol"
 	"mosaune/extensionkit/sdk"
 	"os"
@@ -14,7 +15,7 @@ import (
 )
 
 // Overridden when independently building a provider release.
-var buildVersion = "0.4.0"
+var buildVersion = "0.5.0"
 
 func limit(s string, n int) string {
 	if len(s) <= n {
@@ -27,6 +28,9 @@ func limit(s string, n int) string {
 	return s
 }
 func handle(r protocol.Request) (any, *protocol.Failure) {
+	if r.Capability == catalog.Capability {
+		return handleCatalogue(r)
+	}
 	if r.Capability == "system.health.v1" && r.Operation == "check" {
 		return map[string]string{"version": buildVersion, "provider": "tmdb"}, nil
 	}

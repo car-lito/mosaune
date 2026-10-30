@@ -1,3 +1,8 @@
+## Étape 0.0.43 — catalogue vidéo TMDB
+
+- [x] Exécuter découverte, suggestions, sélections, profils et choix d’affiches dans le paquet signé TMDB ; contrôler services et résultats, refuser le retour silencieux pour un ancien paquet choisi.
+- [ ] Retirer le mode intégré historique et généraliser fournisseurs, transport d’images et identités externes avant de déclarer TMDB entièrement indépendant.
+
 ## Étape 0.0.42 — écrans médias remplaçables
 
 - [x] Distribuer les six écrans de collection dans des paquets déclaratifs ; remplacer leur composition sans modifier le noyau.

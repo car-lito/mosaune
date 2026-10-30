@@ -303,7 +303,7 @@ func (p *tmdbProvider) detailsNative(ctx context.Context, secret string, s Metad
 
 var artworkPath = regexp.MustCompile(`^/[A-Za-z0-9_-]+\.(?:jpg|png)$`)
 
-func (p *tmdbProvider) activeDiscover(ctx context.Context, secret string, q DiscoveryQuery) (DiscoveryPage, error) {
+func (p *tmdbProvider) discoverNative(ctx context.Context, secret string, q DiscoveryQuery) (DiscoveryPage, error) {
 	page := DiscoveryPage{Items: []Metadata{}, Page: q.Page}
 	if !videoKind(q.Kind) || q.Page < 1 || q.Page > 50 {
 		return page, errors.New("Recherche invalide.")
