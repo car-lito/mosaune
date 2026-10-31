@@ -1,15 +1,23 @@
+## Étape 0.0.49 — retour à la version précédente
+
+- [x] Point de restauration par mise à jour, aperçu, retour transactionnel et conservation des choix/droits/états.
+- [x] Historique après redémarrage, conflits explicites, suppression de l’historique au retrait.
+- [ ] Contraintes versionnées entre familles, changements de composition, extraction des services métier et validation du noyau vide.
+
 ## Étape 0.0.48 — familles depuis GitHub
 
 - [x] Catalogue de familles, téléchargement vérifié, aperçu et installation/mise à jour via le cycle commun.
 - [x] Export contributeur et maintien du catalogue des anciennes versions.
-- [ ] Restauration globale, dépendances versionnées entre familles et extraction des services métier restants.
+- [x] 0.0.49 : restauration coordonnée du dernier changement de famille.
+- [ ] Dépendances versionnées entre familles et extraction des services métier restants.
 
 ## Étape 0.0.47 — distribution des familles par archive
 
 - [x] Import local de programmes et écran dans une même archive ; installation et mise à jour coordonnées, prévisualisation, conservation des choix et des permissions.
 - [x] Exemples complets et outil de préparation pour les contributeurs.
 - [x] 0.0.48 : intégrer les familles aux dépôts distants.
-- [ ] Ajouter restauration globale et compatibilité entre familles, puis poursuivre les services métier.
+- [x] 0.0.49 : ajouter le retour coordonné de la dernière mise à jour.
+- [ ] Compatibilité entre familles, puis extraction des services métier.
 
 ## Priorité ajustée — extensions regroupées, 30 octobre 2026
 

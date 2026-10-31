@@ -1,6 +1,6 @@
 # Vers un Mosaune entièrement extensible
 
-État du 31 octobre 2026 · étape 0.0.48.
+État du 1er novembre 2026 · étape 0.0.49.
 
 **Environ 70 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
@@ -20,7 +20,7 @@ La référence est exigeante : une fonction doit pouvoir être installée, désa
 
 La cible est désormais **quelques grandes extensions visibles, composées de sous-composants extensibles**. Films, Séries et Musique regroupent leurs comportements et écrans ; leurs composants restent remplaçables ou cumulables selon un contrat explicite. Les fournisseurs, connecteurs et thèmes restent des ajouts distincts lorsqu’ils ont un usage propre. Les dépendances techniques ne multiplient pas les cartes par défaut.
 
-[Architecture et ordre de migration](ARCHITECTURE-EXTENSIONS-GROUPEES.md). Priorité à un vrai cycle de vie par paquet principal, puis à sa présentation. La 0.0.46 implémente le regroupement des composants extraits et des écrans, avec opérations transactionnelles et réglages avancés. La 0.0.47 ajoute les archives locales et leurs mises à jour coordonnées. La 0.0.48 ajoute le catalogue distant, ses exemples et le même aperçu d’installation. Leur indépendance complète reste ouverte ; estimation globale conservée à 70 %, aucun nouveau service métier extrait.
+[Architecture et ordre de migration](ARCHITECTURE-EXTENSIONS-GROUPEES.md). Priorité à un vrai cycle de vie par paquet principal, puis à sa présentation. La 0.0.46 implémente le regroupement des composants extraits et des écrans, avec opérations transactionnelles et réglages avancés. La 0.0.47 ajoute les archives locales et leurs mises à jour coordonnées. La 0.0.48 ajoute le catalogue distant, ses exemples et le même aperçu d’installation. La 0.0.49 ajoute le retour coordonné des composants mis à jour, sans rétrograder les partagés ni les remplaçants choisis. Leur indépendance complète reste ouverte ; estimation globale conservée à 70 %, aucun nouveau service métier extrait.
 
 ## Checklist
 
@@ -55,7 +55,8 @@ La cible est désormais **quelques grandes extensions visibles, composées de so
 - [x] Les composants de fiches partagés sont conservés lors du retrait d’un ensemble.
 - [ ] Généraliser la distribution des dépendances et leurs contraintes de versions aux paquets médias complets.
 - [x] 0.0.47 : archives de composants et écran, import local et mise à jour avec conservation des remplacements choisis et réutilisation des composants partagés.
-- [ ] Distribution distante, contraintes inter-familles, changement de composition et restauration globale.
+- [x] Distribution distante et retour coordonné à la version précédente (0.0.48/49).
+- [ ] Contraintes inter-familles et changements de composition.
 - [x] 0.0.46 : présenter les composants techniques fournis dans les réglages avancés de leur famille et les filtrer dans le catalogue.
 - [x] 0.0.46 : manifestes de composition versionnés, opérations communes avec l’écran et choix des remplacements conservés.
 - [ ] Ajouter les dépendances de lecture partagées lorsque les lecteurs seront construits.

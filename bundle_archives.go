@@ -369,6 +369,9 @@ func (c *catalog) processBundleArchive(ctx context.Context, p bundleArchive, exp
 			}
 		}
 	}
+	if e = saveBundleUndo(ctx, tx, p, plan); e != nil {
+		return plan, e
+	}
 	store := registry.SQLStore{DB: tx}
 	rev := plan.Revision
 	for _, step := range plan.Steps {

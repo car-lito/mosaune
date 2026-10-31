@@ -1,3 +1,5 @@
+**Préversion 0.0.49 :** retour coordonné à la version précédente d’une famille depuis sa fiche. [Guide d’essai](ESSAYER-LE-RETOUR-ARRIERE-049.md). Le découpage complet et les lecteurs restent en cours ; pas encore de déploiement NAS recommandé.
+
 **0.0.48 :** installation et mise à jour des familles depuis le catalogue GitHub, avec aperçu commun à l’import local et choix conservés. [Essayer](ESSAYER-LE-CATALOGUE-048.md).
 
 **0.0.47 :** import et mise à jour de familles depuis une seule archive, avec aperçu, choix conservés et exemples téléchargeables. [Essayer](ESSAYER-LES-FAMILLES-047.md).

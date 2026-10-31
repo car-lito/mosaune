@@ -203,6 +203,7 @@ func (c *catalog) setUIScreenState(ctx context.Context, p extensionPackage, enab
 type mediaBundlePlan struct {
 	mediaSetPlan
 	Manifest         mediaBundleManifest  `json:"manifest"`
+	PreviousVersion  string               `json:"previousVersion,omitempty"`
 	InstalledVersion string               `json:"installedVersion"`
 	ScreenID         string               `json:"screenId"`
 	ScreenState      string               `json:"screenState"`
@@ -353,6 +354,14 @@ func planBundle(ctx context.Context, tx *sql.Tx, ms []mediaBundleManifest, m med
 	if e != nil {
 		return p, e
 	}
+	var undoVersion, undoChecksum string
+	err := tx.QueryRowContext(ctx, "SELECT previous_version,current_checksum FROM media_bundle_undo WHERE kind=?", m.Kind).Scan(&undoVersion, &undoChecksum)
+	if err != nil && err != sql.ErrNoRows {
+		return p, err
+	}
+	if p.Archive != nil && undoChecksum == p.Archive.Checksum {
+		p.PreviousVersion = undoVersion
+	}
 	p.Checksum = ""
 	raw, _ = json.Marshal(p)
 	p.Checksum = recognitionHash(raw)
@@ -418,9 +427,19 @@ func (c *catalog) mediaBundlePlans(ctx context.Context, id, op string, revision 
 		if id != "" && m.Kind != id {
 			continue
 		}
-		p, e := planBundle(ctx, tx, ms, m, op, pk, chosen, rev, c.extensionSafeMode, screens)
+		baseOp := op
+		if op == "restore" {
+			baseOp = "prepare"
+		}
+		p, e := planBundle(ctx, tx, ms, m, baseOp, pk, chosen, rev, c.extensionSafeMode, screens)
 		if e != nil {
 			return nil, e
+		}
+		if op == "restore" {
+			p, e = planBundleUndo(ctx, tx, p, chosen, c.extensionSafeMode)
+			if e != nil {
+				return nil, e
+			}
 		}
 		plans = append(plans, p)
 	}
@@ -437,19 +456,25 @@ func (c *catalog) mediaBundlePlans(ctx context.Context, id, op string, revision 
 	if len(p.Blockers) > 0 {
 		return nil, errors.New("Résolvez les conflits avant de continuer.")
 	}
-	for _, step := range p.Steps {
-		if step.Slot == "screen" {
-			e = applyBundleScreen(ctx, tx, p.Manifest, step)
-		} else {
-			_, e = changeRecognitionTx(ctx, tx, step.ID, step.Operation, rev)
-			if e == nil {
-				var s registry.Snapshot
-				s, e = (registry.SQLStore{DB: tx}).Load(ctx)
-				rev = s.Revision
-			}
-		}
-		if e != nil {
+	if op == "restore" {
+		if e = applyBundleUndo(ctx, tx, p); e != nil {
 			return nil, e
+		}
+	} else {
+		for _, step := range p.Steps {
+			if step.Slot == "screen" {
+				e = applyBundleScreen(ctx, tx, p.Manifest, step)
+			} else {
+				_, e = changeRecognitionTx(ctx, tx, step.ID, step.Operation, rev)
+				if e == nil {
+					var s registry.Snapshot
+					s, e = (registry.SQLStore{DB: tx}).Load(ctx)
+					rev = s.Revision
+				}
+			}
+			if e != nil {
+				return nil, e
+			}
 		}
 	}
 	if op == "prepare" {
@@ -459,6 +484,9 @@ func (c *catalog) mediaBundlePlans(ctx context.Context, id, op string, revision 
 		_, e = tx.ExecContext(ctx, "DELETE FROM media_bundles WHERE id=?", p.Manifest.ID)
 		if e == nil {
 			_, e = tx.ExecContext(ctx, "DELETE FROM media_bundle_archives WHERE kind=?", p.Manifest.Kind)
+		}
+		if e == nil {
+			_, e = tx.ExecContext(ctx, "DELETE FROM media_bundle_undo WHERE kind=?", p.Manifest.Kind)
 		}
 	}
 	if e != nil {
@@ -471,7 +499,7 @@ func (c *catalog) mediaBundlePlans(ctx context.Context, id, op string, revision 
 		if step.Slot == "screen" {
 			continue
 		}
-		if step.Operation == "remove" || step.Operation == "disable" {
+		if step.Operation == "remove" || step.Operation == "disable" || step.Operation == "restore" {
 			c.cancelRecognitionID(step.ID)
 		}
 		if step.Operation == "select" {

@@ -30,7 +30,7 @@ La prévisualisation n’exécute aucun programme. L’import valide les program
 
 Les nouveaux programmes et écrans restent en pause. Une mise à jour conserve leurs états ; les accès utilisateurs d’un écran existant sont conservés, aucun nouveau droit n’est accordé automatiquement. Les choix externes ou le retour volontaire à une implémentation fournie restent respectés. Un composant conservé n’est ni installé en doublon ni mis à jour par cette archive. Les nouvelles versions d’une archive doivent conserver le même ID, les mêmes IDs de composants et le même écran ; aucune suppression implicite de composant.
 
-Une archive identique peut réparer ses composants absents lorsqu’ils sont toujours sélectionnés. Une archive de version antérieure est refusée. Une autre identité de famille nécessite un retrait préalable. La restauration globale de famille reste à construire.
+Une archive identique peut réparer ses composants absents lorsqu’ils sont toujours sélectionnés. Une archive de version antérieure est refusée. Une autre identité de famille nécessite un retrait préalable. Depuis 0.0.49, chaque nouvelle mise à jour conserve un point de restauration indépendant des historiques individuels.
 
 ## Limites
 
@@ -38,13 +38,13 @@ Une archive identique peut réparer ses composants absents lorsqu’ils sont tou
 
 Schéma de base 31 : media_bundle_archives conserve la composition importée et ses identifiants. Les programmes vivent dans le stockage commun existant ; l’archive externe complète n’est pas conservée. Pas de nouveau processus résident.
 
-À venir : signatures et confiance d’éditeurs, compatibilités inter-familles, changement de composition, restauration coordonnée, contributions cumulables et nouveaux types de médias.
+À venir : signatures et confiance d’éditeurs, compatibilités inter-familles, changement de composition, contributions cumulables et nouveaux types de médias.
 
 ## Catalogue GitHub (0.0.48)
 
 Dans mosaune-repository.json, une fiche kind=family reprend exactement id, name, publisher, version et minCore de family.json. Description reste vide pour ce schéma. path pointe vers le ZIP de famille, sha256 est son empreinte SHA-256. Le téléchargement est borné à 32 Mio et passe ensuite le même analyseur et la même transaction que l’import local ; le dépôt ne confère aucun droit d’exécution.
 
-L’application affiche la version de l’archive installée, indépendamment des remplacements de composants. Les changements individuels restent visibles dans les réglages avancés. La restauration globale et la résolution des versions entre familles ne sont pas implémentées.
+L’application affiche la version de l’archive installée, indépendamment des remplacements de composants. Les changements individuels restent visibles dans les réglages avancés. Le retour coordonné est disponible depuis 0.0.49 ; la résolution des versions entre familles reste à implémenter.
 
 Pour produire un dépôt d’exemples sans ouvrir de base ni lire les réglages :
 
@@ -59,3 +59,11 @@ Les exemples publics de 0.0.48 passent à 2.0.0/2.1.0 : les versions 1.x produit
 Maintenance du dépôt officiel : toute évolution d’un paquet déjà compris par les anciens clients doit être reportée dans les deux index. Les fiches family sont réservées au fichier v2. Ne remplacez jamais les octets d’une version déjà publiée.
 
 Les exemples générés localement sont des bases de développement : une autre version du compilateur peut produire un autre programme. Ne les substituez pas à une archive officielle déjà publiée. Pour distribuer une variante, choisissez vos propres identifiants et versions ; pour une version officielle existante, téléchargez et conservez son archive du catalogue.
+
+## Retour arrière (0.0.49)
+
+Les routes existantes media-bundles/{kind}/preview et /apply acceptent operation=restore, la révision du registre et l’empreinte de l’aperçu. GET media-bundles expose previousVersion lorsqu’un point existe. Ces opérations restent réservées aux administrateurs.
+
+Le point conserve l’état des programmes et de l’écran avant la dernière mise à jour, dans la même transaction que celle-ci. Il ne contient ni secrets, ni comptes, ni données médias. Les contrôles comparent les octets installés à ceux de la mise à jour et incluent les droits, sélections et révisions dans l’aperçu. Une erreur annule toute la transaction ; les appels en cours ne sont annulés qu’après succès.
+
+Les états d’activation et autorisations courants sont conservés. Les composants partagés et les programmes qui ne sont plus choisis restent inchangés ; la version de famille ne prétend donc pas représenter toutes les versions individuelles. Un programme réinstallé sans archive antérieure est bloquant, tout comme une modification indépendante d’un programme encore choisi. Un seul point est conservé, consommé après retour, conservé en pause, supprimé au retrait. Les mises à jour antérieures à 0.0.49 ne sont pas reconstituées.

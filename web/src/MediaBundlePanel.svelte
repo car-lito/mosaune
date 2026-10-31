@@ -8,10 +8,10 @@
  export let changed:()=>void;
  export let select:(id:string)=>void;
  type Step={slot:string;id:string;name:string;version:string;operation:string;shared:boolean};
- type Plan={archive?:{manifest:{name:string;version:string;publisher:string}};manifest:{version:string;components:{slot:string;shared:boolean}[];screen:string};installedVersion:string;screenId:string;screenState:string;state:string;id:string;name:string;operation:string;revision:number;steps:Step[];kept:Step[];blockers:string[];checksum:string};
+ type Plan={previousVersion?:string;archive?:{manifest:{name:string;version:string;publisher:string}};manifest:{version:string;components:{slot:string;shared:boolean}[];screen:string};installedVersion:string;screenId:string;screenState:string;state:string;id:string;name:string;operation:string;revision:number;steps:Step[];kept:Step[];blockers:string[];checksum:string};
  let current:Plan|null=null,preview:Plan|null=null;
  let busy=false,error='',notice='';
- const labels:Record<string,string>={install:'Installer',enable:'Activer',select:'Choisir',disable:'Désactiver',remove:'Désinstaller',shared:'Partagé · conservé',ready:'Déjà prêt',unchanged:'Inchangé'};
+ const labels:Record<string,string>={restore:'Restaurer',install:'Installer',enable:'Activer',select:'Choisir',disable:'Désactiver',remove:'Désinstaller',shared:'Partagé · conservé',ready:'Déjà prêt',unchanged:'Inchangé'};
  async function load(){const result=await accountRequest(token,'media-bundles');current=result.bundles.find((p:Plan)=>p.id===id)??null;}
  onMount(()=>{void load().catch(e=>error=e.message)});
  async function inspect(operation:string){if(busy||!current)return;busy=true;error='';notice='';preview=null;try{await load();preview=await accountRequest(token,'media-bundles/'+id+'/preview','POST',{operation,revision:current.revision});}catch(e){error=e instanceof Error?e.message:'Aperçu indisponible.'}finally{busy=false}}
@@ -31,11 +31,13 @@
  <button class="secondary" disabled={busy} onclick={()=>inspect('prepare')}>Installer / activer la famille</button>
  <button class="text-action" disabled={busy} onclick={()=>inspect('disable')}>Désactiver la famille</button>
  <button class="text-action" disabled={busy} onclick={()=>inspect('remove')}>Retirer la famille</button>
+ {#if current.previousVersion}<button class="secondary" disabled={busy} onclick={()=>inspect('restore')}>Revenir à la version {current.previousVersion}</button>{/if}
  </div>
  {:else}<p role="status">Chargement des composants…</p>{/if}
  {#if preview}
  <div class="extension-preview" aria-live="polite">
  <h4>Changements prévus · {preview.name}</h4>
+ {#if preview.operation==='restore'}<p>Retour à la version {preview.previousVersion}. Les réglages, autorisations et états actif/désactivé restent inchangés. Les composants partagés et les remplaçants choisis sont conservés. Ce retour consomme le dernier point de restauration ; vous pourrez réinstaller la mise à jour depuis le catalogue.</p>{/if}
  {#each preview.blockers as blocker}<p class="form-error">{blocker}</p>{/each}
  {#if preview.steps.length}<ul>{#each preview.steps as step}<li><strong>{labels[step.operation]}</strong> · {step.name} · {step.version}{#if step.shared} · partagé avec d’autres médias{/if}</li>{/each}</ul>{:else}<p>Aucun changement nécessaire.</p>{/if}
  {#if preview.kept.length}<details open><summary>Composants conservés</summary><ul>{#each preview.kept as step}<li>{step.name} · {labels[step.operation]}</li>{/each}</ul></details>{/if}

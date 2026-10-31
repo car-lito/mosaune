@@ -1,3 +1,13 @@
+## 0.0.49 — retour arrière coordonné des familles
+
+Validation locale : 195 tests serveur réussis, 3 essais optionnels ignorés, 33 tests web, Svelte sans erreur ni avertissement, kit et analyses Go réussis. Exécutables Windows/Linux amd64/Linux ARM64 construits. Parcours HTTP réel sur une installation isolée : archives officielles 2.0 puis 2.1, redémarrage, retour à 2.0 avec activation conservée, second redémarrage, réinstallation de 2.1. Aucun contrôle visuel navigateur ni déploiement NAS effectué.
+
+- Point de restauration persistant créé atomiquement lors d’une mise à jour de famille ; retour depuis sa carte avec aperçu et confirmation.
+- Restauration des programmes et de l’écran modifiés, tout en conservant les états, réglages, autorisations, composants partagés et remplaçants choisis.
+- Refus des aperçus périmés et des composants modifiés séparément ; un échec laisse tout inchangé. Un seul point est conservé par famille, consommé après retour et supprimé lors du retrait.
+- Schéma SQLite 32. Les mises à jour précédant cette version ne reçoivent pas d’historique inventé. Les composants réinstallés sans version antérieure ne peuvent pas être restaurés.
+- Aucun nouveau service métier extrait ni déploiement NAS. [Guide d’essai](ESSAYER-LE-RETOUR-ARRIERE-049.md).
+
 ## 0.0.48 — familles dans le catalogue GitHub
 
 Validation finale : 188 tests serveur validés, 3 essais optionnels ignorés, 33 tests web, Svelte sans erreur ni avertissement, kit et analyses Go, trois exécutables Windows/Linux amd64/Linux ARM64. Un premier essai local avait dépassé ses délais pendant des constructions concurrentes ; les deux tests concernés puis la suite complète finale ont réussi. Parcours HTTP sur serveur temporaire avec le vrai GitHub : ancienne archive 1.1 vers 2.0, mise à jour 2.1, activation et état conservés après redémarrage. Aucun test visuel navigateur ni déploiement NAS dans cette étape.

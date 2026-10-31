@@ -1,6 +1,6 @@
 # Extensions regroupées, composants extensibles
 
-Décision produit du 30 octobre 2026, après la 0.0.45. Cette cible remplace la présentation de chaque petit composant technique comme une extension indépendante. Elle ne change pas l’exigence d’un noyau minimal avant les lecteurs et le NAS. Ce document décrit la cible. La 0.0.46 livre une première composition fournie et un cycle commun des composants extraits et de leur écran ; la 0.0.47 ajoute les archives locales et les mises à jour coordonnées. Le catalogue distant et le cycle complet de restauration restent à construire.
+Décision produit du 30 octobre 2026, après la 0.0.45. Cette cible remplace la présentation de chaque petit composant technique comme une extension indépendante. Elle ne change pas l’exigence d’un noyau minimal avant les lecteurs et le NAS. Ce document décrit la cible. La 0.0.46 livre une première composition fournie et un cycle commun des composants extraits et de leur écran ; la 0.0.47 ajoute les archives locales et les mises à jour coordonnées. La 0.0.48 apporte le catalogue distant ; la 0.0.49 ajoute un point de restauration par mise à jour, hors composants partagés et remplaçants choisis.
 
 ## Ce que l’utilisateur installe
 
@@ -55,7 +55,8 @@ Travail restant :
 - [ ] Étendre les manifestes de composition à des archives distribuables : éditeur, compatibilité, dépendances versionnées et contributions cumulables.
 - [x] 0.0.47 : installer et mettre à jour des archives regroupant les contrats actuels ; préserver états, choix et droits.
 - [x] 0.0.48 : distribuer les familles par dépôts GitHub, avec installation et mise à jour vérifiées.
-- [ ] Changements de composition et restauration globale.
+- [x] Retour coordonné du dernier changement de famille, avec aperçu et protection des modifications individuelles.
+- [ ] Changements de composition.
 - [ ] Fournir un exemple contributeur : une extension principale, un composant remplaçant et une contribution cumulable.
 - [ ] Vérifier installation partielle, dépendance partagée, mise à jour avec remplacement, retrait et retour depuis une installation existante.
 - [ ] Terminer l’extraction des services encore intégrés et vérifier le noyau seul, puis les familles complètes.
