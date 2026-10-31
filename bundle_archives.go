@@ -478,9 +478,9 @@ func (c *catalog) bundleArchiveRoutes(mux *secureMux) {
 	mux.HandleFunc("GET /api/v1/media-bundle-archives/example/{kind}", func(w http.ResponseWriter, r *http.Request) {
 		release := r.URL.Query().Get("version")
 		if release == "" {
-			release = "1.0.0"
+			release = "2.0.0"
 		}
-		if release != "1.0.0" && release != "1.1.0" {
+		if release != "2.0.0" && release != "2.1.0" {
 			problem(w, 400, "Version d’exemple inconnue.")
 			return
 		}

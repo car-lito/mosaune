@@ -1,3 +1,13 @@
+## 0.0.48 — familles dans le catalogue GitHub
+
+Validation finale : 188 tests serveur validés, 3 essais optionnels ignorés, 33 tests web, Svelte sans erreur ni avertissement, kit et analyses Go, trois exécutables Windows/Linux amd64/Linux ARM64. Un premier essai local avait dépassé ses délais pendant des constructions concurrentes ; les deux tests concernés puis la suite complète finale ont réussi. Parcours HTTP sur serveur temporaire avec le vrai GitHub : ancienne archive 1.1 vers 2.0, mise à jour 2.1, activation et état conservés après redémarrage. Aucun test visuel navigateur ni déploiement NAS dans cette étape.
+
+- Téléchargement vérifié des archives de familles depuis les dépôts ; contrôle des empreintes, manifestes, limites et compatibilité avant prévisualisation.
+- Versions installées visibles, aperçu partagé entre catalogue et import local, retour vers la fiche de la famille après installation.
+- Catalogue officiel v2 distinct pour préserver les anciens clients ; export de six exemples publics via `-export-family-repository`. Aucun accès aux données du serveur pendant cet export.
+- Exemples 2.0/2.1 pour ne pas réutiliser les versions locales 1.x avec des octets différents ; estampilles Git retirées des constructions WASM distribuées.
+- Pas de nouvelle migration de base, de nouveau service métier extrait ni de déploiement NAS. [Guide](ESSAYER-LE-CATALOGUE-048.md).
+
 ## 0.0.47 — archives de familles installables
 
 Validation locale : 185 tests serveur validés, 33 tests web, kit et analyses Go, Svelte sans erreur ni avertissement, trois exécutables Windows/Linux amd64/Linux ARM64. Trois essais serveur optionnels ignorés. Parcours HTTP sur serveur Windows temporaire : installation, activation, mise à jour, redémarrage, retrait et réinstallation ; outil de création d’archive exécuté et empreintes vérifiées. Vérification visuelle non terminée : connexion au compte fictif refusée par le contrôle automatique du navigateur. Aucun déploiement NAS.

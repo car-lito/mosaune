@@ -25,7 +25,7 @@ import (
 //go:embed all:web/dist
 var frontend embed.FS
 
-const version = "0.0.47"
+const version = "0.0.48"
 
 type module struct {
 	ID    string   `json:"id"`
@@ -98,7 +98,11 @@ func run() error {
 	dataDir := flag.String("data-dir", envDefault("MOSAUNE_DATA_DIR", filepath.Join(filepath.Dir(executable), "data")), "dossier du catalogue SQLite")
 	recoverName := flag.String("recover-admin", "", "récupérer le compte administrateur indiqué")
 	extensionSafeMode := flag.Bool("safe-mode", false, "démarrer sans appliquer les extensions externes")
+	exportFamilies := flag.String("export-family-repository", "", "exporter un dépôt d’exemples de familles vers un nouveau dossier, puis quitter")
 	flag.Parse()
+	if *exportFamilies != "" {
+		return exportFamilyRepository(*exportFamilies)
+	}
 	network := networkConfig{Listen: *listen, Port: *port, PublicURL: *publicURL, Cert: *cert, Key: *key, CA: *ca}
 	if err := network.validate(); err != nil {
 		return err

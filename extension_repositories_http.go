@@ -124,6 +124,30 @@ func (c *catalog) extensionRepositoryRoutes(mux *secureMux) {
 				installed = append(installed, installedVersion{module.ID, module.Version, kind})
 			}
 		}
+		rows, err = c.db.QueryContext(r.Context(), "SELECT record FROM media_bundle_archives")
+		if err != nil {
+			problem(w, 500, "Familles indisponibles.")
+			return
+		}
+		for rows.Next() {
+			var raw string
+			var record bundleArchiveRecord
+			if err = rows.Scan(&raw); err != nil {
+				break
+			}
+			if err = json.Unmarshal([]byte(raw), &record); err != nil {
+				break
+			}
+			installed = append(installed, installedVersion{record.Manifest.ID, record.Manifest.Version, "family"})
+		}
+		if err == nil {
+			err = rows.Err()
+		}
+		rows.Close()
+		if err != nil {
+			problem(w, 500, "Familles illisibles.")
+			return
+		}
 		sendJSON(w, 200, map[string]any{"repositories": repos, "installed": installed, "coreVersion": version})
 	})
 	mux.HandleFunc("POST /api/v1/extension-repositories", func(w http.ResponseWriter, r *http.Request) {
@@ -159,7 +183,7 @@ func (c *catalog) extensionRepositoryRoutes(mux *secureMux) {
 			problem(w, 500, "Dépôts indisponibles.")
 			return
 		}
-		raw, err := c.fetchRepositoryFile(r.Context(), repo, repositoryIndexFile, repositoryIndexLimit)
+		raw, err := c.fetchRepositoryFile(r.Context(), repo, repositoryIndexPath(repo), repositoryIndexLimit)
 		if err != nil {
 			problem(w, 400, err.Error())
 			return
@@ -185,7 +209,7 @@ func (c *catalog) extensionRepositoryRoutes(mux *secureMux) {
 			problem(w, 400, "Ce dépôt ne peut pas être actualisé.")
 			return
 		}
-		raw, err := c.fetchRepositoryFile(r.Context(), repo, repositoryIndexFile, repositoryIndexLimit)
+		raw, err := c.fetchRepositoryFile(r.Context(), repo, repositoryIndexPath(repo), repositoryIndexLimit)
 		if err != nil {
 			problem(w, 400, err.Error())
 			return

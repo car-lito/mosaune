@@ -12,7 +12,7 @@ Chaque entrée components contient slot, file et sha256. Fournir exactement les 
 
 screen possède slot=screen, file et sha256. Son archive contient un manifeste d’interface API 3 avec exactement une page fournissant la rubrique kind. Les identifiants org.mosaune.screens.* sont réservés. Aucun changement de rubrique pendant une mise à jour.
 
-Les trois exemples téléchargeables dans Mosaune donnent des manifestes et programmes complets en versions 1.0.0 et 1.1.0. Décompressez l’exemple dans votre dossier de travail pour inspecter ses composants. Les modules partagés emploient des identifiants communs entre exemples afin d’éviter de multiplier les installations lorsque ces modules sont nécessaires.
+Les trois exemples téléchargeables dans Mosaune donnent des manifestes et programmes complets en versions 2.0.0 et 2.1.0 (depuis 0.0.48). Décompressez l’exemple dans votre dossier de travail pour inspecter ses composants. Les modules partagés emploient des identifiants communs entre exemples afin d’éviter de multiplier les installations lorsque ces modules sont nécessaires.
 
 ## Construire une archive
 
@@ -38,4 +38,24 @@ Une archive identique peut réparer ses composants absents lorsqu’ils sont tou
 
 Schéma de base 31 : media_bundle_archives conserve la composition importée et ses identifiants. Les programmes vivent dans le stockage commun existant ; l’archive externe complète n’est pas conservée. Pas de nouveau processus résident.
 
-À venir : catalogue distant de familles, signatures et confiance d’éditeurs, compatibilités inter-familles, changement de composition, restauration coordonnée, contributions cumulables et nouveaux types de médias.
+À venir : signatures et confiance d’éditeurs, compatibilités inter-familles, changement de composition, restauration coordonnée, contributions cumulables et nouveaux types de médias.
+
+## Catalogue GitHub (0.0.48)
+
+Dans mosaune-repository.json, une fiche kind=family reprend exactement id, name, publisher, version et minCore de family.json. Description reste vide pour ce schéma. path pointe vers le ZIP de famille, sha256 est son empreinte SHA-256. Le téléchargement est borné à 32 Mio et passe ensuite le même analyseur et la même transaction que l’import local ; le dépôt ne confère aucun droit d’exécution.
+
+L’application affiche la version de l’archive installée, indépendamment des remplacements de composants. Les changements individuels restent visibles dans les réglages avancés. La restauration globale et la résolution des versions entre familles ne sont pas implémentées.
+
+Pour produire un dépôt d’exemples sans ouvrir de base ni lire les réglages :
+
+    mosaune -export-family-repository nouveau-dossier
+
+Le dossier parent doit exister et le dossier de destination doit être absent. L’export inclut six archives (trois familles, deux versions), un index et un README. Publiez ce contenu dans un dépôt public puis ajoutez son URL dans Mosaune. Utilisez le paquet 2.0.0 avant le 2.1.0 pour tester une mise à jour.
+
+La source officielle utilise mosaune-repository-v2.json à partir de 0.0.48. Son ancien mosaune-repository.json est conservé sans fiches family pour les anciens clients. Les dépôts personnalisés gardent le nom standard et doivent annoncer la version minimale de Mosaune prenant en charge leurs types de paquets. Le nom v2 est celui du fichier officiel ; le schéma JSON de l’index reste 1.
+
+Les exemples publics de 0.0.48 passent à 2.0.0/2.1.0 : les versions 1.x produites par 0.0.47 ne sont pas republiées avec des octets différents. La construction WASM désactive les estampilles Git avec -buildvcs=false ; tout changement réel des programmes distribués nécessite encore une nouvelle version des composants et de la famille. Les archives publiées doivent être conservées telles quelles.
+
+Maintenance du dépôt officiel : toute évolution d’un paquet déjà compris par les anciens clients doit être reportée dans les deux index. Les fiches family sont réservées au fichier v2. Ne remplacez jamais les octets d’une version déjà publiée.
+
+Les exemples générés localement sont des bases de développement : une autre version du compilateur peut produire un autre programme. Ne les substituez pas à une archive officielle déjà publiée. Pour distribuer une variante, choisissez vos propres identifiants et versions ; pour une version officielle existante, téléchargez et conservez son archive du catalogue.

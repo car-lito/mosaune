@@ -1,6 +1,6 @@
 # Vers un Mosaune entièrement extensible
 
-État du 31 octobre 2026 · étape 0.0.47.
+État du 31 octobre 2026 · étape 0.0.48.
 
 **Environ 70 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
@@ -20,7 +20,7 @@ La référence est exigeante : une fonction doit pouvoir être installée, désa
 
 La cible est désormais **quelques grandes extensions visibles, composées de sous-composants extensibles**. Films, Séries et Musique regroupent leurs comportements et écrans ; leurs composants restent remplaçables ou cumulables selon un contrat explicite. Les fournisseurs, connecteurs et thèmes restent des ajouts distincts lorsqu’ils ont un usage propre. Les dépendances techniques ne multiplient pas les cartes par défaut.
 
-[Architecture et ordre de migration](ARCHITECTURE-EXTENSIONS-GROUPEES.md). Priorité à un vrai cycle de vie par paquet principal, puis à sa présentation. La 0.0.46 implémente le regroupement des composants extraits et des écrans, avec opérations transactionnelles et réglages avancés. La 0.0.47 ajoute les archives locales et leurs mises à jour coordonnées. Le catalogue de familles et leur indépendance complète restent ouverts ; estimation globale : 70 %.
+[Architecture et ordre de migration](ARCHITECTURE-EXTENSIONS-GROUPEES.md). Priorité à un vrai cycle de vie par paquet principal, puis à sa présentation. La 0.0.46 implémente le regroupement des composants extraits et des écrans, avec opérations transactionnelles et réglages avancés. La 0.0.47 ajoute les archives locales et leurs mises à jour coordonnées. La 0.0.48 ajoute le catalogue distant, ses exemples et le même aperçu d’installation. Leur indépendance complète reste ouverte ; estimation globale conservée à 70 %, aucun nouveau service métier extrait.
 
 ## Checklist
 

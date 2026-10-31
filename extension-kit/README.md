@@ -1,3 +1,5 @@
+Familles à partir de 0.0.48 : [distribution par catalogue GitHub](../extensions/FAMILY-ARCHIVES.md), export d’exemples et aperçu commun à l’import local.
+
 **Familles 0.0.47 :** [format des archives, outil de préparation et règles de mise à jour](../extensions/FAMILY-ARCHIVES.md). Import local fonctionnel pour les trois familles actuelles ; le catalogue de familles et leur indépendance métier complète restent ouverts.
 
 **Regroupements 0.0.46 :** les manifestes de composition fournis réunissent programmes et écrans avec un cycle commun. Ils ne sont pas encore un format d’archive installable depuis un dépôt. [Contrat et limites](../extensions/MEDIA-BUNDLES.md).

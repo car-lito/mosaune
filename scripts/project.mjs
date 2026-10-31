@@ -24,7 +24,7 @@ function run(command, args, directory = root, extra = {}) {
 }
 const kit = join(root, 'extension-kit');
 function wasm(output, source) {
-  run(go, ['build', '-trimpath', '-ldflags=-s -w', '-o', output, source], kit, { GOOS: 'wasip1', GOARCH: 'wasm' });
+  run(go, ['build', '-trimpath', '-buildvcs=false', '-ldflags=-s -w', '-o', output, source], kit, { GOOS: 'wasip1', GOARCH: 'wasm' });
 }
 try {
   wasm('providers/tmdb/provider.wasm', './providers/tmdb/source');

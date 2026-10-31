@@ -1,0 +1,1 @@
+export type FamilyPlan={manifest:{name:string;publisher:string;version:string;kind:string};previousVersion:string;checksum:string;steps:{slot:string;id:string;name:string;version:string;operation:string;select:boolean;previousId:string;shared:boolean}[]};

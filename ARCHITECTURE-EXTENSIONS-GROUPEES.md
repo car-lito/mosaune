@@ -54,7 +54,8 @@ Travail restant :
 
 - [ ] Étendre les manifestes de composition à des archives distribuables : éditeur, compatibilité, dépendances versionnées et contributions cumulables.
 - [x] 0.0.47 : installer et mettre à jour des archives regroupant les contrats actuels ; préserver états, choix et droits.
-- [ ] Généraliser aux dépôts distants, changements de composition et restauration globale.
+- [x] 0.0.48 : distribuer les familles par dépôts GitHub, avec installation et mise à jour vérifiées.
+- [ ] Changements de composition et restauration globale.
 - [ ] Fournir un exemple contributeur : une extension principale, un composant remplaçant et une contribution cumulable.
 - [ ] Vérifier installation partielle, dépendance partagée, mise à jour avec remplacement, retrait et retour depuis une installation existante.
 - [ ] Terminer l’extraction des services encore intégrés et vérifier le noyau seul, puis les familles complètes.

@@ -23,7 +23,7 @@ func TestOfficialRepositoryOfflineRefreshAndPersistence(t *testing.T) {
 	raw, _ := json.Marshal(index)
 	c.repositoryTransport = tmdbFixtureTransport(func(r *http.Request) (*http.Response, error) {
 		calls++
-		if r.URL.String() != "https://api.github.com/repos/car-lito/mosaune-extensions/contents/mosaune-repository.json" {
+		if r.URL.String() != "https://api.github.com/repos/car-lito/mosaune-extensions/contents/mosaune-repository-v2.json" {
 			t.Fatal("wrong official source", r.URL)
 		}
 		if offline {

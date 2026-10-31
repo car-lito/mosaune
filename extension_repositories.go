@@ -22,6 +22,17 @@ import (
 
 const repositoryIndexLimit = 256 * 1024
 const repositoryIndexFile = "mosaune-repository.json"
+
+// Preserve the legacy catalogue for clients that cannot parse family entries.
+const officialRepositoryIndexFile = "mosaune-repository-v2.json"
+
+func repositoryIndexPath(repo extensionRepository) string {
+	if repo.Official {
+		return officialRepositoryIndexFile
+	}
+	return repositoryIndexFile
+}
+
 const bundledRepositoryID = "mosaune-bundled"
 const officialRepositoryURL = "https://github.com/car-lito/mosaune-extensions"
 
@@ -124,7 +135,7 @@ func parseRepositoryIndex(raw []byte) (repositoryIndex, error) {
 	}
 	seen := map[string]bool{}
 	for _, p := range index.Packages {
-		if !extensionID.MatchString(p.ID) || len(p.ID) > 100 || !extensionVersion.MatchString(p.Version) || !extensionVersion.MatchString(p.MinCore) || (p.Kind != "pages" && p.Kind != "theme" && p.Kind != "provider" && p.Kind != "recognition" && p.Kind != "audio-tags" && p.Kind != "catalogue" && p.Kind != "detail-list" && p.Kind != "detail-sections" && p.Kind != "detail-header" && p.Kind != "detail-experience") || strings.TrimSpace(p.Name) == "" || len(p.Name) > 100 || strings.TrimSpace(p.Publisher) == "" || len(p.Publisher) > 100 || len(p.Description) > 1000 || !repositoryPath(p.Path) || !strings.HasSuffix(p.Path, ".zip") || !repositoryHash.MatchString(p.SHA256) {
+		if !extensionID.MatchString(p.ID) || len(p.ID) > 100 || !extensionVersion.MatchString(p.Version) || !extensionVersion.MatchString(p.MinCore) || (p.Kind != "family" && p.Kind != "pages" && p.Kind != "theme" && p.Kind != "provider" && p.Kind != "recognition" && p.Kind != "audio-tags" && p.Kind != "catalogue" && p.Kind != "detail-list" && p.Kind != "detail-sections" && p.Kind != "detail-header" && p.Kind != "detail-experience") || strings.TrimSpace(p.Name) == "" || len(p.Name) > 100 || strings.TrimSpace(p.Publisher) == "" || len(p.Publisher) > 100 || len(p.Description) > 1000 || !repositoryPath(p.Path) || !strings.HasSuffix(p.Path, ".zip") || !repositoryHash.MatchString(p.SHA256) {
 			return index, errors.New("Une fiche du catalogue est incomplète ou non valide.")
 		}
 		key := p.ID + "@" + p.Version
@@ -316,6 +327,9 @@ func (c *catalog) repositoryPackage(ctx context.Context, repo extensionRepositor
 		if entry.Kind == "provider" || (entry.Kind == "recognition" || entry.Kind == "audio-tags" || (entry.Kind == "catalogue" || (entry.Kind == "detail-list" || entry.Kind == "detail-sections" || entry.Kind == "detail-header" || entry.Kind == "detail-experience"))) {
 			limit = packageformat.MaxArchive
 		}
+		if entry.Kind == "family" {
+			limit = bundleArchiveLimit
+		}
 		raw, err = c.fetchRepositoryFile(ctx, repo, entry.Path, limit)
 	}
 	if err != nil {
@@ -325,7 +339,14 @@ func (c *catalog) repositoryPackage(ctx context.Context, repo extensionRepositor
 		return nil, errors.New("Le fichier ne correspond plus à l’empreinte du catalogue. Actualisez le dépôt et vérifiez de nouveau le paquet.")
 	}
 	var actual repositoryEntry
-	if entry.Kind == "recognition" || entry.Kind == "audio-tags" || (entry.Kind == "catalogue" || (entry.Kind == "detail-list" || entry.Kind == "detail-sections" || entry.Kind == "detail-header" || entry.Kind == "detail-experience")) {
+	if entry.Kind == "family" {
+		p, err := parseBundleArchive(raw)
+		if err != nil {
+			return nil, err
+		}
+		m := p.Manifest
+		actual = repositoryEntry{ID: m.ID, Version: m.Version, Name: m.Name, Publisher: m.Publisher, MinCore: m.MinCore}
+	} else if entry.Kind == "recognition" || entry.Kind == "audio-tags" || (entry.Kind == "catalogue" || (entry.Kind == "detail-list" || entry.Kind == "detail-sections" || entry.Kind == "detail-header" || entry.Kind == "detail-experience")) {
 		p, err := packageformat.ParseExecutable(raw, version)
 		if err != nil {
 			return nil, err
