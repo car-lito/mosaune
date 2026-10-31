@@ -1,3 +1,5 @@
+**0.0.47 :** import et mise à jour de familles depuis une seule archive, avec aperçu, choix conservés et exemples téléchargeables. [Essayer](ESSAYER-LES-FAMILLES-047.md).
+
 **0.0.46 :** Films, Séries et Musique regroupent leurs composants extraits et leur écran, avec opérations communes et réglages avancés. [Essayer les familles](ESSAYER-LES-FAMILLES-046.md).
 
 **0.0.45 :** TMDB livré comme un paquet installé et réellement retirable ; aucune réactivation sans réinstallation. [Essayer le retrait et le retour](ESSAYER-TMDB-045.md).
@@ -6,7 +8,7 @@
 
 **Étape 0.0.43 :** [catalogue, profils et affiches dans TMDB 0.5.0](ESSAYER-TMDB-043.md).
 
-Écrans médias : [composition remplaçable — 0.0.42](ESSAYER-LES-ECRANS-042.md). [Checklist du découpage : environ 68 %](AVANCEMENT-EXTENSIONS.md).
+Écrans médias : [composition remplaçable — 0.0.42](ESSAYER-LES-ECRANS-042.md). [Checklist du découpage : environ 70 %](AVANCEMENT-EXTENSIONS.md).
 
 # Mosaune
 
@@ -14,7 +16,7 @@
 
 Un espace pour vos films, séries et musiques, hébergé chez vous. Mosaune réunit une bibliothèque locale, des fiches enrichies et la découverte de contenus dans une interface commune. Le projet privilégie un serveur léger en Go et une architecture extensible.
 
-**Prototype 0.0.46 — développement actif.** Reconnaissance, tags audio, catalogues, saisons, descriptions, en-têtes et comportements des fiches sont exécutés dans des extensions installables et remplaçables. Les familles médias complètes, fournisseurs/connecteurs restants et lecteurs restent à terminer avant le premier essai NAS. HTTPS direct et images Docker amd64/arm64 sont préparés pour les essais ; ce n’est pas encore la bêta. [Plan avant le NAS](PLAN-AVANT-NAS.md).
+**Prototype 0.0.47 — développement actif.** Reconnaissance, tags audio, catalogues, saisons, descriptions, en-têtes et comportements des fiches sont exécutés dans des extensions installables et remplaçables. Les familles médias complètes, fournisseurs/connecteurs restants et lecteurs restent à terminer avant le premier essai NAS. HTTPS direct et images Docker amd64/arm64 sont préparés pour les essais ; ce n’est pas encore la bêta. [Plan avant le NAS](PLAN-AVANT-NAS.md).
 
 ## Déjà disponible
 

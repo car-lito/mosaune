@@ -1,6 +1,6 @@
 # Manifestes de composition — schéma 1
 
-Les trois répertoires media-films, media-series et media-music contiennent les manifestes compilés dans cette étape. Ce ne sont pas des archives externes importables. Leurs identifiants sont stables ; version désigne la composition, pas une mise à jour automatique des programmes.
+Les trois répertoires media-films, media-series et media-music contiennent les manifestes compilés dans cette étape. Ces manifestes de composition ne sont pas eux-mêmes des archives. Depuis la 0.0.47, un format distinct permet de distribuer leurs composants : voir [FAMILY-ARCHIVES.md](FAMILY-ARCHIVES.md). Leurs identifiants sont stables ; version désigne la composition, pas une mise à jour automatique des programmes.
 
 Champs : schema=1, id, name, version, kind (films/series/music), components (slot, composition, shared), screen (identifiant du paquet d’écran fourni).
 
@@ -12,4 +12,4 @@ API d’administration : GET /api/v1/media-bundles ; POST /api/v1/media-bundles/
 
 Les changements de programmes, écran et enregistrement du regroupement partagent une transaction. Les appels en cours sont annulés uniquement après validation. La migration schéma 30 adopte l’état existant sans installer ni activer un programme. Les données médias sont conservées.
 
-Restent à définir : archives, signatures/éditeurs de familles, résolution des versions et mise à jour coordonnée, contributions cumulables, propriétés des données privées et extraction des services métiers restants. Ne pas publier ce schéma comme un SDK universel d’extensions médias.
+Import et mise à jour coordonnée par fichier sont disponibles en 0.0.47. Restent à définir : distribution distante, signatures/éditeurs de familles, résolution de contraintes inter-familles, restauration globale, contributions cumulables, propriétés des données privées et extraction des services métiers restants. Ne pas publier ce schéma comme un SDK universel d’extensions médias.

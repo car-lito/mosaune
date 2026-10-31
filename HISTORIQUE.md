@@ -1,3 +1,12 @@
+## 0.0.47 — archives de familles installables
+
+Validation locale : 185 tests serveur validés, 33 tests web, kit et analyses Go, Svelte sans erreur ni avertissement, trois exécutables Windows/Linux amd64/Linux ARM64. Trois essais serveur optionnels ignorés. Parcours HTTP sur serveur Windows temporaire : installation, activation, mise à jour, redémarrage, retrait et réinstallation ; outil de création d’archive exécuté et empreintes vérifiées. Vérification visuelle non terminée : connexion au compte fictif refusée par le contrôle automatique du navigateur. Aucun déploiement NAS.
+
+- Format d’archive borné regroupant les composants exécutables existants et un écran ; import local avec aperçu statique et contrôle de l’ensemble avant validation.
+- Installation et mise à jour transactionnelles, états et droits conservés, remplaçants non écrasés, réutilisation des composants partagés, refus des aperçus périmés et des versions incohérentes.
+- Exemples Films/Séries/Musique 1.0 et 1.1 téléchargeables, outil de préparation d’archives pour les contributeurs, regroupement des programmes importés dans la fiche de leur famille.
+- Migration schéma 31. Catalogue distant de familles, restauration globale, nouveaux médias et services encore intégrés restent à terminer. [Guide utilisateur](ESSAYER-LES-FAMILLES-047.md).
+
 ## 0.0.46 — familles médias et composants avancés
 
 Validation locale : 179 tests serveur validés (suite complète puis les six tests de regroupement après correction d’une fixture d’autorisation), 33 tests web, kit et analyses Go, Svelte sans erreur ni avertissement, trois exécutables Windows/Linux amd64/Linux ARM64. Trois essais serveur optionnels ignorés sur cette machine. Parcours HTTP avec redémarrage et parcours navigateur sur une installation temporaire. Aucun déploiement NAS.

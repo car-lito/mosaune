@@ -1,26 +1,26 @@
 # Vers un Mosaune entièrement extensible
 
-État du 30 octobre 2026 · étape 0.0.45.
+État du 31 octobre 2026 · étape 0.0.47.
 
-**Environ 68 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 70 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
 | Chantier | Poids | Estimation réalisée | Contribution au total |
 |---|---:|---:|---:|
 | Moteur, contrats, registre et isolation | 20 % | 90 % | 18 points |
-| Installation, dépendances et gestion des ensembles | 20 % | 60 % | 12 points |
+| Installation, dépendances et gestion des ensembles | 20 % | 70 % | 14 points |
 | Extraction des comportements Films/Séries/Musique | 25 % | 72 % | 18 points |
 | Thèmes et contributions d’interface | 15 % | 90 % | 13,5 points |
 | Fournisseurs et connecteurs indépendants | 10 % | 60 % | 6 points |
 | Validation finale d’un noyau vide et d’une installation complète par extensions | 10 % | 0 % | 0 point |
-| **Total estimé** | **100 %** | | **67,5 points, arrondis à 68 %** |
+| **Total estimé** | **100 %** | | **69,5 points, arrondis à 70 %** |
 
 ## Regroupement confirmé après la 0.0.45
 
 La cible est désormais **quelques grandes extensions visibles, composées de sous-composants extensibles**. Films, Séries et Musique regroupent leurs comportements et écrans ; leurs composants restent remplaçables ou cumulables selon un contrat explicite. Les fournisseurs, connecteurs et thèmes restent des ajouts distincts lorsqu’ils ont un usage propre. Les dépendances techniques ne multiplient pas les cartes par défaut.
 
-[Architecture et ordre de migration](ARCHITECTURE-EXTENSIONS-GROUPEES.md). Priorité à un vrai cycle de vie par paquet principal, puis à sa présentation. La 0.0.46 implémente le regroupement des composants extraits et des écrans, avec opérations transactionnelles et réglages avancés. La distribution de familles complètes reste ouverte ; l’estimation globale reste 68 %.
+[Architecture et ordre de migration](ARCHITECTURE-EXTENSIONS-GROUPEES.md). Priorité à un vrai cycle de vie par paquet principal, puis à sa présentation. La 0.0.46 implémente le regroupement des composants extraits et des écrans, avec opérations transactionnelles et réglages avancés. La 0.0.47 ajoute les archives locales et leurs mises à jour coordonnées. Le catalogue de familles et leur indépendance complète restent ouverts ; estimation globale : 70 %.
 
 ## Checklist
 
@@ -54,7 +54,8 @@ La cible est désormais **quelques grandes extensions visibles, composées de so
 - [x] Aperçu détaillé, application transactionnelle, refus d’un aperçu périmé et conservation des remplaçants choisis.
 - [x] Les composants de fiches partagés sont conservés lors du retrait d’un ensemble.
 - [ ] Généraliser la distribution des dépendances et leurs contraintes de versions aux paquets médias complets.
-- [ ] Regrouper les composants fournis en paquets principaux versionnés ; conserver les remplacements choisis et les dépendances partagées pendant toute opération.
+- [x] 0.0.47 : archives de composants et écran, import local et mise à jour avec conservation des remplacements choisis et réutilisation des composants partagés.
+- [ ] Distribution distante, contraintes inter-familles, changement de composition et restauration globale.
 - [x] 0.0.46 : présenter les composants techniques fournis dans les réglages avancés de leur famille et les filtrer dans le catalogue.
 - [x] 0.0.46 : manifestes de composition versionnés, opérations communes avec l’écran et choix des remplacements conservés.
 - [ ] Ajouter les dépendances de lecture partagées lorsque les lecteurs seront construits.

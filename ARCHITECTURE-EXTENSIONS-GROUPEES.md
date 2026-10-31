@@ -1,6 +1,6 @@
 # Extensions regroupées, composants extensibles
 
-Décision produit du 30 octobre 2026, après la 0.0.45. Cette cible remplace la présentation de chaque petit composant technique comme une extension indépendante. Elle ne change pas l’exigence d’un noyau minimal avant les lecteurs et le NAS. Ce document décrit la cible. La 0.0.46 livre une première composition fournie et un cycle commun des composants extraits et de leur écran ; les archives de familles et leur cycle complet de mises à jour restent à construire.
+Décision produit du 30 octobre 2026, après la 0.0.45. Cette cible remplace la présentation de chaque petit composant technique comme une extension indépendante. Elle ne change pas l’exigence d’un noyau minimal avant les lecteurs et le NAS. Ce document décrit la cible. La 0.0.46 livre une première composition fournie et un cycle commun des composants extraits et de leur écran ; la 0.0.47 ajoute les archives locales et les mises à jour coordonnées. Le catalogue distant et le cycle complet de restauration restent à construire.
 
 ## Ce que l’utilisateur installe
 
@@ -53,9 +53,10 @@ Les contrats WASI, le registre, les droits, les paquets signés, les thèmes et 
 Travail restant :
 
 - [ ] Étendre les manifestes de composition à des archives distribuables : éditeur, compatibilité, dépendances versionnées et contributions cumulables.
-- [ ] Généraliser l’installation aux archives de familles et leur mise à jour coordonnée ; les opérations 0.0.46 réutilisent les installateurs de composants fournis.
+- [x] 0.0.47 : installer et mettre à jour des archives regroupant les contrats actuels ; préserver états, choix et droits.
+- [ ] Généraliser aux dépôts distants, changements de composition et restauration globale.
 - [ ] Fournir un exemple contributeur : une extension principale, un composant remplaçant et une contribution cumulable.
 - [ ] Vérifier installation partielle, dépendance partagée, mise à jour avec remplacement, retrait et retour depuis une installation existante.
 - [ ] Terminer l’extraction des services encore intégrés et vérifier le noyau seul, puis les familles complètes.
 
-L’estimation globale reste 68 % : cette étape rend la gestion des composants existants plus cohérente, mais n’extrait pas de nouveau service métier. Les familles complètes et le noyau seul restent les critères de fin.
+L’estimation globale passe à 70 % en 0.0.47 : le cycle de distribution locale progresse, sans nouveau service métier extrait. Les familles complètes et le noyau seul restent les critères de fin.

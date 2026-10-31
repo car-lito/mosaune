@@ -1,7 +1,7 @@
 name: mosaune
 services:
   mosaune:
-    image: ghcr.io/car-lito/mosaune:0.0.46-preview
+    image: ghcr.io/car-lito/mosaune:0.0.47-preview
     container_name: mosaune
     user: "65532:65532"
     environment:

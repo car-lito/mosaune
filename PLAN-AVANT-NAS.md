@@ -1,3 +1,9 @@
+## Étape 0.0.47 — distribution des familles par archive
+
+- [x] Import local de programmes et écran dans une même archive ; installation et mise à jour coordonnées, prévisualisation, conservation des choix et des permissions.
+- [x] Exemples complets et outil de préparation pour les contributeurs.
+- [ ] Intégrer les familles aux dépôts distants ; ajouter restauration globale et compatibilité entre familles, puis poursuivre les services métier.
+
 ## Priorité ajustée — extensions regroupées, 30 octobre 2026
 
 Installer quelques grandes extensions (Films, Séries, Musique), avec leurs composants internes et réglages avancés, plutôt qu’une extension visible par petite fonction. Les composants restent remplaçables ou cumulables selon leur contrat. Fournisseurs, connecteurs et thèmes ayant un usage propre restent séparés ; les dépendances techniques partagées sont gérées automatiquement.

@@ -202,12 +202,13 @@ func (c *catalog) setUIScreenState(ctx context.Context, p extensionPackage, enab
 
 type mediaBundlePlan struct {
 	mediaSetPlan
-	Manifest         mediaBundleManifest `json:"manifest"`
-	InstalledVersion string              `json:"installedVersion"`
-	ScreenID         string              `json:"screenId"`
-	ScreenState      string              `json:"screenState"`
-	State            string              `json:"state"`
-	Snapshot         string              `json:"snapshot"`
+	Manifest         mediaBundleManifest  `json:"manifest"`
+	InstalledVersion string               `json:"installedVersion"`
+	ScreenID         string               `json:"screenId"`
+	ScreenState      string               `json:"screenState"`
+	State            string               `json:"state"`
+	Snapshot         string               `json:"snapshot"`
+	Archive          *bundleArchiveRecord `json:"archive,omitempty"`
 }
 
 func planBundle(ctx context.Context, tx *sql.Tx, ms []mediaBundleManifest, m mediaBundleManifest, op string, packages []recognitionPackageView, selected map[string]string, revision int64, safe bool, screens []bundleScreen) (mediaBundlePlan, error) {
@@ -348,6 +349,10 @@ func planBundle(ctx context.Context, tx *sql.Tx, ms []mediaBundleManifest, m med
 			p.State = "disabled"
 		}
 	}
+	p.Archive, e = readBundleRecord(ctx, tx, m.Kind)
+	if e != nil {
+		return p, e
+	}
 	p.Checksum = ""
 	raw, _ = json.Marshal(p)
 	p.Checksum = recognitionHash(raw)
@@ -452,6 +457,9 @@ func (c *catalog) mediaBundlePlans(ctx context.Context, id, op string, revision 
 		_, e = tx.ExecContext(ctx, "INSERT INTO media_bundles VALUES(?,?) ON CONFLICT(id) DO UPDATE SET manifest=excluded.manifest", p.Manifest.ID, string(raw))
 	} else if op == "remove" {
 		_, e = tx.ExecContext(ctx, "DELETE FROM media_bundles WHERE id=?", p.Manifest.ID)
+		if e == nil {
+			_, e = tx.ExecContext(ctx, "DELETE FROM media_bundle_archives WHERE kind=?", p.Manifest.Kind)
+		}
 	}
 	if e != nil {
 		return nil, e
@@ -477,6 +485,7 @@ func (c *catalog) mediaBundlePlans(ctx context.Context, id, op string, revision 
 	return plans, nil
 }
 func (c *catalog) mediaBundleRoutes(mux *secureMux) {
+	c.bundleArchiveRoutes(mux)
 	mux.HandleFunc("GET /api/v1/media-bundles", func(w http.ResponseWriter, r *http.Request) {
 		p, e := c.mediaBundlePlans(r.Context(), "", "prepare", nil, "", false)
 		if e != nil {

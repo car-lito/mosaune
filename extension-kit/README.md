@@ -1,3 +1,5 @@
+**Familles 0.0.47 :** [format des archives, outil de préparation et règles de mise à jour](../extensions/FAMILY-ARCHIVES.md). Import local fonctionnel pour les trois familles actuelles ; le catalogue de familles et leur indépendance métier complète restent ouverts.
+
 **Regroupements 0.0.46 :** les manifestes de composition fournis réunissent programmes et écrans avec un cycle commun. Ils ne sont pas encore un format d’archive installable depuis un dépôt. [Contrat et limites](../extensions/MEDIA-BUNDLES.md).
 
 **Orientation confirmée après la 0.0.45 :** les composants techniques restent modulaires mais sont distribués dans quelques extensions principales, avec des points de remplacement ou de contribution explicites. [Architecture des extensions regroupées et prochaine migration](../ARCHITECTURE-EXTENSIONS-GROUPEES.md). Le format regroupé reste à implémenter.

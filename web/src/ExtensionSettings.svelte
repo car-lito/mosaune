@@ -3,6 +3,7 @@
  import ExtensionCard from './ExtensionCard.svelte';
  import RecognitionPackages from './RecognitionPackages.svelte';
  import MediaBundlePanel from './MediaBundlePanel.svelte';
+ import MediaBundleImport from './MediaBundleImport.svelte';
  import RecognitionImport from './RecognitionImport.svelte';
  const recognitionNames:Record<string,string>={films:'Reconnaissance des films',series:'Reconnaissance des séries',music:'Reconnaissance musicale'};
  import ExtensionConfiguration from './ExtensionConfiguration.svelte';
@@ -30,9 +31,10 @@
 
  let packages:ExtensionPackage[]=[];let users:Account[]=[];let appearance:ExtensionAppearance={selected:'',effective:'',stamp:'',safeMode:false};
  let recognitionRefresh=0;
- let bundles:{id:string;name:string;state:string;manifest:{version:string;screen:string}}[]=[];
+ let bundles:{id:string;name:string;state:string;manifest:{version:string;screen:string};archive?:{ids:Record<string,string>;screenId:string}}[]=[];
  let selectionStack:string[]=[];let suppliedComponentIds:string[]=[];
- $: groupedScreens=new Set(bundles.map(b=>b.manifest.screen));
+ $: groupedScreens=new Set(bundles.flatMap(b=>[b.manifest.screen,...(b.archive?[b.archive.screenId]:[])]));
+ $: bundledComponentIds=bundles.flatMap(b=>Object.values(b.archive?.ids??{}));
  const bundleStatus:Record<string,string>={ready:'Prêt',partial:'À compléter',disabled:'Désactivé',absent:'À installer'};
  let busy=false;let loading=true;let error='';let notice='';let file:File|null=null;let input:HTMLInputElement;
  let preview:{package:ExtensionPackage;previousChecksum:string;previousVersion:string}|null=null;
@@ -92,9 +94,9 @@
   <div class="extension-tabs" aria-label="Catalogue des extensions"><button class:selected={tab==='installed'} aria-pressed={tab==='installed'} onclick={()=>tab='installed'}>Sur le serveur</button><button class:selected={tab==='available'} aria-pressed={tab==='available'} onclick={()=>tab='available'}>À télécharger</button></div>
   {#if tab==='available'}
    {#if user.admin}<div class="extension-grid">{#each bundles as b}<ExtensionCard id={'available.'+b.id} name={b.name} family="Famille média" description="Installer ou gérer ensemble ses composants et son écran." status={bundleStatus[b.state]} open={()=>show('builtin.'+b.id)}/>{/each}</div>{/if}
-   {#if user.admin}<RecognitionPackages {token} refreshKey={recognitionRefresh} hideFactory {tab} select={kind=>show('recognition.'+kind)}/>{/if}
-   {#if user.admin}<ExtensionRepositoryStore {token} groupedComponents={[...groupedScreens,...suppliedComponentIds]} safeMode={appearance.safeMode} installed={repositoryInstalled}/>{/if}
-   {#if user.admin}<details class="extension-import"><summary>Importer un fichier depuis cet appareil</summary><RecognitionImport {token} installed={()=>{recognitionRefresh++;}}/><ProviderPackageImport {token} installed={providerInstalled}/>
+   {#if user.admin}<RecognitionPackages {token} refreshKey={recognitionRefresh} hideFactory excludeIds={bundledComponentIds} {tab} select={kind=>show('recognition.'+kind)}/>{/if}
+   {#if user.admin}<ExtensionRepositoryStore {token} groupedComponents={[...groupedScreens,...suppliedComponentIds,...bundledComponentIds]} safeMode={appearance.safeMode} installed={repositoryInstalled}/>{/if}
+   {#if user.admin}<details class="extension-import"><summary>Importer un fichier depuis cet appareil</summary><MediaBundleImport {token} installed={async kind=>{await load();tab="installed";await show("builtin."+kind);notice="Archive de famille installée. Vérifiez ses composants puis activez la famille si nécessaire.";}}/><RecognitionImport {token} installed={()=>{recognitionRefresh++;}}/><ProviderPackageImport {token} installed={providerInstalled}/>
    <section class="extension-import"><div><span class="eyebrow">UN PAQUET, UNE NOUVELLE POSSIBILITÉ</span><h3>Installer des pages ou un thème</h3><p>Importez un fichier <strong>.mosaune.zip</strong>. Mosaune vérifie son format et sa compatibilité avant de proposer l’installation.</p></div>
  <label class="extension-file">Paquet à vérifier<input bind:this={input} type="file" accept=".zip,application/zip" disabled={busy} onchange={inspect}/></label>
  <a class="text-action" href="/api/v1/extensions/pages-example" download>Télécharger l’exemple Salon personnel</a>
@@ -109,7 +111,7 @@
    <div class="extension-toolbar"><label>Rechercher une extension<input type="search" bind:value={filter} placeholder="Nom ou description…"/></label><button class="text-action" disabled={busy} onclick={()=>void load()}>Actualiser</button></div>
    {#if loading}<p role="status">Chargement des extensions…</p>{/if}
    <div class="extension-grid">
-    {#if user.admin}<RecognitionPackages {token} refreshKey={recognitionRefresh} hideFactory {filter} select={kind=>show('recognition.'+kind)}/>{/if}
+    {#if user.admin}<RecognitionPackages {token} refreshKey={recognitionRefresh} hideFactory excludeIds={bundledComponentIds} {filter} select={kind=>show('recognition.'+kind)}/>{/if}
     {#if user.admin&&runtime&&matches('TMDB métadonnées films séries',filter)}<ExtensionCard id="tmdb" name="TMDB" family="Métadonnées · expérimental" description="Recherche, fiches, découverte, profils et affiches, avec le moteur d’extensions." status={tmdbStatus} enabled={runtime.installed&&runtime.providerEnabled} disabled={busy||!runtime.installed} toggle={toggleProvider} open={()=>show('tmdb')}/>{/if}
     {#each visiblePackages as p (p.manifest.id)}<ExtensionCard id={p.manifest.id} name={p.manifest.name} family={p.manifest.api===3?'Interface · pages et menus':'Interface · thème'} description={p.manifest.description} status={appearance.safeMode?'Suspendu':p.enabled?'Actif':'Désactivé'} enabled={p.enabled} disabled={busy||appearance.safeMode&&!p.enabled} toggle={user.admin?()=>toggle(p):undefined} open={()=>show(p.manifest.id)}/>{/each}
     {#if user.admin}{#each native.filter(p=>matches(p.name+' '+p.description,filter)) as item}<ExtensionCard id={item.id} name={item.name} family={item.family} description={item.description} status={bundleStatus[bundles.find(b=>"builtin."+b.id===item.id)?.state??""]??"Intégré"} open={()=>show(item.id)}/>{/each}{/if}

@@ -8,7 +8,7 @@
  export let changed:()=>void;
  export let select:(id:string)=>void;
  type Step={slot:string;id:string;name:string;version:string;operation:string;shared:boolean};
- type Plan={manifest:{version:string;components:{slot:string;shared:boolean}[];screen:string};installedVersion:string;screenId:string;screenState:string;state:string;id:string;name:string;operation:string;revision:number;steps:Step[];kept:Step[];blockers:string[];checksum:string};
+ type Plan={archive?:{manifest:{name:string;version:string;publisher:string}};manifest:{version:string;components:{slot:string;shared:boolean}[];screen:string};installedVersion:string;screenId:string;screenState:string;state:string;id:string;name:string;operation:string;revision:number;steps:Step[];kept:Step[];blockers:string[];checksum:string};
  let current:Plan|null=null,preview:Plan|null=null;
  let busy=false,error='',notice='';
  const labels:Record<string,string>={install:'Installer',enable:'Activer',select:'Choisir',disable:'Désactiver',remove:'Désinstaller',shared:'Partagé · conservé',ready:'Déjà prêt',unchanged:'Inchangé'};
@@ -25,7 +25,7 @@
  {#if error}<p class="form-error" role="alert">{error}</p>{/if}
  {#if notice}<p class="extension-notice" role="status">{notice}</p>{/if}
  {#if current}
- <p class="folder-help">Regroupement {current.manifest.version}{current.installedVersion?" · installé":" · à installer"}</p>
+ <p class="folder-help">{#if current.archive}{current.archive.manifest.name} · {current.archive.manifest.version} · {current.archive.manifest.publisher}{:else}Regroupement {current.manifest.version}{/if}{current.installedVersion?" · installé":" · à installer"}</p>
  <p class="folder-help">{current.blockers.length?'Un choix de composant doit être corrigé.':current.steps.length?'Certains composants sont absents, désactivés ou non sélectionnés.':'Tous les composants de cet ensemble sont prêts.'}</p>
  <div class="extension-actions">
  <button class="secondary" disabled={busy} onclick={()=>inspect('prepare')}>Installer / activer la famille</button>
