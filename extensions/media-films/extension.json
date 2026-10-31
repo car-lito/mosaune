@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "id": "org.mosaune.media.films",
+  "name": "Films",
+  "version": "1.0.0",
+  "kind": "films",
+  "components": [
+    {
+      "slot": "films",
+      "composition": "exclusive",
+      "shared": false
+    },
+    {
+      "slot": "catalogue-films",
+      "composition": "exclusive",
+      "shared": false
+    },
+    {
+      "slot": "detail-information",
+      "composition": "exclusive",
+      "shared": true
+    },
+    {
+      "slot": "detail-header",
+      "composition": "exclusive",
+      "shared": true
+    },
+    {
+      "slot": "detail-experience",
+      "composition": "exclusive",
+      "shared": true
+    }
+  ],
+  "screen": "org.mosaune.screens.films"
+}

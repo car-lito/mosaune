@@ -1,3 +1,9 @@
+## Priorité ajustée — extensions regroupées, 30 octobre 2026
+
+Installer quelques grandes extensions (Films, Séries, Musique), avec leurs composants internes et réglages avancés, plutôt qu’une extension visible par petite fonction. Les composants restent remplaçables ou cumulables selon leur contrat. Fournisseurs, connecteurs et thèmes ayant un usage propre restent séparés ; les dépendances techniques partagées sont gérées automatiquement.
+
+**Étape 0.0.46 livrée :** manifestes de composition, cycle commun des composants extraits et des écrans, gestionnaire regroupé. **Suite :** distribution et mise à jour de familles complètes, puis extraction des services encore intégrés. Les contrats et extractions existants sont conservés. [Décision et checklist détaillées](ARCHITECTURE-EXTENSIONS-GROUPEES.md).
+
 ## Étape 0.0.45
 
 - [x] Distribuer TMDB comme un paquet signé installé une fois, sans exécution directe d’un module embarqué de remplacement.

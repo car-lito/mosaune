@@ -16,6 +16,12 @@ La référence est exigeante : une fonction doit pouvoir être installée, désa
 | Validation finale d’un noyau vide et d’une installation complète par extensions | 10 % | 0 % | 0 point |
 | **Total estimé** | **100 %** | | **67,5 points, arrondis à 68 %** |
 
+## Regroupement confirmé après la 0.0.45
+
+La cible est désormais **quelques grandes extensions visibles, composées de sous-composants extensibles**. Films, Séries et Musique regroupent leurs comportements et écrans ; leurs composants restent remplaçables ou cumulables selon un contrat explicite. Les fournisseurs, connecteurs et thèmes restent des ajouts distincts lorsqu’ils ont un usage propre. Les dépendances techniques ne multiplient pas les cartes par défaut.
+
+[Architecture et ordre de migration](ARCHITECTURE-EXTENSIONS-GROUPEES.md). Priorité à un vrai cycle de vie par paquet principal, puis à sa présentation. La 0.0.46 implémente le regroupement des composants extraits et des écrans, avec opérations transactionnelles et réglages avancés. La distribution de familles complètes reste ouverte ; l’estimation globale reste 68 %.
+
 ## Checklist
 
 ### Socle des extensions
@@ -48,9 +54,12 @@ La référence est exigeante : une fonction doit pouvoir être installée, désa
 - [x] Aperçu détaillé, application transactionnelle, refus d’un aperçu périmé et conservation des remplaçants choisis.
 - [x] Les composants de fiches partagés sont conservés lors du retrait d’un ensemble.
 - [ ] Généraliser la distribution des dépendances et leurs contraintes de versions aux paquets médias complets.
+- [ ] Regrouper les composants fournis en paquets principaux versionnés ; conserver les remplacements choisis et les dépendances partagées pendant toute opération.
+- [x] 0.0.46 : présenter les composants techniques fournis dans les réglages avancés de leur famille et les filtrer dans le catalogue.
+- [x] 0.0.46 : manifestes de composition versionnés, opérations communes avec l’écran et choix des remplacements conservés.
 - [ ] Ajouter les dépendances de lecture partagées lorsque les lecteurs seront construits.
 
-Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils ne sont pas encore les extensions médias complètes. Leur retrait ne masque pas toute une rubrique et ne retire ni fournisseur ni lecteur intégré. Les composants communs sont conservés même si les trois ensembles sont retirés ; leur retrait individuel reste possible.
+Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils ne sont pas encore les extensions médias complètes. Depuis la 0.0.46, le regroupement retire aussi l’écran choisi et sa rubrique ; il ne retire pas les fournisseurs ni le lecteur intégré. Les composants communs sont conservés même si les trois ensembles sont retirés ; leur retrait individuel reste possible.
 
 ### Interface et fournisseurs
 

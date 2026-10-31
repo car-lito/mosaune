@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "id": "org.mosaune.media.music",
+  "name": "Musique",
+  "version": "1.0.0",
+  "kind": "music",
+  "components": [
+    {
+      "slot": "music",
+      "composition": "exclusive",
+      "shared": false
+    },
+    {
+      "slot": "audiotags",
+      "composition": "exclusive",
+      "shared": false
+    },
+    {
+      "slot": "catalogue-music",
+      "composition": "exclusive",
+      "shared": false
+    },
+    {
+      "slot": "detail-information",
+      "composition": "exclusive",
+      "shared": true
+    },
+    {
+      "slot": "detail-header",
+      "composition": "exclusive",
+      "shared": true
+    },
+    {
+      "slot": "detail-experience",
+      "composition": "exclusive",
+      "shared": true
+    }
+  ],
+  "screen": "org.mosaune.screens.music"
+}

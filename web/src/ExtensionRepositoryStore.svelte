@@ -7,6 +7,7 @@
  import type {Entry,Repository,Choice} from './repository-catalog';
  export let token:string;
  export let safeMode=false;
+ export let groupedComponents:string[]=[];let showComponents=false;
  export let installed:(kind:string,id:string)=>Promise<void>;
  type Installed={id:string;version:string;kind:string};
  type Preview={revision?:number;package:{checksum:string;manifest:{requires?:string[];contributions?:{role:string;target:string}[]}};previousVersion:string;previousChecksum:string;signer?:string;services?:{label:string;description:string}[]};
@@ -16,7 +17,7 @@
  let choice:Choice|null=null;let preview:Preview|null=null;let archive:Blob|null=null;let heading:HTMLElement;
  function current(e:Entry){return versions.find(v=>v.kind===e.kind&&v.id===e.id)?.version??''}
  function status(e:Entry){if(compare(e.minCore,core)>0)return 'Mosaune '+e.minCore+' requis';const v=current(e);return !v?'Disponible':compare(e.version,v)>0?'Mise à jour disponible':compare(e.version,v)===0?'Installé':'Version plus récente installée'}
- $: visible=catalogCandidates(repos,search,source,family);
+ $: visible=catalogCandidates(repos,search,source,family).filter(c=>showComponents||!groupedComponents.includes(c.entry.id));
  $: releases=choice?choice.repo.index.packages.filter(e=>e.id===choice?.entry.id&&e.kind===choice?.entry.kind).sort((a,b)=>compare(b.version,a.version)):[];
  $: canInspect=choice&&compare(choice.entry.minCore,core)<=0&&(!current(choice.entry)||compare(choice.entry.version,current(choice.entry))>0)&&!(safeMode&&choice.entry.kind!=='theme');
  async function load(){const data=await accountRequest(token,'extension-repositories');repos=data.repositories;versions=data.installed;core=data.coreVersion;if(source&&!repos.some(r=>r.id===source))source=''}
@@ -32,6 +33,7 @@
 </script>
 
 <section class="repository-store" aria-busy={busy}>
+ {#if !choice&&groupedComponents.length}<label><input type="checkbox" bind:checked={showComponents}/> Afficher les composants techniques des familles</label>{/if}
  {#if choice}<button class="back-link" disabled={busy} onclick={()=>open(null)}>← Retour au catalogue</button>{/if}
  <span class="eyebrow">À VOTRE CHOIX</span><h3 bind:this={heading} tabindex="-1">{choice?choice.entry.name:'Le catalogue des extensions'}</h3>
  {#if error}<p class="form-error" role="alert">{error}</p>{/if}

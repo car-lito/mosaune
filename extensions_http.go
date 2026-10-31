@@ -201,7 +201,7 @@ func (c *catalog) extensionRoutes(mux *secureMux) {
 				return
 			}
 		}
-		if _, e = c.db.ExecContext(r.Context(), "UPDATE extensions SET enabled=? WHERE id=?", in.Enabled, p.Manifest.ID); e != nil {
+		if e = c.setUIScreenState(r.Context(), p, in.Enabled); e != nil {
 			problem(w, 500, "État non enregistré.")
 			return
 		}

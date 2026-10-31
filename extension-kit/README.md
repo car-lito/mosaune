@@ -1,3 +1,7 @@
+**Regroupements 0.0.46 :** les manifestes de composition fournis réunissent programmes et écrans avec un cycle commun. Ils ne sont pas encore un format d’archive installable depuis un dépôt. [Contrat et limites](../extensions/MEDIA-BUNDLES.md).
+
+**Orientation confirmée après la 0.0.45 :** les composants techniques restent modulaires mais sont distribués dans quelques extensions principales, avec des points de remplacement ou de contribution explicites. [Architecture des extensions regroupées et prochaine migration](../ARCHITECTURE-EXTENSIONS-GROUPEES.md). Le format regroupé reste à implémenter.
+
 **0.0.45 :** le module TMDB de démarrage est désormais installé depuis son archive signée dans provider_packages et le registre, une seule fois (schéma 29). effectiveEngine charge exclusivement le paquet installé ; aucun programme fourni de remplacement. Retrait, absence persistante et réinstallation explicite suivent le même cycle que les imports. Les archives du catalogue inclus restent disponibles hors ligne. [Migration et limites](../ESSAYER-TMDB-045.md).
 
 ## Informations musicales (0.0.33)

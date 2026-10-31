@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "id": "org.mosaune.media.series",
+  "name": "Séries",
+  "version": "1.0.0",
+  "kind": "series",
+  "components": [
+    {
+      "slot": "series",
+      "composition": "exclusive",
+      "shared": false
+    },
+    {
+      "slot": "catalogue-series",
+      "composition": "exclusive",
+      "shared": false
+    },
+    {
+      "slot": "detail-series",
+      "composition": "exclusive",
+      "shared": false
+    },
+    {
+      "slot": "detail-information",
+      "composition": "exclusive",
+      "shared": true
+    },
+    {
+      "slot": "detail-header",
+      "composition": "exclusive",
+      "shared": true
+    },
+    {
+      "slot": "detail-experience",
+      "composition": "exclusive",
+      "shared": true
+    }
+  ],
+  "screen": "org.mosaune.screens.series"
+}

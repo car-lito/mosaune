@@ -1,3 +1,13 @@
+## 0.0.46 — familles médias et composants avancés
+
+Validation locale : 179 tests serveur validés (suite complète puis les six tests de regroupement après correction d’une fixture d’autorisation), 33 tests web, kit et analyses Go, Svelte sans erreur ni avertissement, trois exécutables Windows/Linux amd64/Linux ARM64. Trois essais serveur optionnels ignorés sur cette machine. Parcours HTTP avec redémarrage et parcours navigateur sur une installation temporaire. Aucun déploiement NAS.
+
+- Manifestes de regroupement fournis pour Films, Séries et Musique : composants exclusifs/partagés, écran et version de composition.
+- Préparation, désactivation et retrait des programmes déjà extraits et de leur écran dans une même transaction. Une erreur annule toute l’opération ; un aperçu périmé est refusé.
+- Migration schéma 30 sans activation ni réinstallation implicite. Choix des remplaçants et droits existants conservés ; conflits vérifiés sur toutes les rubriques d’un écran alternatif.
+- Cartes principales regroupées ; composants techniques fournis dans les réglages avancés et filtre du catalogue.
+- Archives de familles, mises à jour coordonnées, cumul de contributions et services encore intégrés restent à terminer. [Essai et limites](ESSAYER-LES-FAMILLES-046.md).
+
 ## 0.0.45 — distribution du module TMDB
 
 Validation locale : 173 tests serveur, 33 tests interface, kit et analyses Go, Svelte sans erreur ni avertissement, trois exécutables Windows/Linux amd64/Linux ARM64. Parcours HTTP sur un vrai serveur Windows temporaire : retrait, redémarrage, activation refusée sans paquet, réinstallation puis activation. Vérifications conteneurs déléguées à GitHub Actions ; aucun déploiement NAS.
