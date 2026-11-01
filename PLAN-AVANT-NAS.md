@@ -1,3 +1,9 @@
+## Étape 0.0.51 — contrat des sources de découverte
+
+- [x] Déclarations de recherche/sélections et routage générique dans les écrans.
+- [x] Plusieurs sources de recherche compatibles et refus serveur des fonctions non déclarées.
+- [ ] Distribuer ces déclarations et tous les adaptateurs par paquets indépendants ; extraire les profils, associations et playlists restants.
+
 ## Étape 0.0.50 — recherche locale dans les familles
 
 - [x] Index de recherche déclaré par les composants de catalogue, titres et priorités, groupes/fichiers, libellés et formats d’aperçu.

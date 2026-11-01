@@ -1,3 +1,14 @@
+## 0.0.51 — déclaration commune de recherche et de découverte
+
+Validation : 200 tests serveur, 45 tests web, contrôles Svelte/Go et essai HTTP sur installation temporaire réussis. Trois exécutables reconstruits ; aucun déploiement NAS.
+
+- Contrat discovery/v1 : types recherchables, libellés, suggestions similaires et sélections nommées, avec sélecteur de type ou de contributeur.
+- Recherche sur plusieurs fournisseurs compatibles, jusqu’à six requêtes ; erreurs d’une source indépendantes des autres. Les messages et champs de recherche ne citent plus TMDB en dur.
+- Les lignes de découverte ne connaissent plus MusicBrainz : le fournisseur indique si des contributeurs identifiés sont requis. Trois contributeurs visibles maximum, aucun nom deviné.
+- Les écrans peuvent référencer une source et une sélection nommées sans liste spécifique aux fournisseurs dans le noyau. Le serveur refuse les fonctions non déclarées ; les déclarations n’accordent aucun droit réseau supplémentaire.
+- Compatibilité de recherche pour les anciens adaptateurs sans déclaration, absence explicite respectée. Pas de migration de base ni nouvelle carte d’extension.
+- Limite : déclarations livrées par les adaptateurs actuels, pas encore chargeables depuis tout paquet fournisseur externe. MusicBrainz et des services de découverte restent intégrés. [Guide](ESSAYER-LA-DECOUVERTE-051.md).
+
 ## 0.0.50 — index de recherche fourni par les catalogues
 
 Validation : 40 tests web, kit, contrôles Svelte/Go, quatre tests serveur ciblés et essai HTTP isolé réussis. Trois exécutables reconstruits. Suite serveur complète locale interrompue pour lenteur ; contrôles GitHub à consulter pour sa validation intégrale.

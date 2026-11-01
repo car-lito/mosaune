@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	discovery "mosaune/extensionkit/discovery/v1"
 	presentation "mosaune/extensionkit/presentation/v1"
 )
 
@@ -17,17 +18,18 @@ type MetadataProvider interface {
 }
 
 type ProviderInfo struct {
-	Enabled            bool     `json:"enabled"`
-	Discovery          bool     `json:"discovery"`
-	ID                 string   `json:"id"`
-	Name               string   `json:"name"`
-	ContractVersion    int      `json:"contractVersion"`
-	Kinds              []string `json:"kinds"`
-	Configured         bool     `json:"configured"`
-	RequiresCredential bool     `json:"requiresCredential"`
-	NetworkHosts       []string `json:"networkHosts"`
-	Attribution        string   `json:"attribution"`
-	Website            string   `json:"website"`
+	Catalogue          *discovery.Surface `json:"catalogue,omitempty"`
+	Enabled            bool               `json:"enabled"`
+	Discovery          bool               `json:"discovery"`
+	ID                 string             `json:"id"`
+	Name               string             `json:"name"`
+	ContractVersion    int                `json:"contractVersion"`
+	Kinds              []string           `json:"kinds"`
+	Configured         bool               `json:"configured"`
+	RequiresCredential bool               `json:"requiresCredential"`
+	NetworkHosts       []string           `json:"networkHosts"`
+	Attribution        string             `json:"attribution"`
+	Website            string             `json:"website"`
 }
 type MetadataQuery struct {
 	Kind  string

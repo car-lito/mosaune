@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	discovery "mosaune/extensionkit/discovery/v1"
 	"slices"
 )
 
@@ -105,11 +106,8 @@ func validUIFeed(b uiBlock) bool {
 	if b.Source != "remote" {
 		return b.Provider == "" && b.Shelf == ""
 	}
-	// These are versioned host service names, not URLs or executable instructions.
-	if b.Provider == "tmdb" {
-		return b.View == "films" && (b.Shelf == "now_playing" || b.Shelf == "upcoming") || b.View == "series" && b.Shelf == "popular"
-	}
-	return b.Provider == "musicbrainz" && b.View == "music" && b.Shelf == "upcoming"
+	// Named operations only; support is checked against the active provider at runtime.
+	return uiKindKnown(b.View) && discovery.Identifier(b.Provider) && discovery.Identifier(b.Shelf)
 }
 func uiNavigationOrder(p uiPage) int {
 	for i, b := range uiBuiltins() {

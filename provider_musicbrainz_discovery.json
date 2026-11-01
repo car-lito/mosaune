@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "search": [
+    {
+      "kind": "music",
+      "label": "Musique",
+      "placeholder": "Rechercher un album, un artiste, un morceau…",
+      "similar": true
+    }
+  ],
+  "shelves": [
+    {
+      "id": "upcoming",
+      "kind": "music",
+      "label": "Prochaines sorties de vos artistes",
+      "selector": "contributors"
+    }
+  ]
+}

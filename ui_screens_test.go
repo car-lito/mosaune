@@ -28,7 +28,7 @@ func TestUIScreensValidation(t *testing.T) {
 		"hidden claim":       func(m *extensionManifest) { m.Pages[0].Placement = "hidden" },
 		"unsupported source": func(m *extensionManifest) { m.Pages[0].Blocks[0].Source = "files" },
 		"remote URL":         func(m *extensionManifest) { m.Pages[0].Blocks[3].Provider = "http://localhost/private" },
-		"unsupported feed":   func(m *extensionManifest) { m.Pages[0].Blocks[3].Shelf = "secrets" },
+		"invalid feed ID":    func(m *extensionManifest) { m.Pages[0].Blocks[3].Shelf = "../secrets" },
 		"duplicate remote":   func(m *extensionManifest) { m.Pages[0].Blocks = append(m.Pages[0].Blocks, m.Pages[0].Blocks[3]) },
 		"old core":           func(m *extensionManifest) { m.MinCore = "0.0.41" },
 		"mixed fields":       func(m *extensionManifest) { m.Pages[0].Blocks[0].Type = "text" },

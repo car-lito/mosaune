@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "search": [
+    {
+      "kind": "films",
+      "label": "Films",
+      "placeholder": "Rechercher un film…",
+      "similar": true
+    },
+    {
+      "kind": "series",
+      "label": "Séries",
+      "placeholder": "Rechercher une série…",
+      "similar": true
+    }
+  ],
+  "shelves": [
+    {
+      "id": "now_playing",
+      "kind": "films",
+      "label": "En ce moment au cinéma",
+      "selector": "kind"
+    },
+    {
+      "id": "upcoming",
+      "kind": "films",
+      "label": "Prochainement au cinéma",
+      "selector": "kind"
+    },
+    {
+      "id": "popular",
+      "kind": "series",
+      "label": "Les séries du moment",
+      "selector": "kind"
+    }
+  ]
+}

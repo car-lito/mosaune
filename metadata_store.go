@@ -12,6 +12,7 @@ import (
 	"image/jpeg"
 	_ "image/png"
 	"io"
+	discovery "mosaune/extensionkit/discovery/v1"
 )
 
 type databaseAccess interface {
@@ -150,6 +151,16 @@ func (c *catalog) providerInfo(ctx context.Context) []ProviderInfo {
 		info := p.Info()
 		info.Enabled = providerEnabled(p)
 		_, info.Discovery = p.(DiscoveryProvider)
+		surface, e := providerDiscoverySurface(p)
+		if e != nil {
+			info.Discovery = false
+			info.Catalogue = &discovery.Surface{Version: 1}
+		} else {
+			info.Catalogue = surface
+			if surface != nil && len(surface.Search) == 0 {
+				info.Discovery = false
+			}
+		}
 		info.Configured = !info.RequiresCredential || c.credential(ctx, info.ID) != ""
 		infos = append(infos, info)
 	}
