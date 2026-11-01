@@ -1,3 +1,14 @@
+## 0.0.50 — index de recherche fourni par les catalogues
+
+Validation : 40 tests web, kit, contrôles Svelte/Go, quatre tests serveur ciblés et essai HTTP isolé réussis. Trois exécutables reconstruits. Suite serveur complète locale interrompue pour lenteur ; contrôles GitHub à consulter pour sa validation intégrale.
+
+- Les composants de catalogue fournissent leurs candidats de recherche : groupe/fichier, titres, mots-clés, priorités et présentation. Films, Séries et Musique restent trois familles visibles.
+- Recherche locale générique, accents neutralisés, plusieurs mots, titres exacts prioritaires, dédoublonnage des œuvres distantes contre groupes et fichiers locaux.
+- Séries et épisodes, albums et morceaux peuvent être proposés séparément. Index fourni seulement à partir des métadonnées autorisées, sans nouvelles permissions ni moteur à chaque frappe.
+- Migration SQLite 33 des seuls catalogues officiels installés 0.1 vers 0.2, conservant états et remplaçants. Les anciens composants gardent une recherche générique par nom de fichier ; un index explicitement vide est respecté.
+- Exemple contributeur enrichi ; familles d’exemple 3.0/3.1 exigeant 0.0.50, sans écraser les archives publiques 2.x.
+- La recherche distante, la découverte et les autres services métier restent à extraire. [Guide](ESSAYER-LA-RECHERCHE-050.md).
+
 ## 0.0.49 — retour arrière coordonné des familles
 
 Validation locale : 195 tests serveur réussis, 3 essais optionnels ignorés, 33 tests web, Svelte sans erreur ni avertissement, kit et analyses Go réussis. Exécutables Windows/Linux amd64/Linux ARM64 construits. Parcours HTTP réel sur une installation isolée : archives officielles 2.0 puis 2.1, redémarrage, retour à 2.0 avec activation conservée, second redémarrage, réinstallation de 2.1. Aucun contrôle visuel navigateur ni déploiement NAS effectué.

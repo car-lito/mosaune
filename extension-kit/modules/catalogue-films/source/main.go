@@ -5,4 +5,4 @@ import (
 	"mosaune/extensionkit/modules/cataloguer/rules"
 )
 
-func main() { cataloguer.Serve(rules.Film) }
+func main() { cataloguer.Serve(rules.FilmSearch) }

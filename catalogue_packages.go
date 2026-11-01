@@ -100,6 +100,10 @@ func loadFactProjector(ctx context.Context, d protocol.Descriptor, code []byte, 
 		limits.InputBytes = 1 << 20
 		limits.OutputBytes = 1 << 20
 	}
+	if capability == "media.catalogue.v1" {
+		// Larger search replies need time for JSON processing in the interpreter.
+		limits.Timeout = 4 * time.Second
+	}
 	limits.Interpreter = true
 	e, err := runtime.New(ctx, limits)
 	if err != nil {
@@ -208,7 +212,7 @@ func (c *catalog) projectCatalogue(ctx context.Context, items []media) []string 
 			continue
 		}
 		err := func() error {
-			timeout, stop := context.WithTimeout(ctx, 15*time.Second)
+			timeout, stop := context.WithTimeout(ctx, 45*time.Second)
 			defer stop()
 			call, done, d, code, err := c.beginRecognition(timeout, "catalogue-"+kind)
 			if err != nil {
@@ -247,7 +251,8 @@ func (c *catalog) projectCatalogue(ctx context.Context, items []media) []string 
 			projections := make([]catalogueProjection, 0, len(indices))
 			for start := 0; start < len(indices); {
 				q := catalogue.Query{}
-				for start < len(indices) && len(q.Items) < catalogue.BatchSize {
+				// Keep interpreter work bounded with richer search projections.
+				for start < len(indices) && len(q.Items) < 64 {
 					q.Items = append(q.Items, facts[start])
 					encoded, _ := json.Marshal(q)
 					if len(encoded) > 48<<10 {

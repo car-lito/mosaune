@@ -36,11 +36,12 @@ type Query struct {
 // Empty Key means an individual item. Keys are scoped by host to kind and owner.
 // Replies correspond by position and cannot reference hidden catalogue entries.
 type Item struct {
-	Key      string `json:"key"`
-	Title    string `json:"title"`
-	Subtitle string `json:"subtitle"`
-	Order    [2]int `json:"order"`
-	SortText string `json:"sortText"`
+	Search   *SearchIndex `json:"search,omitempty"`
+	Key      string       `json:"key"`
+	Title    string       `json:"title"`
+	Subtitle string       `json:"subtitle"`
+	Order    [2]int       `json:"order"`
+	SortText string       `json:"sortText"`
 }
 type Result struct {
 	Items []Item `json:"items"`
@@ -70,7 +71,11 @@ func (r Result) Validate(q Query) error {
 	if q.Validate() != nil || len(r.Items) != len(q.Items) {
 		return errors.New("invalid catalogue reply")
 	}
+	// The transport enforces its 256 KiB output limit before decoding.
 	for _, v := range r.Items {
+		if err := v.Search.Validate(); err != nil {
+			return err
+		}
 		if strings.TrimSpace(v.Title) == "" {
 			return errors.New("empty catalogue title")
 		}

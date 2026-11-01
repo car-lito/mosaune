@@ -3,18 +3,16 @@
  import Icon from './Icon.svelte';
  import SearchResultContent from './SearchResultContent.svelte';
  import {searchPresentation} from './search-presentation';
- import {groupMedia} from './collection';
- import {groupCard,workCard,type Card} from './experience';
+ import {localSearch,mergeSearch} from './catalogue-search';
+ import type {Card} from './experience';
  import type {Entry,Kind,Provider,Work} from './types';
  export let works:Work[]=[];export let entries:Entry[];export let providers:Provider[];export let kinds:Kind[];export let context:string;export let token:string;export let open:(card:Card)=>void;
  let query='';let expanded=false;let searching=false;let remote:Work[]=[];let warning='';let timer:ReturnType<typeof setTimeout>;let abort:AbortController|undefined;let serial=0;let activeIndex=-1;let input:HTMLInputElement;
  let scope:Kind[]=[];let results:Card[]=[];
  $: scope=kinds.includes(context as Kind)?[context as Kind]:kinds;
  $: label=scope.length===1?(scope[0]==='music'?'Rechercher un album, un artiste, un morceau…':scope[0]==='series'?'Rechercher une série…':'Rechercher un film…'):'Rechercher dans Mosaune…';
- $: groupResults=query.trim()?groupMedia(entries.filter(e=>scope.includes(e.kind))).filter(g=>[g.title,g.subtitle,...g.entries.map(e=>e.metadata?.title||e.name)].join(' ').toLocaleLowerCase('fr').includes(query.toLocaleLowerCase('fr').trim())).slice(0,8).map(groupCard):[];
- $: trackResults=query.trim()&&scope.includes('music')?entries.filter(e=>e.kind==='music'&&(e.metadata?.title||e.name).toLocaleLowerCase('fr').includes(query.toLocaleLowerCase('fr').trim())).slice(0,4).map<Card>(e=>({key:'track:'+e.id,title:e.metadata?.title||e.name,subtitle:e.metadata?.artist||'',kind:e.kind,local:true,entry:e,image:e.metadata?.imageId?`/api/v1/artwork/${e.metadata.imageId}`:undefined})):[];
- $: local=[...groupResults,...trackResults];
- $: results=[...local,...remote.filter(w=>!local.some(c=>c.group?.entries.some(e=>e.workId===w.id||(e.metadata?.provider===w.metadata.provider&&e.metadata?.providerId===w.metadata.providerId&&e.kind===w.kind)))).slice(0,12).map(workCard)];
+ $: local=localSearch(entries,scope,query,works);
+ $: results=[...local,...mergeSearch(local,remote)];
  $: providerStamp=providers.map(p=>p.id+':'+p.enabled+':'+p.configured).join('|');
  let previousProviders='';
  $: if(providerStamp!==previousProviders){previousProviders=providerStamp;close();remote=[];warning='';}

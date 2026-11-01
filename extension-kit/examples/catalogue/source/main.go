@@ -2,6 +2,7 @@ package main
 
 import (
 	catalogue "mosaune/extensionkit/capabilities/catalogue/v1"
+	presentation "mosaune/extensionkit/presentation/v1"
 	"mosaune/extensionkit/protocol"
 	"mosaune/extensionkit/sdk"
 	"os"
@@ -26,7 +27,7 @@ func main() {
 		}
 		out := catalogue.Result{Items: make([]catalogue.Item, len(q.Items))}
 		for i, f := range q.Items {
-			out.Items[i] = catalogue.Item{Title: f.Name, Subtitle: "Exemple contributeur", SortText: f.Name}
+			out.Items[i] = catalogue.Item{Title: f.Name, Subtitle: "Exemple contributeur", SortText: f.Name, Search: &catalogue.SearchIndex{Version: 1, Entries: []catalogue.SearchEntry{{Target: "item", Title: f.Name, Subtitle: "Exemple contributeur", Terms: []string{f.Name, "collection démo"}, Priority: 80, Presentation: &presentation.Result{Version: 1, Label: "Piste démo", Keywords: []string{"Contribution"}, Preview: &presentation.Preview{AspectRatio: 1, Shape: "circle", Fit: "contain"}}}}}}
 		}
 		if out.Validate(q) != nil {
 			return fail()

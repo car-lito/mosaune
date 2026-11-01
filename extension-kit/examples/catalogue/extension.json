@@ -3,10 +3,10 @@
   "name": "Albums individuels — exemple",
   "publisher": "Exemple contributeur",
   "description": "Présente chaque morceau séparément pour démontrer le remplacement des règles de catalogue.",
-  "minCore": "0.0.35",
+  "minCore": "0.0.50",
   "module": {
     "id": "example.music.individual",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "capabilities": [
       "media.catalogue.v1"
     ]

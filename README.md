@@ -1,3 +1,5 @@
+**Préversion 0.0.50 :** les extensions de catalogue définissent aussi leurs résultats de recherche locale, leurs mots-clés et leurs vignettes. [Guide d’essai](ESSAYER-LA-RECHERCHE-050.md).
+
 **Préversion 0.0.49 :** retour coordonné à la version précédente d’une famille depuis sa fiche. [Guide d’essai](ESSAYER-LE-RETOUR-ARRIERE-049.md). Le découpage complet et les lecteurs restent en cours ; pas encore de déploiement NAS recommandé.
 
 **0.0.48 :** installation et mise à jour des familles depuis le catalogue GitHub, avec aperçu commun à l’import local et choix conservés. [Essayer](ESSAYER-LE-CATALOGUE-048.md).

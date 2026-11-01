@@ -1,6 +1,6 @@
 # Vers un Mosaune entièrement extensible
 
-État du 1er novembre 2026 · étape 0.0.49.
+État du 1er novembre 2026 · étape 0.0.50.
 
 **Environ 70 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
@@ -20,7 +20,7 @@ La référence est exigeante : une fonction doit pouvoir être installée, désa
 
 La cible est désormais **quelques grandes extensions visibles, composées de sous-composants extensibles**. Films, Séries et Musique regroupent leurs comportements et écrans ; leurs composants restent remplaçables ou cumulables selon un contrat explicite. Les fournisseurs, connecteurs et thèmes restent des ajouts distincts lorsqu’ils ont un usage propre. Les dépendances techniques ne multiplient pas les cartes par défaut.
 
-[Architecture et ordre de migration](ARCHITECTURE-EXTENSIONS-GROUPEES.md). Priorité à un vrai cycle de vie par paquet principal, puis à sa présentation. La 0.0.46 implémente le regroupement des composants extraits et des écrans, avec opérations transactionnelles et réglages avancés. La 0.0.47 ajoute les archives locales et leurs mises à jour coordonnées. La 0.0.48 ajoute le catalogue distant, ses exemples et le même aperçu d’installation. La 0.0.49 ajoute le retour coordonné des composants mis à jour, sans rétrograder les partagés ni les remplaçants choisis. Leur indépendance complète reste ouverte ; estimation globale conservée à 70 %, aucun nouveau service métier extrait.
+[Architecture et ordre de migration](ARCHITECTURE-EXTENSIONS-GROUPEES.md). Priorité à un vrai cycle de vie par paquet principal, puis à sa présentation. La 0.0.46 implémente le regroupement des composants extraits et des écrans, avec opérations transactionnelles et réglages avancés. La 0.0.47 ajoute les archives locales et leurs mises à jour coordonnées. La 0.0.48 ajoute le catalogue distant, ses exemples et le même aperçu d’installation. La 0.0.49 ajoute le retour coordonné des composants mis à jour, sans rétrograder les partagés ni les remplaçants choisis. La 0.0.50 extrait l’indexation de la recherche locale dans les catalogues existants. Leur indépendance complète reste ouverte ; l’estimation globale reste approximativement 70 %, la recherche distante et les autres services restant intégrés.
 
 ## Checklist
 
@@ -39,6 +39,7 @@ La cible est désormais **quelques grandes extensions visibles, composées de so
 - [x] Reconnaissance des fichiers Films, Séries et Musique.
 - [x] Lecture des informations et pochettes intégrées aux fichiers musicaux.
 - [x] Regroupement et classement des catalogues.
+- [x] Indexation des résultats de recherche locale (groupes/fichiers, mots-clés, priorités et présentation) dans les mêmes composants.
 - [x] Saisons et listes d’épisodes.
 - [x] Résumés, informations, distribution et bandes-annonces des fiches.
 - [x] Titres et informations de l’en-tête des fiches.

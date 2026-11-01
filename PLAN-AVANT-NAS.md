@@ -1,3 +1,10 @@
+## Étape 0.0.50 — recherche locale dans les familles
+
+- [x] Index de recherche déclaré par les composants de catalogue, titres et priorités, groupes/fichiers, libellés et formats d’aperçu.
+- [x] Moteur de filtrage générique et exemple contributeur sans modification de l’interface.
+- [ ] Orchestration distante de recherche/découverte, profils, associations, playlists et adaptateurs des commandes.
+- [ ] Optimiser le calcul initial et le cache de recherche des grosses bibliothèques, puis mesurer sur ARM/Pi.
+
 ## Étape 0.0.49 — retour à la version précédente
 
 - [x] Point de restauration par mise à jour, aperçu, retour transactionnel et conservation des choix/droits/états.
