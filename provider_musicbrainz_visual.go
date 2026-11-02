@@ -179,7 +179,9 @@ func (p *musicBrainzProvider) visualArtwork(ctx context.Context, ref string) ([]
 	if len(parts) == 2 {
 		group = parts[1]
 	} else {
-		var release mbRelease
+		var release struct {
+			Group struct{ ID string } `json:"release-group"`
+		}
 		if p.get(ctx, "/release/"+parts[0], url.Values{"inc": {"release-groups"}}, &release) == nil {
 			group = release.Group.ID
 		}
@@ -191,19 +193,22 @@ func (p *musicBrainzProvider) visualArtwork(ctx context.Context, ref string) ([]
 	return nil, errors.New("Aucune pochette renseignée pour cette édition.")
 }
 func (p *musicBrainzProvider) ResolveArtist(ctx context.Context, name string) ([]Contributor, error) {
-	var response struct {
-		Artists []struct {
-			ID             string
-			Name           string
-			Disambiguation string
-		}
+	ctx, done, e := p.openMusicResults(ctx)
+	if e != nil {
+		return nil, e
 	}
-	err := p.get(ctx, "/artist/", url.Values{"query": {"artist:" + mbQuote(name)}, "limit": {"8"}}, &response)
+	defer done()
+	var raw json.RawMessage
+	if e = p.get(ctx, "/artist/", url.Values{"query": {"artist:" + mbQuote(name)}, "limit": {"8"}}, &raw); e != nil {
+		return nil, e
+	}
+	decoded, e := p.decodeMusic(ctx, "artists", "", 1, raw)
+	if e != nil {
+		return nil, e
+	}
 	out := []Contributor{}
-	for _, artist := range response.Artists {
-		if mbID.MatchString(artist.ID) {
-			out = append(out, Contributor{ID: artist.ID, Name: truncate(artist.Name, 200), Role: truncate(artist.Disambiguation, 300)})
-		}
+	for _, a := range decoded.Artists {
+		out = append(out, Contributor{ID: a.ID, Name: a.Name, Role: a.Role})
 	}
-	return out, err
+	return out, nil
 }

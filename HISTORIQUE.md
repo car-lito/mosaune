@@ -1,3 +1,14 @@
+## 0.0.53 — interprétation MusicBrainz dans un composant remplaçable
+
+Validation : 203 tests serveur réussis (dont 17 relancés après adaptation des scénarios de migration), 45 tests web, tests du kit, contrôles Svelte/Go et trois exécutables construits. Essai HTTP sur installation neuve : désactivation/réactivation du composant et redémarrage vérifiés. Aucun déploiement NAS.
+
+- Albums, éditions, pistes, crédits et artistes sont interprétés par un programme Wasm installé dans la famille Musique. L'implémentation Go correspondante n'est plus liée au noyau.
+- Contrat metadata.music-results.v1, validation à l'entrée et à la sortie, absence de service réseau ou d'accès aux fichiers pour le programme. Le serveur conserve le transport MusicBrainz, le cache et les images : le fournisseur n'est pas encore entièrement extrait.
+- Désactivation/retrait sans repli natif, annulation des opérations actives, choix d'un paquet externe et conservation du cache commun. Migration 34 : les choix musique désactivés ou absents restent respectés ; aucune réinstallation au redémarrage après retrait.
+- Regroupement dans Musique ; exemples de familles 4.0/4.1 avec versions minimales adaptées. Les archives publiées précédemment ne sont pas remplacées.
+- Réponses JSON limitées à 512 Kio pour ce composant, enveloppe 1 Mio et mémoire linéaire plafonnée à 64 Mio, sans changement des plafonds globaux. Une réponse trop volumineuse échoue explicitement et conserve les métadonnées existantes.
+- Test des conteneurs corrigé : la version attendue du paquet TMDB initial est 0.6.0. C'était la cause de l'échec du contrôle conteneur 0.0.52, après réussite des tests Windows/Linux.
+
 ## 0.0.52 — découverte déclarée par le paquet TMDB installé
 
 Validation : 201 tests serveur réussis (dont 10 contrôles réseau relancés après autorisation de l’environnement), 45 tests web, Svelte sans erreur ni avertissement, tests du kit et analyses Go réussis. Trois exécutables construits ; essai HTTP sur installation neuve avec le paquet signé 0.6.0 et redémarrage réussi. Aucun parcours navigateur ni déploiement NAS.

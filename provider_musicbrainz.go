@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	presentation "mosaune/extensionkit/presentation/v1"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -17,17 +16,19 @@ import (
 )
 
 type musicBrainzProvider struct {
-	db     *sql.DB
-	client *http.Client
-	base   string
-	mu     sync.Mutex
-	next   time.Time
+	owner       *catalog
+	resultsGate chan struct{}
+	db          *sql.DB
+	client      *http.Client
+	base        string
+	mu          sync.Mutex
+	next        time.Time
 }
 
 var mbID = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
 
 func newMusicBrainzProvider(db *sql.DB) *musicBrainzProvider {
-	return &musicBrainzProvider{db: db, base: "https://musicbrainz.org/ws/2", client: &http.Client{Timeout: 12 * time.Second, CheckRedirect: func(r *http.Request, via []*http.Request) error {
+	return &musicBrainzProvider{owner: &catalog{db: db}, resultsGate: make(chan struct{}, 1), db: db, base: "https://musicbrainz.org/ws/2", client: &http.Client{Timeout: 12 * time.Second, CheckRedirect: func(r *http.Request, via []*http.Request) error {
 		host := r.URL.Hostname()
 		if len(via) > 5 || r.URL.User != nil || (r.URL.Scheme != "https" && r.URL.Scheme != "http") || r.URL.Port() != "" || !(host == "coverartarchive.org" || host == "archive.org" || strings.HasSuffix(host, ".archive.org") || host == "www.wikidata.org" || host == "commons.wikimedia.org" || host == "upload.wikimedia.org" || host == "thumb.wikimedia.org") {
 			return errors.New("Redirection refusée.")
@@ -91,106 +92,37 @@ func (p *musicBrainzProvider) get(ctx context.Context, endpoint string, params u
 	return nil
 }
 
-type mbCredit struct {
-	Name   string
-	Join   string `json:"joinphrase"`
-	Artist struct {
-		ID   string
-		Name string
-	}
-}
-type mbRelease struct {
-	ID             string
-	Title          string
-	Date           string
-	Country        string
-	Disambiguation string
-	Group          struct {
-		ID          string
-		PrimaryType string `json:"primary-type"`
-	} `json:"release-group"`
-	Credits []mbCredit `json:"artist-credit"`
-	Media   []struct {
-		Position int
-		Format   string
-		Tracks   []struct {
-			ID        string
-			Title     string
-			Position  int
-			Length    int
-			Credits   []mbCredit `json:"artist-credit"`
-			Recording struct {
-				Title   string
-				Length  int
-				Credits []mbCredit `json:"artist-credit"`
-			}
-		}
-	}
-	Cover struct{ Front bool } `json:"cover-art-archive"`
-}
-
-func mbPeople(credits []mbCredit) []Contributor {
-	out := []Contributor{}
-	for _, c := range credits {
-		if len(out) >= 30 {
-			break
-		}
-		if mbID.MatchString(c.Artist.ID) {
-			out = append(out, Contributor{ID: c.Artist.ID, Name: truncate(c.Artist.Name, 200), Role: "Artiste"})
-		}
-	}
-	return out
-}
-func mbArtist(credits []mbCredit) string {
-	var b strings.Builder
-	for _, c := range credits {
-		name := c.Name
-		if name == "" {
-			name = c.Artist.Name
-		}
-		b.WriteString(name + c.Join)
-	}
-	return truncate(b.String(), 500)
-}
-func mbMetadata(r mbRelease) Metadata {
-	year := 0
-	if len(r.Date) >= 4 {
-		year, _ = strconv.Atoi(r.Date[:4])
-	}
-	ref := r.ID
-	if mbID.MatchString(r.Group.ID) {
-		ref += "/" + r.Group.ID
-	}
-	label := map[string]string{"Album": "Album", "Single": "Single", "EP": "EP", "Broadcast": "Émission"}[r.Group.PrimaryType]
-	if label == "" {
-		label = "Sortie musicale"
-	}
-	return Metadata{Presentation: &presentation.Result{Version: 1, Label: label, Preview: &presentation.Preview{AspectRatio: 1, Shape: "rectangle", Fit: "cover"}}, Title: truncate(r.Title, 500), Album: truncate(r.Title, 500), Artist: mbArtist(r.Credits), AlbumArtist: mbArtist(r.Credits), Year: year, ReleaseDate: r.Date, Provider: "musicbrainz", ProviderID: r.ID, MatchState: "matched", Contributors: mbPeople(r.Credits), ArtworkRef: ref, Edition: truncate(strings.Trim(r.Country+" · "+r.Date+" · "+r.Disambiguation, " ·"), 400)}
-}
 func mbQuote(s string) string {
 	return `"` + strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(s) + `"`
 }
 func (p *musicBrainzProvider) searchReleases(ctx context.Context, q string, page int) (DiscoveryPage, error) {
+	ctx, done, e := p.openMusicResults(ctx)
+	if e != nil {
+		return DiscoveryPage{}, e
+	}
+	defer done()
 	out := DiscoveryPage{Items: []Metadata{}, Page: page}
-	var response struct {
-		Count    int
-		Releases []mbRelease
+	var raw json.RawMessage
+	if e := p.get(ctx, "/release/", url.Values{"query": {q}, "limit": {"20"}, "offset": {strconv.Itoa((page - 1) * 20)}}, &raw); e != nil {
+		return out, e
 	}
-	if err := p.get(ctx, "/release/", url.Values{"query": {q}, "limit": {"20"}, "offset": {strconv.Itoa((page - 1) * 20)}}, &response); err != nil {
-		return out, err
+	decoded, e := p.decodeMusic(ctx, "releases", "", page, raw)
+	if e != nil {
+		return out, e
 	}
-	out.Pages = max(1, min(50, (response.Count+19)/20))
-	for _, r := range response.Releases {
-		if mbID.MatchString(r.ID) && r.Title != "" {
-			out.Items = append(out.Items, mbMetadata(r))
-		}
-		if len(out.Items) >= 20 {
-			break
-		}
+	out.Pages = decoded.Pages
+	for _, m := range decoded.Items {
+		out.Items = append(out.Items, musicResultMetadata(m))
 	}
 	return out, nil
 }
+
 func (p *musicBrainzProvider) Discover(ctx context.Context, _ string, q DiscoveryQuery) (DiscoveryPage, error) {
+	ctx, done, openErr := p.openMusicResults(ctx)
+	if openErr != nil {
+		return DiscoveryPage{}, openErr
+	}
+	defer done()
 	if q.Kind != "music" || q.Page < 1 || q.Page > 50 {
 		return DiscoveryPage{}, errors.New("Recherche musicale invalide.")
 	}
@@ -199,14 +131,18 @@ func (p *musicBrainzProvider) Discover(ctx context.Context, _ string, q Discover
 		if !mbID.MatchString(q.Seed) {
 			return DiscoveryPage{}, errors.New("Album invalide.")
 		}
-		var release mbRelease
-		if err := p.get(ctx, "/release/"+q.Seed, url.Values{"inc": {"artist-credits"}}, &release); err != nil {
-			return DiscoveryPage{}, err
+		var raw json.RawMessage
+		if e := p.get(ctx, "/release/"+q.Seed, url.Values{"inc": {"artist-credits"}}, &raw); e != nil {
+			return DiscoveryPage{}, e
 		}
-		if len(release.Credits) == 0 || !mbID.MatchString(release.Credits[0].Artist.ID) {
+		decoded, e := p.decodeMusic(ctx, "seed", q.Seed, 1, raw)
+		if e != nil {
+			return DiscoveryPage{}, e
+		}
+		if decoded.ArtistID == "" {
 			return DiscoveryPage{Items: []Metadata{}, Page: 1, Pages: 1}, nil
 		}
-		query = "arid:" + release.Credits[0].Artist.ID
+		query = "arid:" + decoded.ArtistID
 	}
 	return p.searchReleases(ctx, query, q.Page)
 }
@@ -219,67 +155,59 @@ func (p *musicBrainzProvider) Search(ctx context.Context, secret string, q Metad
 	return out, err
 }
 func (p *musicBrainzProvider) Details(ctx context.Context, _ string, q MetadataSelection) (Metadata, error) {
+	ctx, done, openErr := p.openMusicResults(ctx)
+	if openErr != nil {
+		return Metadata{}, openErr
+	}
+	defer done()
 	if q.Kind != "music" || !mbID.MatchString(q.ID) {
 		return Metadata{}, errors.New("Édition musicale invalide.")
 	}
-	var r mbRelease
-	if err := p.get(ctx, "/release/"+q.ID, url.Values{"inc": {"recordings+artist-credits+labels+release-groups"}}, &r); err != nil {
-		return Metadata{}, err
+	var raw json.RawMessage
+	if e := p.get(ctx, "/release/"+q.ID, url.Values{"inc": {"recordings+artist-credits+labels+release-groups"}}, &raw); e != nil {
+		return Metadata{}, e
 	}
-	m := mbMetadata(r)
-	m.DetailVersion = 2
-	m.Tracks = []CatalogTrack{}
-	for _, disc := range r.Media {
-		for _, track := range disc.Tracks {
-			if len(m.Tracks) >= 200 {
-				m.Edition += " · liste limitée à 200 pistes"
-				return m, nil
-			}
-			title := track.Title
-			if title == "" {
-				title = track.Recording.Title
-			}
-			credits := track.Credits
-			if len(credits) == 0 {
-				credits = track.Recording.Credits
-			}
-			if len(credits) == 0 {
-				credits = r.Credits
-			}
-			length := track.Length
-			if length == 0 {
-				length = track.Recording.Length
-			}
-			m.Tracks = append(m.Tracks, CatalogTrack{ID: track.ID, Title: truncate(title, 500), Disc: disc.Position, Number: track.Position, Duration: length / 1000, Artists: mbPeople(credits)})
-		}
+	decoded, e := p.decodeMusic(ctx, "release", q.ID, 1, raw)
+	if e != nil {
+		return Metadata{}, e
 	}
-	return m, nil
+	return musicResultMetadata(decoded.Items[0]), nil
 }
+
 func (p *musicBrainzProvider) Artwork(ctx context.Context, _ string, ref string) ([]byte, error) {
 	return p.visualArtwork(ctx, ref)
 }
 
 func (p *musicBrainzProvider) Shelf(ctx context.Context, _ string, shelf, artist string) (DiscoveryPage, error) {
+	ctx, done, openErr := p.openMusicResults(ctx)
+	if openErr != nil {
+		return DiscoveryPage{}, openErr
+	}
+	defer done()
 	if shelf != "upcoming" || !mbID.MatchString(artist) {
 		return DiscoveryPage{}, errors.New("Choisissez d’abord un album identifié pour connaître son artiste.")
 	}
 	return p.searchReleases(ctx, "arid:"+artist+" AND date:["+time.Now().UTC().Format("2006-01-02")+" TO *]", 1)
 }
 func (p *musicBrainzProvider) Profile(ctx context.Context, _ string, id string, page int) (PersonProfile, error) {
+	ctx, done, openErr := p.openMusicResults(ctx)
+	if openErr != nil {
+		return PersonProfile{}, openErr
+	}
+	defer done()
 	out := PersonProfile{ID: id, Page: page}
 	if !mbID.MatchString(id) {
 		return out, errors.New("Artiste invalide.")
 	}
-	var artist struct {
-		Name           string
-		Disambiguation string
-		Country        string
+	var raw json.RawMessage
+	if e := p.get(ctx, "/artist/"+id, nil, &raw); e != nil {
+		return out, e
 	}
-	if err := p.get(ctx, "/artist/"+id, nil, &artist); err != nil {
-		return out, err
+	decoded, e := p.decodeMusic(ctx, "artist", id, page, raw)
+	if e != nil {
+		return out, e
 	}
-	out.Name = truncate(artist.Name, 300)
-	out.Detail = truncate(strings.Trim(artist.Country+" · "+artist.Disambiguation, " ·"), 500)
+	out.Name, out.Detail = decoded.Name, decoded.Detail
 	releases, err := p.searchReleases(ctx, "arid:"+id, page)
 	if err != nil {
 		return out, err

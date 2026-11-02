@@ -20,6 +20,6 @@
  <div class="extension-actions"><button class="primary" disabled={busy} onclick={apply}>Installer ce paquet de famille</button><button class="text-action" disabled={busy} onclick={()=>{plan=null;file=null;input.value=''}}>Annuler</button></div>
  </div>{/if}
  <details><summary>Exemples pour les contributeurs</summary><p>Ces exemples réutilisent les fonctions actuelles avec des identifiants distincts. Ils servent à tester l’installation et une mise à jour ; ils n’ajoutent pas de lecteur.</p>
- {#each [{id:'films',name:'Films'},{id:'series',name:'Séries'},{id:'music',name:'Musique'}] as family}<p>{family.name} : <a href={'/api/v1/media-bundle-archives/example/'+family.id} download>Version 3.0</a> · <a href={'/api/v1/media-bundle-archives/example/'+family.id+'?version=3.1.0'} download>Version 3.1</a></p>{/each}
+ {#each [{id:'films',name:'Films'},{id:'series',name:'Séries'},{id:'music',name:'Musique'}] as family}<p>{family.name} : <a href={'/api/v1/media-bundle-archives/example/'+family.id} download>Version 4.0</a> · <a href={'/api/v1/media-bundle-archives/example/'+family.id+'?version=4.1.0'} download>Version 4.1</a></p>{/each}
  </details>
 </section>

@@ -81,7 +81,7 @@ func TestMediaSetsLifecycleAndPreservedData(t *testing.T) {
 		t.Fatal(p)
 	}
 	p = setPreview(t, c, "music", "disable")
-	if len(p.Steps) != 3 || len(p.Kept) != 3 {
+	if len(p.Steps) != 4 || len(p.Kept) != 3 {
 		t.Fatal(p)
 	}
 	if e = setApply(c, p); e != nil {
@@ -93,7 +93,7 @@ func TestMediaSetsLifecycleAndPreservedData(t *testing.T) {
 	}
 	defer reopened.close()
 	p = setPreview(t, reopened, "music", "prepare")
-	if len(p.Steps) != 3 {
+	if len(p.Steps) != 4 {
 		t.Fatal("disabled state lost", p)
 	}
 	if len(setPreview(t, reopened, "series", "prepare").Steps) != 0 {

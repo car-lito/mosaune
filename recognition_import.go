@@ -57,6 +57,9 @@ CREATE TABLE recognition_selection(kind TEXT PRIMARY KEY,id TEXT NOT NULL);`)
 func validateRecognitionImport(p packageformat.Executable) (string, error) {
 	m := p.Manifest
 	d := m.Module
+	if len(m.Contributions) == 1 && m.Contributions[0].Role == "metadata.music-results.v1" {
+		return musicResultsImport(p)
+	}
 	// Reserve factory identities. A local author's label is not an endorsement.
 	if strings.HasPrefix(d.ID, "mosaune.") {
 		return "", errors.New("Les identifiants mosaune.* sont réservés.")

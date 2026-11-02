@@ -177,7 +177,7 @@ func (c *catalog) mediaSetInputs(ctx context.Context, tx *sql.Tx) ([]recognition
 		return nil, nil, 0, err
 	}
 	list := []recognitionPackageView{}
-	names := map[string]string{}
+	names := map[string]string{"music-results": "Albums et artistes MusicBrainz"}
 	rows, err = tx.QueryContext(ctx, "SELECT id,kind,manifest FROM recognition_packages")
 	if err != nil {
 		return nil, nil, 0, err
@@ -233,7 +233,7 @@ func (c *catalog) mediaSetInputs(ctx context.Context, tx *sql.Tx) ([]recognition
 	return list, chosen, s.Revision, nil
 }
 func mediaSlotName(slot string) string {
-	names := map[string]string{"films": "Reconnaissance des films", "series": "Reconnaissance des séries", "music": "Reconnaissance musicale", "audiotags": "Informations des fichiers musicaux", "catalogue-films": "Catalogue des films", "catalogue-series": "Catalogue des séries", "catalogue-music": "Catalogue musical", "detail-series": "Saisons et épisodes", "detail-information": "Informations des fiches", "detail-header": "En-têtes des fiches", "detail-experience": "Comportements des fiches"}
+	names := map[string]string{"music-results": "Albums et artistes MusicBrainz", "films": "Reconnaissance des films", "series": "Reconnaissance des séries", "music": "Reconnaissance musicale", "audiotags": "Informations des fichiers musicaux", "catalogue-films": "Catalogue des films", "catalogue-series": "Catalogue des séries", "catalogue-music": "Catalogue musical", "detail-series": "Saisons et épisodes", "detail-information": "Informations des fiches", "detail-header": "En-têtes des fiches", "detail-experience": "Comportements des fiches"}
 	if name := names[slot]; name != "" {
 		return name
 	}

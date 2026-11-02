@@ -12,6 +12,6 @@ import (
 //go:embed provider_musicbrainz_discovery.json
 var musicBrainzDiscoverySurface []byte
 
-func (p *musicBrainzProvider) DiscoverySurface() discovery.Surface {
+func (p *musicBrainzProvider) legacyDiscoverySurface() discovery.Surface {
 	return readDiscoverySurface(musicBrainzDiscoverySurface)
 }

@@ -29,7 +29,7 @@ function wasm(output, source) {
 try {
   wasm('providers/tmdb/provider.wasm', './providers/tmdb/source');
   wasm('modules/audiotags/tags.wasm', './modules/audiotags/source');
-  for (const kind of ['films', 'series', 'music', 'catalogue-films', 'catalogue-series', 'catalogue-music', 'detail-series', 'detail-information', 'detail-header', 'detail-experience']) wasm(`modules/${kind}/recognizer.wasm`, `./modules/${kind}/source`);
+  for (const kind of ['music-results', 'films', 'series', 'music', 'catalogue-films', 'catalogue-series', 'catalogue-music', 'detail-series', 'detail-information', 'detail-header', 'detail-experience']) wasm(`modules/${kind}/recognizer.wasm`, `./modules/${kind}/source`);
   wasm('examples/recognition/module.wasm', './examples/recognition/source');
   wasm('examples/audiotags/module.wasm', './examples/audiotags/source');
   wasm('examples/detailexperience/module.wasm', './examples/detailexperience/source');

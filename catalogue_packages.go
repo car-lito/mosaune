@@ -104,6 +104,11 @@ func loadFactProjector(ctx context.Context, d protocol.Descriptor, code []byte, 
 		// Larger search replies need time for JSON processing in the interpreter.
 		limits.Timeout = 4 * time.Second
 	}
+	if capability == "metadata.music-results.v1" {
+		limits.InputBytes = 1 << 20
+		limits.OutputBytes = 512 << 10
+		limits.Timeout = 4 * time.Second
+	}
 	limits.Interpreter = true
 	e, err := runtime.New(ctx, limits)
 	if err != nil {

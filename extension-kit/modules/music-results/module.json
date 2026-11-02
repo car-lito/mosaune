@@ -1,0 +1,7 @@
+{
+  "id": "mosaune.music.results",
+  "version": "0.1.0",
+  "capabilities": [
+    "metadata.music-results.v1"
+  ]
+}

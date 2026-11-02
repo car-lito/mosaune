@@ -338,3 +338,25 @@ Les étapes A à D restent testables sur Windows. Les essais ARM64 et la prépar
 - [ ] Finaliser le transport générique des fournisseurs, puis extraire MusicBrainz et les connecteurs.
 
 Pas de déploiement NAS ; regroupement Films/Séries/Musique conservé.
+
+### Application TV — reprise depuis l’accueil
+
+- [ ] Intégrer Watch Next : film/épisode à reprendre, position de lecture et lien ouvrant directement le lecteur Mosaune.
+- [ ] Respecter le profil actif, les droits de bibliothèque et retirer les éléments terminés ou indisponibles.
+- [ ] Tester Android TV classique et Chromecast avec Google TV séparément : sur Google TV, l’affichage exige une certification de l’intégration par Google. Un APK installé manuellement ne garantit pas cet affichage.
+
+Références vérifiées le 2 novembre 2026 : https://developer.android.com/training/tv/discovery/watch-next-add-programs et https://developer.android.com/training/tv/get-started/google-tv . Chantier prévu avec le client TV, après le découpage et les lecteurs.
+
+### Étape 0.0.53 — composant musical
+
+- [x] Interprétation MusicBrainz hors du noyau, dans un composant de Musique.
+- [x] Cycle de vie commun : remplacement, désactivation, retrait et données conservées.
+- [ ] Achever les transports et services des fournisseurs ; éviter de multiplier les cartes d'extensions.
+
+### Profils TV
+
+- [ ] Sélection rapide du compte Mosaune par avatar, session mémorisée et PIN facultatif.
+- [ ] Étudier la correspondance avec le profil Google TV actif : aucune promesse de bascule automatique à ce stade. L'association des contenus à un accountId/profileId via Engage ne prouve pas la disponibilité d'une API de changement automatique de session pour une application tierce.
+- [ ] Pour la reprise sur l'accueil, examiner Engage SDK (recommandé par Google pour Google TV) et Watch Next pour Android TV classique ; garder les droits et consentements par compte.
+
+Référence profils/reprise : https://developer.android.com/guide/playcore/engage/faq (consultée le 2 novembre 2026).

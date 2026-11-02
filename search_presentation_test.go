@@ -8,19 +8,6 @@ import (
 	"testing"
 )
 
-func TestMusicReleasePresentation(t *testing.T) {
-	for _, tc := range []struct{ kind, label string }{{"Album", "Album"}, {"Single", "Single"}, {"EP", "EP"}, {"", "Sortie musicale"}, {"Other", "Sortie musicale"}} {
-		var release mbRelease
-		raw := `{"id":"test","title":"Record","release-group":{"primary-type":"` + tc.kind + `"}}`
-		if e := json.Unmarshal([]byte(raw), &release); e != nil {
-			t.Fatal(e)
-		}
-		m := mbMetadata(release)
-		if m.Presentation.Label != tc.label || m.Presentation.Preview.AspectRatio != 1 {
-			t.Fatal(m.Presentation)
-		}
-	}
-}
 func TestSearchPresentationPersistsAndValidatesAtGuestBoundary(t *testing.T) {
 	c, _ := testCatalog(t)
 	ctx := testContext(context.Background())
