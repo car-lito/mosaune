@@ -280,10 +280,6 @@ func discoveryRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 			problem(w, 400, "Fournisseur incompatible.")
 			return
 		}
-		if !providerSearchAllowed(p, input.Kind, input.Seed != "") {
-			problem(w, 400, "Recherche non proposée par ce fournisseur.")
-			return
-		}
 		dp, ok := p.(DiscoveryProvider)
 		if !ok {
 			problem(w, 400, "Ce fournisseur ne propose pas la découverte.")
@@ -321,6 +317,10 @@ func discoveryRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 			return
 		}
 		defer done()
+		if !providerSearchAllowed(ctx, p, input.Kind, input.Seed != "") {
+			problem(w, 400, "Recherche non proposée par ce fournisseur.")
+			return
+		}
 		page, err := dp.Discover(ctx, c.credential(ctx, input.Provider), q)
 		if err != nil {
 			problem(w, 502, err.Error())

@@ -108,7 +108,15 @@ func experienceRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 			problem(w, 404, "Source indisponible.")
 			return
 		}
-		surface, e := providerDiscoverySurface(p)
+		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
+		defer cancel()
+		ctx, done, e := beginProvider(ctx, p)
+		if e != nil {
+			problem(w, 409, e.Error())
+			return
+		}
+		defer done()
+		surface, e := providerDiscoverySurface(ctx, p)
 		if e != nil || surface == nil {
 			problem(w, 400, "Ce fournisseur ne déclare aucune sélection.")
 			return
@@ -123,8 +131,6 @@ func experienceRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 			problem(w, 400, "Sélection non proposée par ce fournisseur.")
 			return
 		}
-		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
-		defer cancel()
 		// Artist-based upcoming releases require a known provider identity, not a guessed name.
 		selector := input.Kind
 		if selection.Selector == "contributors" {
@@ -134,12 +140,6 @@ func experienceRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 			}
 			selector = input.Artist
 		}
-		ctx, done, e := beginProvider(ctx, p)
-		if e != nil {
-			problem(w, 409, e.Error())
-			return
-		}
-		defer done()
 		page, err := sp.Shelf(ctx, c.credential(ctx, p.Info().ID), input.Shelf, selector)
 		if err != nil {
 			problem(w, 502, err.Error())

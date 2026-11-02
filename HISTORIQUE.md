@@ -1,3 +1,13 @@
+## 0.0.52 — découverte déclarée par le paquet TMDB installé
+
+Validation : 201 tests serveur réussis (dont 10 contrôles réseau relancés après autorisation de l’environnement), 45 tests web, Svelte sans erreur ni avertissement, tests du kit et analyses Go réussis. Trois exécutables construits ; essai HTTP sur installation neuve avec le paquet signé 0.6.0 et redémarrage réussi. Aucun parcours navigateur ni déploiement NAS.
+
+- TMDB 0.6.0 emporte ses recherches, suggestions et sélections dans son manifeste signé. Le serveur lit le paquet installé ; mise à jour, retour arrière, retrait et redémarrage suivent sa déclaration.
+- Une déclaration vide reste vide. Les archives historiques restent compatibles et inchangées ; aucun paquet retiré n'est recréé. Une installation neuve reçoit TMDB 0.6.0, les installations existantes gardent leur version jusqu'à une mise à jour explicite.
+- Cache borné à la petite déclaration, renouvelé selon l'empreinte du paquet ; aucune conservation supplémentaire du programme Wasm en mémoire. Vérification sous le verrou du moteur avant un appel de découverte.
+- Aucune nouvelle carte d'extension, migration de base ou permission réseau. Les adaptateurs génériques, MusicBrainz et les connecteurs restent à extraire.
+- [Vérifier cette étape](ESSAYER-LE-PAQUET-TMDB-052.md).
+
 ## 0.0.51 — déclaration commune de recherche et de découverte
 
 Validation : 200 tests serveur, 45 tests web, contrôles Svelte/Go et essai HTTP sur installation temporaire réussis. Trois exécutables reconstruits ; aucun déploiement NAS.

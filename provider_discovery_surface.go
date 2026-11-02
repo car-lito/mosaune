@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	discovery "mosaune/extensionkit/discovery/v1"
@@ -10,12 +11,23 @@ import (
 // empty or invalid declaration must never regain features through a fallback.
 type DiscoverySurfaceProvider interface{ DiscoverySurface() discovery.Surface }
 
-func providerDiscoverySurface(p MetadataProvider) (*discovery.Surface, error) {
-	v, ok := p.(DiscoverySurfaceProvider)
-	if !ok {
+type ContextDiscoverySurfaceProvider interface {
+	DiscoverySurfaceContext(context.Context) (discovery.Surface, error)
+}
+
+func providerDiscoverySurface(ctx context.Context, p MetadataProvider) (*discovery.Surface, error) {
+	var surface discovery.Surface
+	if v, ok := p.(ContextDiscoverySurfaceProvider); ok {
+		var err error
+		surface, err = v.DiscoverySurfaceContext(ctx)
+		if err != nil {
+			return nil, err
+		}
+	} else if v, ok := p.(DiscoverySurfaceProvider); ok {
+		surface = v.DiscoverySurface()
+	} else {
 		return nil, nil
 	}
-	surface := v.DiscoverySurface()
 	if err := surface.Validate(p.Info().Kinds); err != nil {
 		return nil, err
 	}
@@ -31,8 +43,8 @@ func providerDiscoverySurface(p MetadataProvider) (*discovery.Surface, error) {
 	}
 	return &surface, nil
 }
-func providerSearchAllowed(p MetadataProvider, kind string, similar bool) bool {
-	s, e := providerDiscoverySurface(p)
+func providerSearchAllowed(ctx context.Context, p MetadataProvider, kind string, similar bool) bool {
+	s, e := providerDiscoverySurface(ctx, p)
 	if e != nil {
 		return false
 	}

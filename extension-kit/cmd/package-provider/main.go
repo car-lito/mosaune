@@ -6,7 +6,9 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	discovery "mosaune/extensionkit/discovery/v1"
 	"mosaune/extensionkit/packageformat"
+	"mosaune/extensionkit/protocol"
 	"mosaune/extensionkit/providers/tmdb"
 	"os"
 	"strings"
@@ -25,6 +27,7 @@ func run() error {
 	out := flag.String("out", "", "package path")
 	codePath := flag.String("code", "", "Wasm program path")
 	v := flag.String("version", "0.5.0", "provider version")
+	surfacePath := flag.String("discovery", "", "optional discovery declaration JSON (requires core 0.0.52)")
 	flag.Parse()
 	if *keyPath == "" || *public == "" {
 		return fmt.Errorf("key and public paths required")
@@ -75,6 +78,18 @@ func run() error {
 	d := tmdb.Descriptor()
 	d.Version = *v
 	m := packageformat.Manifest{Schema: 1, Name: "TMDB", Publisher: "Mosaune", Description: "Recherche, fiches, découverte, profils et affiches alternatives de films et séries. Programme indépendant du serveur Mosaune.", MinCore: "0.0.43", Adapter: "tmdb.v1", Descriptor: d, Settings: tmdb.Settings()}
+	if *surfacePath != "" {
+		data, e := os.ReadFile(*surfacePath)
+		if e != nil {
+			return e
+		}
+		var surface discovery.Surface
+		if len(data) > 32<<10 || protocol.DecodeOne(data, &surface) != nil {
+			return fmt.Errorf("invalid discovery declaration")
+		}
+		m.Discovery = &surface
+		m.MinCore = "0.0.52"
+	}
 	data, err := packageformat.Create(m, code, key)
 	if err != nil {
 		return err

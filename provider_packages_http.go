@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-// These signed archives are standalone deliverables. Version 0.5.0 is provisioned
+// These signed archives are standalone deliverables. Version 0.6.0 is provisioned
 // once for a fresh installation; runtime execution only reads the installed archive.
 //
 //go:embed packages/tmdb-0.4.0.mosaune.zip
@@ -19,6 +19,9 @@ var providerUpdateExample []byte
 
 //go:embed packages/tmdb-0.5.0.mosaune.zip
 var providerCatalogueExample []byte
+
+//go:embed packages/tmdb-0.6.0.mosaune.zip
+var providerDiscoveryExample []byte
 
 func (c *catalog) providerPackageRoutes(mux *secureMux) {
 	provider := func() *tmdbProvider { p, _ := c.provider("tmdb").(*tmdbProvider); return p }
@@ -42,6 +45,9 @@ func (c *catalog) providerPackageRoutes(mux *secureMux) {
 		}
 		if r.URL.Query().Get("catalogue") == "1" {
 			raw, name = providerCatalogueExample, "tmdb-0.5.0.mosaune.zip"
+		}
+		if r.URL.Query().Get("discovery") == "1" {
+			raw, name = providerDiscoveryExample, "tmdb-0.6.0.mosaune.zip"
 		}
 		w.Header().Set("Content-Type", "application/zip")
 		w.Header().Set("Content-Disposition", `attachment; filename="`+name+`"`)

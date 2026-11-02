@@ -330,3 +330,11 @@ Les étapes A à D restent testables sur Windows. Les essais ARM64 et la prépar
 - [OWASP — stockage des mots de passe](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
 - [GitHub — publication d’images Docker](https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images)
 - [CasaOS — guide des catalogues tiers et formats](https://github.com/IceWhaleTech/CasaOS-AppStore/blob/main/docs/guides/third-party-store-guide.md)
+
+### Étape 0.0.52 — surface de découverte du fournisseur
+
+- [x] Importer les recherches/sélections TMDB depuis son paquet signé installé.
+- [x] Suivre mises à jour, retours arrière et retrait, sans repli pour une déclaration explicitement vide.
+- [ ] Finaliser le transport générique des fournisseurs, puis extraire MusicBrainz et les connecteurs.
+
+Pas de déploiement NAS ; regroupement Films/Séries/Musique conservé.

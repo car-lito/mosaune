@@ -151,7 +151,7 @@ func (c *catalog) providerInfo(ctx context.Context) []ProviderInfo {
 		info := p.Info()
 		info.Enabled = providerEnabled(p)
 		_, info.Discovery = p.(DiscoveryProvider)
-		surface, e := providerDiscoverySurface(p)
+		surface, e := providerDiscoverySurface(ctx, p)
 		if e != nil {
 			info.Discovery = false
 			info.Catalogue = &discovery.Surface{Version: 1}

@@ -105,6 +105,20 @@ func (p *tmdbProvider) catalogueExtension(ctx context.Context, secret, op string
 		return videocatalog.Result{}, err
 	}
 	defer release()
+	// The engine lease serializes updates. Recheck against this installed package,
+	// even if an HTTP request was admitted immediately before an update.
+	if op == "discover" && !providerSearchAllowed(ctx, p, q.Kind, q.ID != "") {
+		return videocatalog.Result{}, errors.New("Recherche non déclarée par le paquet installé.")
+	}
+	if op == "shelf" {
+		surface, e := providerDiscoverySurface(ctx, p)
+		if e != nil || surface == nil {
+			return videocatalog.Result{}, errors.New("Déclaration de sélection indisponible.")
+		}
+		if _, ok := surface.ForShelf(q.Kind, q.Shelf); !ok {
+			return videocatalog.Result{}, errors.New("Sélection non déclarée par le paquet installé.")
+		}
+	}
 	raw, _ := json.Marshal(q)
 	used := false
 	var serviceErr error

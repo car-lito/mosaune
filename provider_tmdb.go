@@ -15,14 +15,15 @@ import (
 )
 
 type tmdbProvider struct {
-	state     providerLifecycle
-	extension tmdbExtension
-	db        *sql.DB
-	client    *http.Client
-	apiBase   string
-	imageBase string
-	mu        sync.Mutex
-	next      time.Time
+	discoveryCache tmdbDiscoveryCache
+	state          providerLifecycle
+	extension      tmdbExtension
+	db             *sql.DB
+	client         *http.Client
+	apiBase        string
+	imageBase      string
+	mu             sync.Mutex
+	next           time.Time
 }
 
 func newTMDBProvider(db *sql.DB) *tmdbProvider {

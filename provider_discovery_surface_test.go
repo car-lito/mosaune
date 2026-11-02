@@ -85,13 +85,13 @@ func TestDiscoveryDeclaredSurfaceRouting(t *testing.T) {
 }
 func TestDiscoverySurfaceDefaultsAndIndependentFeed(t *testing.T) {
 	for _, p := range []MetadataProvider{newTMDBProvider(nil), newMusicBrainzProvider(nil)} {
-		s, e := providerDiscoverySurface(p)
+		s, e := providerDiscoverySurface(context.Background(), p)
 		if e != nil || s == nil || len(s.Search) == 0 || len(s.Shelves) == 0 {
 			t.Fatal(p.Info().ID, s, e)
 		}
 	}
 	old := &discoveryFixture{}
-	if !providerSearchAllowed(old, "films", false) {
+	if !providerSearchAllowed(context.Background(), old, "films", false) {
 		t.Fatal("legacy search lost")
 	}
 	if !validUIFeed(uiBlock{Type: "feed", Source: "remote", View: "films", Provider: "org.independent.source", Shelf: "festival"}) {

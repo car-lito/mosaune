@@ -59,7 +59,7 @@ func migrateTMDBInstalledPackage(db *sql.DB) error {
 		return err
 	}
 	if !exists && wanted {
-		pack, e := packageformat.Parse(providerCatalogueExample, trustedProviderKey(), version)
+		pack, e := packageformat.Parse(providerDiscoveryExample, trustedProviderKey(), version)
 		if e != nil {
 			return e
 		}

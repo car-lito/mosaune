@@ -11,6 +11,7 @@ import (
 	"errors"
 	"io"
 	"mosaune/extensionkit/configuration"
+	discovery "mosaune/extensionkit/discovery/v1"
 	"mosaune/extensionkit/protocol"
 	"regexp"
 	"strconv"
@@ -22,6 +23,7 @@ const MaxCode = 8 << 20
 const HealthCapability = "system.health.v1"
 
 type Manifest struct {
+	Discovery   *discovery.Surface   `json:"discovery,omitempty"`
 	Schema      int                  `json:"schema"`
 	Name        string               `json:"name"`
 	Publisher   string               `json:"publisher"`
@@ -76,6 +78,17 @@ func (m Manifest) Validate(core string) error {
 	}
 	if len(d.Capabilities) == 4 && (!caps["metadata.video-catalog.v1"] || Compare(m.MinCore, "0.0.43") < 0) {
 		return invalid
+	}
+	if m.Discovery != nil {
+		if Compare(m.MinCore, "0.0.52") < 0 || !caps["metadata.video-catalog.v1"] || m.Discovery.Validate([]string{"films", "series"}) != nil {
+			return invalid
+		}
+		// Declarations may narrow this adapter's network grants, never extend them.
+		for _, shelf := range m.Discovery.Shelves {
+			if shelf.Selector != "kind" || !(shelf.Kind == "films" && (shelf.ID == "now_playing" || shelf.ID == "upcoming") || shelf.Kind == "series" && shelf.ID == "popular") {
+				return invalid
+			}
+		}
 	}
 	if len(m.Settings.Fields) != 1 {
 		return invalid

@@ -95,7 +95,7 @@ func TestTMDBCatalogueOldPackageAndSafeModeNeverFallback(t *testing.T) {
 		t.Fatal(e)
 	}
 	_ = p.setExtension(ctx, true)
-	if _, e = p.Shelf(ctx, "fixture", "upcoming", "films"); e == nil || !strings.Contains(e.Error(), "0.5.0") || calls != 0 {
+	if _, e = p.Shelf(ctx, "fixture", "upcoming", "films"); e == nil || !strings.Contains(e.Error(), "non déclarée") || calls != 0 {
 		t.Fatal("silent old-package fallback", e, calls)
 	}
 	c.extensionSafeMode = true
