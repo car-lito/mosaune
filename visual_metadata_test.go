@@ -116,7 +116,7 @@ func TestMusicArtworkFallbackPhotoCreditsAndValidation(t *testing.T) {
 			t.Fatal("unsafe ref", ref)
 		}
 	}
-	if safeUpload("https://upload.wikimedia.org.evil.test/x") || safeUpload("http://upload.wikimedia.org/x") || safeUpload("https://user@upload.wikimedia.org/x") {
+	if musicrequests.SafeUpload("https://upload.wikimedia.org.evil.test/x") || musicrequests.SafeUpload("http://upload.wikimedia.org/x") || musicrequests.SafeUpload("https://user@upload.wikimedia.org/x") {
 		t.Fatal("unsafe upload accepted")
 	}
 	real := newMusicBrainzProvider(nil)

@@ -81,7 +81,7 @@ func TestMusicResultsExternalReplacement(t *testing.T) {
 		t.Fatal(e)
 	}
 	desc.ID = "org.example.music.decoder"
-	m := packageformat.ExecutableManifest{Schema: 2, Name: "Décodeur de remplacement", Publisher: "Fixture", MinCore: "0.0.54", Module: desc, Contributions: []packageformat.Contribution{{Role: d.Capability, Target: "music"}}}
+	m := packageformat.ExecutableManifest{Schema: 2, Name: "Décodeur de remplacement", Publisher: "Fixture", MinCore: "0.0.55", Module: desc, Contributions: []packageformat.Contribution{{Role: d.Capability, Target: "music"}}}
 	raw, e := packageformat.CreateExecutable(m, code)
 	if e != nil {
 		t.Fatal(e)
@@ -126,6 +126,15 @@ func TestMusicResultsExternalReplacement(t *testing.T) {
 	})
 	if _, e = p.requestMusic(call, d.Request{Operation: "discover", Title: "External", Page: 1}); e != nil {
 		t.Fatal(e)
+	}
+	p.client.Transport = tmdbFixtureTransport(func(req *http.Request) (*http.Response, error) {
+		if req.URL.Host != "coverartarchive.org" {
+			t.Fatal("unexpected visual source", req.URL)
+		}
+		return visualResponse(200, string(testPicture())), nil
+	})
+	if data, e := p.visualArtwork(call, visualRelease); e != nil || len(data) == 0 {
+		t.Fatal("external visual workflow failed", e)
 	}
 }
 func TestMusicResultsMigrationPreservesMusicConsent(t *testing.T) {

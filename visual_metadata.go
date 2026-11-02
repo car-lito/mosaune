@@ -31,13 +31,18 @@ func (c *catalog) visualImage(ctx context.Context, p MetadataProvider, ref strin
 	defer cancel()
 	key := "visual-image:v2:" + ref
 	var id []byte
-	if c.db.QueryRowContext(ctx, `SELECT body FROM provider_cache WHERE provider=? AND key=? AND (expires>? OR ? AND length(body)>0)`, p.Info().ID, key, time.Now().Unix(), !providerAvailable(p)).Scan(&id) == nil {
+	var expires int64
+	var fallback []byte
+	if c.db.QueryRowContext(ctx, `SELECT body,expires FROM provider_cache WHERE provider=? AND key=? AND (expires>? OR length(body)>0)`, p.Info().ID, key, time.Now().Unix()).Scan(&id, &expires) == nil {
 		if len(id) == 0 {
 			return nil, errors.New("Image absente.")
 		}
 		var data []byte
 		if c.db.QueryRowContext(ctx, `SELECT data FROM artwork WHERE id=?`, string(id)).Scan(&data) == nil {
-			return data, nil
+			if expires > time.Now().Unix() || !providerAvailable(p) {
+				return data, nil
+			}
+			fallback = data
 		}
 	}
 	ctx, done, err := beginProvider(ctx, p)
@@ -46,6 +51,15 @@ func (c *catalog) visualImage(ctx context.Context, p MetadataProvider, ref strin
 	}
 	defer done()
 	raw, err := p.Artwork(ctx, c.credential(ctx, p.Info().ID), ref)
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
+	if err != nil && len(fallback) > 0 {
+		return fallback, nil
+	}
+	if errors.Is(err, errRecognitionUnavailable) || errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		return nil, err
+	}
 	unlock, e := providerCommit(ctx)
 	if e != nil {
 		return nil, e

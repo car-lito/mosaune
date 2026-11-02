@@ -481,9 +481,9 @@ func (c *catalog) bundleArchiveRoutes(mux *secureMux) {
 	mux.HandleFunc("GET /api/v1/media-bundle-archives/example/{kind}", func(w http.ResponseWriter, r *http.Request) {
 		release := r.URL.Query().Get("version")
 		if release == "" {
-			release = "5.0.0"
+			release = "6.0.0"
 		}
-		if release != "5.0.0" && release != "5.1.0" {
+		if release != "6.0.0" && release != "6.1.0" {
 			problem(w, 400, "Version d’exemple inconnue.")
 			return
 		}
@@ -505,7 +505,7 @@ func exampleBundleArchive(kind, release string) ([]byte, error) {
 	if e != nil {
 		return nil, e
 	}
-	manifest := bundleArchiveManifest{Schema: 1, ID: "org.mosaune.examples.family." + kind, Name: "Famille " + m.Name + " · exemple", Publisher: "Mosaune · exemple local", Version: release, MinCore: "0.0.54", Kind: kind}
+	manifest := bundleArchiveManifest{Schema: 1, ID: "org.mosaune.examples.family." + kind, Name: "Famille " + m.Name + " · exemple", Publisher: "Mosaune · exemple local", Version: release, MinCore: "0.0.55", Kind: kind}
 	files := map[string][]byte{}
 	for _, comp := range m.Components {
 		d, code, e := modules.Lookup(comp.Slot)
@@ -521,7 +521,7 @@ func exampleBundleArchive(kind, release string) ([]byte, error) {
 		case "detail-series":
 			target = "series"
 		}
-		em := packageformat.ExecutableManifest{Schema: 2, Name: mediaSlotName(comp.Slot), Publisher: manifest.Publisher, MinCore: "0.0.54", Module: d, Contributions: []packageformat.Contribution{{Role: d.Capabilities[0], Target: target}}}
+		em := packageformat.ExecutableManifest{Schema: 2, Name: mediaSlotName(comp.Slot), Publisher: manifest.Publisher, MinCore: "0.0.55", Module: d, Contributions: []packageformat.Contribution{{Role: d.Capabilities[0], Target: target}}}
 		b, e := packageformat.CreateExecutable(em, code)
 		if e != nil {
 			return nil, e
@@ -535,7 +535,7 @@ func exampleBundleArchive(kind, release string) ([]byte, error) {
 			screen.Manifest.ID = manifest.ID + ".screen"
 			screen.Manifest.Version = release
 			screen.Manifest.Name = "Écran " + m.Name + " · exemple"
-			screen.Manifest.MinCore = "0.0.54"
+			screen.Manifest.MinCore = "0.0.55"
 			files["screen.zip"] = screenArchive(screen)
 		}
 	}

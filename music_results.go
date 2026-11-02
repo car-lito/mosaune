@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	d "mosaune/extensionkit/capabilities/musicresults/v1"
 	discovery "mosaune/extensionkit/discovery/v1"
 	"mosaune/extensionkit/modules"
@@ -91,7 +92,7 @@ func migrateMusicResults(db *sql.DB) error {
 func musicResultsImport(p packageformat.Executable) (string, error) {
 	m := p.Manifest
 	v := m.Module
-	if strings.HasPrefix(v.ID, "mosaune.") || packageformat.Compare(m.MinCore, "0.0.54") < 0 || len(m.Contributions) != 1 || m.Contributions[0].Role != d.Capability || m.Contributions[0].Target != "music" || len(v.Capabilities) != 1 || v.Capabilities[0] != d.Capability || len(v.Services) != 0 || len(v.Dependencies) != 0 {
+	if strings.HasPrefix(v.ID, "mosaune.") || packageformat.Compare(m.MinCore, "0.0.55") < 0 || len(m.Contributions) != 1 || m.Contributions[0].Role != d.Capability || m.Contributions[0].Target != "music" || len(v.Capabilities) != 1 || v.Capabilities[0] != d.Capability || len(v.Services) != 0 || len(v.Dependencies) != 0 {
 		return "", errors.New("Décodeur musical incompatible : résultats musicaux bornés, sans service ni dépendance.")
 	}
 	return "music-results", nil
@@ -165,7 +166,7 @@ func (p *musicBrainzProvider) openMusicResults(ctx context.Context) (context.Con
 		call, stop, desc, code, e := p.owner.beginRecognition(ctx, "music-results")
 		if e != nil {
 			release()
-			return ctx, func() {}, errors.New("Le composant Albums et artistes MusicBrainz est désactivé ou absent. Réactivez-le dans Musique.")
+			return ctx, func() {}, fmt.Errorf("Le composant Albums et artistes MusicBrainz est indisponible. Vérifiez-le dans Musique : %w", e)
 		}
 		ctx = call
 		done = stop

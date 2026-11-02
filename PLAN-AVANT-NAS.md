@@ -369,3 +369,12 @@ Référence profils/reprise : https://developer.android.com/guide/playcore/engag
 - [ ] Extraire le transport, les images et les adaptateurs de fournisseurs restants.
 
 Pas de nouvelle carte d’extension ; aucun déploiement NAS.
+
+### Étape 0.0.55 — images musicales
+
+- [x] Recherche des pochettes et portraits, replis et crédits dans le composant MusicBrainz déjà regroupé dans Musique.
+- [x] Exécution bornée et validation des destinations ; annulation des requêtes lors d’une désactivation.
+- [x] Cache partagé conservé, y compris les références positives expirées lorsque la source ne peut être interrogée.
+- [ ] Généraliser transport réseau, permissions de sources et configuration des fournisseurs.
+
+CI 0.0.54 confirmée réussie le 3 novembre 2026 (Windows/Linux, conteneurs amd64 et arm64, publication). Aucun déploiement NAS.

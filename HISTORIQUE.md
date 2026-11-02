@@ -1,3 +1,13 @@
+## 0.0.55 — images musicales pilotées par l’extension
+
+Validation : 208 tests serveur, 45 tests web, tests du kit, contrôles Svelte/Go et trois exécutables réussis. Essai HTTP sur installation neuve avec composant 0.3.0, désactivation/réactivation et redémarrage vérifiés. Aucun déploiement NAS.
+
+- Le composant Musique décide des sources et replis pour les pochettes et portraits ; il interprète les relations MusicBrainz, les images Wikidata/Commons et les crédits. Cette logique n’est plus compilée dans le noyau.
+- Contrat visual/describe-visuals v1 avec état opaque, plans contrôlés, six étapes maximum et délais bornés. Les images binaires restent hors du programme Wasm. Aucun accès réseau direct ou nouvelle carte d’extension.
+- Désactivation : requêtes en cours annulées, images déjà conservées disponibles même après expiration, aucun résultat négatif enregistré du fait de la pause. Le cache reste commun.
+- Composant fourni 0.3.0, migration 36 conservant états, retraits et remplaçants. Nouveaux exemples de familles 6.0/6.1 ; anciens paquets publiés inchangés.
+- Le transport HTTP, la cadence, la configuration et les adaptateurs restent à généraliser. Aucun déploiement NAS.
+
 ## 0.0.54 — requêtes musicales pilotées par l’extension
 
 Validation locale : 205 tests serveur, 45 tests web, tests du kit et contrôles Svelte/Go réussis. Après le dernier ajustement de migration, contrôles musicaux ciblés et compilation des trois exécutables relancés avec succès.
