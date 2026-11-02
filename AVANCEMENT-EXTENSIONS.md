@@ -1,6 +1,6 @@
 # Vers un Mosaune entièrement extensible
 
-État du 2 novembre 2026 · étape 0.0.53.
+État du 2 novembre 2026 · étape 0.0.54.
 
 **Environ 70 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
@@ -66,6 +66,7 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 
 ### Interface et fournisseurs
 
+- [x] **0.0.54 :** préparation des recherches MusicBrainz (albums, association, artistes, discographies, prochaines sorties) dans le même composant Wasm ; le noyau valide puis exécute le plan borné.
 - [x] Contrat de thème avec variables, variantes et composants communs.
 - [x] Cartes d’extensions, fiches de réglages, recherche et présentation extensible des résultats.
 - [x] Rendu des fiches à partir de contributions contrôlées, avec les thèmes.
@@ -80,7 +81,7 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [x] Lire les recherches et sélections depuis le manifeste signé TMDB installé, avec cache, retour arrière et retrait cohérents (0.0.52).
 - [ ] Achever l’indépendance de TMDB : transport/configuration, identifiants Sonarr et interface fournisseur générique.
 - [x] Extraire l’interprétation des réponses MusicBrainz (albums, éditions, pistes et artistes) dans un composant Wasm de Musique, remplaçable et désactivable.
-- [ ] Achever MusicBrainz : transport réseau, stratégie de recherche, images, configuration et distribution comme fournisseur indépendant.
+- [ ] Achever MusicBrainz : transport réseau, images, configuration et distribution comme fournisseur indépendant.
 - [ ] Extraire Radarr et Sonarr derrière le même contrat de demandes/suivi.
 
 ### Condition de fin du découpage

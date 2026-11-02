@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"html"
+	d "mosaune/extensionkit/capabilities/musicresults/v1"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -198,11 +199,7 @@ func (p *musicBrainzProvider) ResolveArtist(ctx context.Context, name string) ([
 		return nil, e
 	}
 	defer done()
-	var raw json.RawMessage
-	if e = p.get(ctx, "/artist/", url.Values{"query": {"artist:" + mbQuote(name)}, "limit": {"8"}}, &raw); e != nil {
-		return nil, e
-	}
-	decoded, e := p.decodeMusic(ctx, "artists", "", 1, raw)
+	decoded, e := p.requestMusic(ctx, d.Request{Operation: "artists", Title: name, Page: 1})
 	if e != nil {
 		return nil, e
 	}

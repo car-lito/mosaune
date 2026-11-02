@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { buildNotices } from './build-notices.mjs';
 import { buildRecognitionRepository } from './build-recognition-repository.mjs';
+import { buildBundledWasm } from './build-bundled-wasm.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const go = process.env.MOSAUNE_GO || 'go';
@@ -27,9 +28,7 @@ function wasm(output, source) {
   run(go, ['build', '-trimpath', '-buildvcs=false', '-ldflags=-s -w', '-o', output, source], kit, { GOOS: 'wasip1', GOARCH: 'wasm' });
 }
 try {
-  wasm('providers/tmdb/provider.wasm', './providers/tmdb/source');
-  wasm('modules/audiotags/tags.wasm', './modules/audiotags/source');
-  for (const kind of ['music-results', 'films', 'series', 'music', 'catalogue-films', 'catalogue-series', 'catalogue-music', 'detail-series', 'detail-information', 'detail-header', 'detail-experience']) wasm(`modules/${kind}/recognizer.wasm`, `./modules/${kind}/source`);
+  buildBundledWasm(wasm);
   wasm('examples/recognition/module.wasm', './examples/recognition/source');
   wasm('examples/audiotags/module.wasm', './examples/audiotags/source');
   wasm('examples/detailexperience/module.wasm', './examples/detailexperience/source');

@@ -81,7 +81,7 @@ func TestMusicResultsExternalReplacement(t *testing.T) {
 		t.Fatal(e)
 	}
 	desc.ID = "org.example.music.decoder"
-	m := packageformat.ExecutableManifest{Schema: 2, Name: "Décodeur de remplacement", Publisher: "Fixture", MinCore: "0.0.53", Module: desc, Contributions: []packageformat.Contribution{{Role: d.Capability, Target: "music"}}}
+	m := packageformat.ExecutableManifest{Schema: 2, Name: "Décodeur de remplacement", Publisher: "Fixture", MinCore: "0.0.54", Module: desc, Contributions: []packageformat.Contribution{{Role: d.Capability, Target: "music"}}}
 	raw, e := packageformat.CreateExecutable(m, code)
 	if e != nil {
 		t.Fatal(e)
@@ -117,6 +117,15 @@ func TestMusicResultsExternalReplacement(t *testing.T) {
 	r, e := p.decodeMusic(call, "releases", "", 1, []byte(`{"count":1,"releases":[{"id":"11111111-1111-1111-1111-111111111111","title":"From replacement"}]}`))
 	if e != nil || len(r.Items) != 1 || r.Items[0].Title != "From replacement" {
 		t.Fatal(r, e)
+	}
+	p.client.Transport = tmdbFixtureTransport(func(req *http.Request) (*http.Response, error) {
+		if req.URL.Query().Get("query") != `release:"External" OR artist:"External"` {
+			t.Fatal("external request planning not used", req.URL)
+		}
+		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{"count":0,"releases":[]}`))}, nil
+	})
+	if _, e = p.requestMusic(call, d.Request{Operation: "discover", Title: "External", Page: 1}); e != nil {
+		t.Fatal(e)
 	}
 }
 func TestMusicResultsMigrationPreservesMusicConsent(t *testing.T) {

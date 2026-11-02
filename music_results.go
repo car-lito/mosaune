@@ -10,6 +10,7 @@ import (
 	"mosaune/extensionkit/modules"
 	"mosaune/extensionkit/packageformat"
 	"mosaune/extensionkit/registry"
+	"net/url"
 	"strings"
 )
 
@@ -90,7 +91,7 @@ func migrateMusicResults(db *sql.DB) error {
 func musicResultsImport(p packageformat.Executable) (string, error) {
 	m := p.Manifest
 	v := m.Module
-	if strings.HasPrefix(v.ID, "mosaune.") || packageformat.Compare(m.MinCore, "0.0.53") < 0 || len(m.Contributions) != 1 || m.Contributions[0].Role != d.Capability || m.Contributions[0].Target != "music" || len(v.Capabilities) != 1 || v.Capabilities[0] != d.Capability || len(v.Services) != 0 || len(v.Dependencies) != 0 {
+	if strings.HasPrefix(v.ID, "mosaune.") || packageformat.Compare(m.MinCore, "0.0.54") < 0 || len(m.Contributions) != 1 || m.Contributions[0].Role != d.Capability || m.Contributions[0].Target != "music" || len(v.Capabilities) != 1 || v.Capabilities[0] != d.Capability || len(v.Services) != 0 || len(v.Dependencies) != 0 {
 		return "", errors.New("Décodeur musical incompatible : résultats musicaux bornés, sans service ni dépendance.")
 	}
 	return "music-results", nil
@@ -100,6 +101,41 @@ type musicResultsKey struct{}
 type musicResultsReader struct {
 	owner  *musicBrainzProvider
 	engine *cataloguer
+}
+
+func checkMusicRequests(ctx context.Context, r *cataloguer) error {
+	var info struct{ Version int }
+	if e := r.call(ctx, "describe-requests", struct{}{}, &info); e != nil || info.Version != 1 {
+		return errors.New("Ce composant musical doit être mis à jour : la préparation des recherches (version 1) est requise. Vos fiches sont conservées.")
+	}
+	return nil
+}
+
+func (p *musicBrainzProvider) requestMusic(ctx context.Context, q d.Request) (d.Result, error) {
+	var out d.Result
+	if e := q.Validate(); e != nil {
+		return out, errors.New("Recherche musicale invalide.")
+	}
+	reader, ok := ctx.Value(musicResultsKey{}).(*musicResultsReader)
+	if !ok || reader.owner != p {
+		return out, errors.New("Composant musical absent.")
+	}
+	var plan d.RequestPlan
+	if e := reader.engine.call(ctx, "plan", q, &plan); e != nil {
+		return out, e
+	}
+	if e := plan.Validate(q); e != nil {
+		return out, errors.New("Requête du composant musical refusée.")
+	}
+	params := url.Values{}
+	for k, v := range plan.Params {
+		params.Set(k, v)
+	}
+	var raw json.RawMessage
+	if e := p.get(ctx, plan.Path, params, &raw); e != nil {
+		return out, e
+	}
+	return p.decodeMusic(ctx, plan.Decode, plan.ID, q.Page, raw)
 }
 
 func (p *musicBrainzProvider) openMusicResults(ctx context.Context) (context.Context, func(), error) {
@@ -139,6 +175,12 @@ func (p *musicBrainzProvider) openMusicResults(ctx context.Context) (context.Con
 			release()
 			return ctx, func() {}, e
 		}
+	}
+	if e := checkMusicRequests(ctx, reader); e != nil {
+		reader.engine.Close()
+		done()
+		release()
+		return ctx, func() {}, e
 	}
 	return context.WithValue(ctx, musicResultsKey{}, &musicResultsReader{p, reader}), func() { reader.engine.Close(); done(); release() }, nil
 }

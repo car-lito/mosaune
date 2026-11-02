@@ -1,3 +1,13 @@
+## 0.0.54 — requêtes musicales pilotées par l’extension
+
+Validation locale : 205 tests serveur, 45 tests web, tests du kit et contrôles Svelte/Go réussis. Après le dernier ajustement de migration, contrôles musicaux ciblés et compilation des trois exécutables relancés avec succès.
+
+- Le composant musical prépare les recherches et leurs paramètres : albums, correction titre/artiste, artistes, éditions, discographies et prochaines sorties. Les expressions MusicBrainz quittent les parcours correspondants du noyau.
+- L’hôte valide le plan avant tout appel : chemins relatifs bornés, identités, paramètres et pagination ; aucune URL, méthode, clé ou en-tête arbitraire. Le transport, les images et le cache restent à extraire.
+- Migration 35 du composant fourni 0.1.0 vers 0.2.0, avec état et sélection conservés. L’identité réservée, l’absence d’import et l’intégrité des octets enregistrés sont vérifiées ; les compilations officielles avec différentes versions de Go sont prises en charge. Les remplaçants externes restent choisis et doivent annoncer le protocole de requêtes v1 ; aucune implémentation native de secours.
+- Archives d’exemple 5.0/5.1 et guide du contrat mis à jour ; les anciens fichiers publiés sont immuables.
+- Compilation des programmes intégrés commune à Docker et aux builds locaux, à partir des fichiers déclarés dans Go. Corrige l’échec Docker 0.0.53 qui omettait music-results ; les validations Windows/Linux de cette version avaient réussi.
+
 ## 0.0.53 — interprétation MusicBrainz dans un composant remplaçable
 
 Validation : 203 tests serveur réussis (dont 17 relancés après adaptation des scénarios de migration), 45 tests web, tests du kit, contrôles Svelte/Go et trois exécutables construits. Essai HTTP sur installation neuve : désactivation/réactivation du composant et redémarrage vérifiés. Aucun déploiement NAS.

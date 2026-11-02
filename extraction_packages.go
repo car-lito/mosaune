@@ -51,6 +51,7 @@ func validateExtractionCode(ctx context.Context, p packageformat.Executable) err
 	if kind == "music-results" {
 		r, e := loadFactProjector(ctx, p.Manifest.Module, p.Code, "metadata.music-results.v1")
 		if e == nil {
+			e = checkMusicRequests(ctx, r)
 			r.engine.Close()
 		}
 		return e

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	musicrequests "mosaune/extensionkit/capabilities/musicresults/v1"
 	"net/http"
 	"os"
 	"strings"
@@ -207,7 +208,7 @@ func TestPublicVisualSources(t *testing.T) {
 	if data, err := c.visualImage(ctx, p, "commons:"+photo.File); err != nil || len(data) == 0 {
 		t.Fatal("portrait bytes", err)
 	}
-	releases, err := p.searchReleases(ctx, `release:"Le Chant des sirènes" AND artist:"Orelsan"`, 1)
+	releases, err := p.searchMusic(ctx, musicrequests.Request{Operation: "match", Title: "Le Chant des sirènes", Artist: "Orelsan", Page: 1})
 	if err != nil || len(releases.Items) == 0 {
 		t.Fatal("album search", err)
 	}

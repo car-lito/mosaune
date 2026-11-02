@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	d "mosaune/extensionkit/capabilities/musicresults/v1"
 	"net/http"
 	"net/url"
 	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -92,21 +92,14 @@ func (p *musicBrainzProvider) get(ctx context.Context, endpoint string, params u
 	return nil
 }
 
-func mbQuote(s string) string {
-	return `"` + strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(s) + `"`
-}
-func (p *musicBrainzProvider) searchReleases(ctx context.Context, q string, page int) (DiscoveryPage, error) {
+func (p *musicBrainzProvider) searchMusic(ctx context.Context, q d.Request) (DiscoveryPage, error) {
 	ctx, done, e := p.openMusicResults(ctx)
 	if e != nil {
 		return DiscoveryPage{}, e
 	}
 	defer done()
-	out := DiscoveryPage{Items: []Metadata{}, Page: page}
-	var raw json.RawMessage
-	if e := p.get(ctx, "/release/", url.Values{"query": {q}, "limit": {"20"}, "offset": {strconv.Itoa((page - 1) * 20)}}, &raw); e != nil {
-		return out, e
-	}
-	decoded, e := p.decodeMusic(ctx, "releases", "", page, raw)
+	out := DiscoveryPage{Items: []Metadata{}, Page: q.Page}
+	decoded, e := p.requestMusic(ctx, q)
 	if e != nil {
 		return out, e
 	}
@@ -126,25 +119,21 @@ func (p *musicBrainzProvider) Discover(ctx context.Context, _ string, q Discover
 	if q.Kind != "music" || q.Page < 1 || q.Page > 50 {
 		return DiscoveryPage{}, errors.New("Recherche musicale invalide.")
 	}
-	query := "release:" + mbQuote(q.Query) + " OR artist:" + mbQuote(q.Query)
+	query := d.Request{Operation: "discover", Title: q.Query, Page: q.Page}
 	if q.Seed != "" {
 		if !mbID.MatchString(q.Seed) {
 			return DiscoveryPage{}, errors.New("Album invalide.")
 		}
-		var raw json.RawMessage
-		if e := p.get(ctx, "/release/"+q.Seed, url.Values{"inc": {"artist-credits"}}, &raw); e != nil {
-			return DiscoveryPage{}, e
-		}
-		decoded, e := p.decodeMusic(ctx, "seed", q.Seed, 1, raw)
+		decoded, e := p.requestMusic(ctx, d.Request{Operation: "seed", ID: q.Seed, Page: 1})
 		if e != nil {
 			return DiscoveryPage{}, e
 		}
 		if decoded.ArtistID == "" {
 			return DiscoveryPage{Items: []Metadata{}, Page: 1, Pages: 1}, nil
 		}
-		query = "arid:" + decoded.ArtistID
+		query = d.Request{Operation: "artist-releases", ID: decoded.ArtistID, Page: q.Page}
 	}
-	return p.searchReleases(ctx, query, q.Page)
+	return p.searchMusic(ctx, query)
 }
 func (p *musicBrainzProvider) Search(ctx context.Context, secret string, q MetadataQuery) ([]MetadataCandidate, error) {
 	page, err := p.Discover(ctx, secret, DiscoveryQuery{Kind: q.Kind, Query: q.Title, Page: 1})
@@ -163,11 +152,7 @@ func (p *musicBrainzProvider) Details(ctx context.Context, _ string, q MetadataS
 	if q.Kind != "music" || !mbID.MatchString(q.ID) {
 		return Metadata{}, errors.New("Édition musicale invalide.")
 	}
-	var raw json.RawMessage
-	if e := p.get(ctx, "/release/"+q.ID, url.Values{"inc": {"recordings+artist-credits+labels+release-groups"}}, &raw); e != nil {
-		return Metadata{}, e
-	}
-	decoded, e := p.decodeMusic(ctx, "release", q.ID, 1, raw)
+	decoded, e := p.requestMusic(ctx, d.Request{Operation: "release", ID: q.ID, Page: 1})
 	if e != nil {
 		return Metadata{}, e
 	}
@@ -187,7 +172,7 @@ func (p *musicBrainzProvider) Shelf(ctx context.Context, _ string, shelf, artist
 	if shelf != "upcoming" || !mbID.MatchString(artist) {
 		return DiscoveryPage{}, errors.New("Choisissez d’abord un album identifié pour connaître son artiste.")
 	}
-	return p.searchReleases(ctx, "arid:"+artist+" AND date:["+time.Now().UTC().Format("2006-01-02")+" TO *]", 1)
+	return p.searchMusic(ctx, d.Request{Operation: "upcoming", ID: artist, Date: time.Now().UTC().Format("2006-01-02"), Page: 1})
 }
 func (p *musicBrainzProvider) Profile(ctx context.Context, _ string, id string, page int) (PersonProfile, error) {
 	ctx, done, openErr := p.openMusicResults(ctx)
@@ -199,16 +184,12 @@ func (p *musicBrainzProvider) Profile(ctx context.Context, _ string, id string, 
 	if !mbID.MatchString(id) {
 		return out, errors.New("Artiste invalide.")
 	}
-	var raw json.RawMessage
-	if e := p.get(ctx, "/artist/"+id, nil, &raw); e != nil {
-		return out, e
-	}
-	decoded, e := p.decodeMusic(ctx, "artist", id, page, raw)
+	decoded, e := p.requestMusic(ctx, d.Request{Operation: "artist", ID: id, Page: page})
 	if e != nil {
 		return out, e
 	}
 	out.Name, out.Detail = decoded.Name, decoded.Detail
-	releases, err := p.searchReleases(ctx, "arid:"+id, page)
+	releases, err := p.searchMusic(ctx, d.Request{Operation: "artist-releases", ID: id, Page: page})
 	if err != nil {
 		return out, err
 	}

@@ -16,12 +16,23 @@ func main() {
 		if r.Capability != d.Capability {
 			return fail()
 		}
-		if r.Operation == "describe" {
+		if r.Operation == "describe" || r.Operation == "describe-requests" {
 			var empty struct{}
 			if protocol.DecodeOne(r.Payload, &empty) != nil {
 				return fail()
 			}
 			return struct{ Version int }{1}, nil
+		}
+		if r.Operation == "plan" {
+			var q d.Request
+			if protocol.DecodeOne(r.Payload, &q) != nil {
+				return fail()
+			}
+			out, err := musicresults.Plan(q)
+			if err != nil {
+				return fail()
+			}
+			return out, nil
 		}
 		var q d.Query
 		if r.Operation != "decode" || protocol.DecodeOne(r.Payload, &q) != nil {

@@ -360,3 +360,12 @@ Références vérifiées le 2 novembre 2026 : https://developer.android.com/trai
 - [ ] Pour la reprise sur l'accueil, examiner Engage SDK (recommandé par Google pour Google TV) et Watch Next pour Android TV classique ; garder les droits et consentements par compte.
 
 Référence profils/reprise : https://developer.android.com/guide/playcore/engage/faq (consultée le 2 novembre 2026).
+
+### Étape 0.0.54 — requêtes musicales
+
+- [x] Confier les recherches, paramètres et pagination MusicBrainz au composant Musique déjà installé.
+- [x] Valider les plans avant le réseau, garder les limites, l’annulation et le cycle de vie existants.
+- [x] Préserver les choix lors de la mise à jour du composant fourni ; ne pas réinstaller les composants retirés.
+- [ ] Extraire le transport, les images et les adaptateurs de fournisseurs restants.
+
+Pas de nouvelle carte d’extension ; aucun déploiement NAS.

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	musicrequests "mosaune/extensionkit/capabilities/musicresults/v1"
 	"net/http"
 	"net/url"
 	"strings"
@@ -130,11 +131,7 @@ func visualRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 				problem(w, 400, "Indiquez au moins deux caractères pour le titre.")
 				return
 			}
-			q := "release:" + mbQuote(input.Title)
-			if input.Artist != "" {
-				q += " AND artist:" + mbQuote(input.Artist)
-			}
-			page, err = p.searchReleases(ctx, q, input.Page)
+			page, err = p.searchMusic(ctx, musicrequests.Request{Operation: "match", Title: input.Title, Artist: input.Artist, Page: input.Page})
 		}
 		if err != nil {
 			problem(w, 502, err.Error())
