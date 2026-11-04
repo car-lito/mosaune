@@ -1,0 +1,8 @@
+{
+ "version":1,"language":"fr-FR","region":"BE","languageSetting":"language","regionSetting":"region",
+ "sources":[
+  {"id":"api","baseURL":"https://api.themoviedb.org/3","format":"json","maxBytes":2097152,"timeoutMs":10000,"intervalMs":300,"cacheSeconds":604800,"cachePaths":{"/movie/now_playing":21600,"/movie/upcoming":21600,"/tv/popular":21600},"credential":"apiToken","auth":"key-or-bearer","queryKey":"api_key"},
+  {"id":"images","baseURL":"https://image.tmdb.org/t/p/w500","format":"image","maxBytes":8388608,"timeoutMs":10000,"intervalMs":300,"cacheSeconds":0},
+  {"id":"trailers","baseURL":"https://i.ytimg.com/vi","format":"image","maxBytes":8388608,"timeoutMs":10000,"intervalMs":0,"cacheSeconds":0}
+ ]
+}

@@ -192,7 +192,7 @@ try {
   const tmdbPause=await request('/api/v1/metadata/tmdb-runtime',{method:'PUT',headers:auth,body:{enabled:false}});
   assert(tmdbPause.status===200&&!JSON.parse(tmdbPause.text).effective,'TMDB module pause failed');
   const tmdbPackage=JSON.parse((await request('/api/v1/provider-packages/tmdb',{headers:auth})).text).package;
-  assert(tmdbPackage?.manifest.module.version==='0.6.0','Starter TMDB package not installed');
+  assert(tmdbPackage?.manifest.module.version==='0.7.0' && tmdbPackage.manifest.transport?.sources?.length===3,'Starter TMDB package or transport profile not installed');
   const tmdbRemove=await request('/api/v1/provider-packages/tmdb',{method:'DELETE',headers:auth,body:{checksum:tmdbPackage.checksum}});
   assert(tmdbRemove.status===204,'TMDB package removal failed');
   docker(['stop', '--time', '15', id]);

@@ -11,10 +11,36 @@ import (
 	"mosaune/extensionkit/configuration"
 	"mosaune/extensionkit/packageformat"
 	"mosaune/extensionkit/protocol"
+	"mosaune/extensionkit/transport"
 )
 
 //go:embed settings.json
 var settingsJSON []byte
+
+//go:embed transport.json
+var transportJSON []byte
+
+func Transport() transport.Profile {
+	var p transport.Profile
+	if json.Unmarshal(transportJSON, &p) != nil {
+		panic("invalid transport")
+	}
+	return p
+}
+
+//go:embed transport-settings.json
+var transportSettingsJSON []byte
+
+func TransportSettings() configuration.Schema {
+	var s configuration.Schema
+	if e := json.Unmarshal(transportSettingsJSON, &s); e != nil {
+		panic(e)
+	}
+	if e := s.Validate(); e != nil {
+		panic(e)
+	}
+	return s
+}
 
 func Settings() configuration.Schema {
 	var schema configuration.Schema

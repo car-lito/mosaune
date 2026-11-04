@@ -13,6 +13,8 @@ import (
 	"mosaune/extensionkit/configuration"
 	discovery "mosaune/extensionkit/discovery/v1"
 	"mosaune/extensionkit/protocol"
+	"mosaune/extensionkit/transport"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -23,6 +25,7 @@ const MaxCode = 8 << 20
 const HealthCapability = "system.health.v1"
 
 type Manifest struct {
+	Transport   *transport.Profile   `json:"transport,omitempty"`
 	Discovery   *discovery.Surface   `json:"discovery,omitempty"`
 	Schema      int                  `json:"schema"`
 	Name        string               `json:"name"`
@@ -90,8 +93,29 @@ func (m Manifest) Validate(core string) error {
 			}
 		}
 	}
-	if len(m.Settings.Fields) != 1 {
+	if m.Transport == nil && len(m.Settings.Fields) != 1 {
 		return invalid
+	}
+	if m.Transport != nil {
+		if Compare(m.MinCore, "0.0.57") < 0 || m.Transport.Validate(m.Settings) != nil || len(m.Transport.Sources) != 3 {
+			return invalid
+		}
+		// This adapter's existing consent covers only these three origins. A
+		// manifest cannot expand a previously granted TMDB service permission.
+		origins := map[string]string{"api": "api.themoviedb.org", "images": "image.tmdb.org", "trailers": "i.ytimg.com"}
+		for _, s := range m.Transport.Sources {
+			u, _ := url.Parse(s.BaseURL)
+			if origins[s.ID] != u.Host {
+				return invalid
+			}
+			if s.ID == "api" {
+				if s.Credential != "apiToken" || s.Auth != "key-or-bearer" || s.QueryKey != "api_key" || s.Format != "json" || s.IntervalMS < 300 {
+					return invalid
+				}
+			} else if s.Auth != "" || s.Format != "image" {
+				return invalid
+			}
+		}
 	}
 	f := m.Settings.Fields[0]
 	if f.ID != "apiToken" || f.Type != "secret" || f.Format != "token" || f.MinLength != 20 || f.MaxLength != 2048 {

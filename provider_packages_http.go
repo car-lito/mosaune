@@ -23,6 +23,9 @@ var providerCatalogueExample []byte
 //go:embed packages/tmdb-0.6.0.mosaune.zip
 var providerDiscoveryExample []byte
 
+//go:embed packages/tmdb-0.7.0.mosaune.zip
+var providerTransportExample []byte
+
 func (c *catalog) providerPackageRoutes(mux *secureMux) {
 	provider := func() *tmdbProvider { p, _ := c.provider("tmdb").(*tmdbProvider); return p }
 	mux.HandleFunc("GET /api/v1/provider-packages/tmdb", func(w http.ResponseWriter, r *http.Request) {
@@ -48,6 +51,9 @@ func (c *catalog) providerPackageRoutes(mux *secureMux) {
 		}
 		if r.URL.Query().Get("discovery") == "1" {
 			raw, name = providerDiscoveryExample, "tmdb-0.6.0.mosaune.zip"
+		}
+		if r.URL.Query().Get("transport") == "1" {
+			raw, name = providerTransportExample, "tmdb-0.7.0.mosaune.zip"
 		}
 		w.Header().Set("Content-Type", "application/zip")
 		w.Header().Set("Content-Disposition", `attachment; filename="`+name+`"`)

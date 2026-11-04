@@ -216,7 +216,7 @@ func (p *tmdbProvider) installPackage(ctx context.Context, pack packageformat.Pa
 		err = registerProviderPackage(ctx, tx, pack, enabled, rollback)
 	}
 	if err == nil {
-		err = (configuration.SQLStore{DB: tx}).Register(ctx, tmdbConfigurationOwner, pack.Manifest.Settings)
+		err = registerProviderSettings(ctx, configuration.SQLStore{DB: tx}, pack.Manifest.Settings)
 	}
 	if err == nil {
 		// The pilot format requires exactly tmdb.api.v1/get for both engines.
@@ -268,7 +268,7 @@ func (p *tmdbProvider) removePackage(ctx context.Context, checksum string) error
 	}
 	// The host connection adapter still consumes these settings. Preserve consent
 	// and credentials until that remaining consumer has itself been extracted.
-	if err = (configuration.SQLStore{DB: tx}).Register(ctx, tmdbConfigurationOwner, bundled.Settings()); err != nil {
+	if err = registerProviderSettings(ctx, configuration.SQLStore{DB: tx}, bundled.Settings()); err != nil {
 		return err
 	}
 	if err = (authorization.SQLStore{DB: tx}).Register(ctx, bundled.Descriptor()); err != nil {

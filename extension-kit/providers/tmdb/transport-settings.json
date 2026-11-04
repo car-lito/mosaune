@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "title": "TMDB · connexion et catalogue",
+  "description": "Connexion, langue des fiches et pays des sorties. Les secrets restent sur le serveur. Les informations déjà enregistrées ne sont pas réécrites automatiquement.",
+  "instructions": [
+    "Créez un compte TMDB puis ouvrez Paramètres → API.",
+    "Demandez un accès développeur pour votre application personnelle Mosaune. Copiez le jeton API Read Access Token ou la clé API v3.",
+    "Collez-le dans le champ ci-dessous. Un champ laissé vide conserve la clé déjà enregistrée."
+  ],
+  "links": [
+    {
+      "label": "Créer un compte TMDB",
+      "url": "https://www.themoviedb.org/signup"
+    },
+    {
+      "label": "Ouvrir les paramètres API",
+      "url": "https://www.themoviedb.org/settings/api"
+    }
+  ],
+  "fields": [
+    {
+      "id": "apiToken",
+      "label": "Jeton de lecture ou clé API",
+      "type": "secret",
+      "help": "Sans préfixe Bearer. La clé est conservée dans le catalogue local du serveur.",
+      "minLength": 20,
+      "maxLength": 2048,
+      "format": "token"
+    },
+    {
+      "id": "language",
+      "label": "Langue des fiches et bandes-annonces",
+      "type": "select",
+      "help": "Par défaut : français. S’applique aux prochaines consultations et actualisations.",
+      "options": [
+        {
+          "value": "fr-FR",
+          "label": "Français"
+        },
+        {
+          "value": "en-US",
+          "label": "English"
+        },
+        {
+          "value": "nl-NL",
+          "label": "Nederlands"
+        },
+        {
+          "value": "de-DE",
+          "label": "Deutsch"
+        },
+        {
+          "value": "es-ES",
+          "label": "Español"
+        },
+        {
+          "value": "it-IT",
+          "label": "Italiano"
+        },
+        {
+          "value": "pt-PT",
+          "label": "Português"
+        }
+      ]
+    },
+    {
+      "id": "region",
+      "label": "Pays des sorties cinéma",
+      "type": "select",
+      "help": "Par défaut : Belgique. S’applique aux sélections des sorties.",
+      "options": [
+        {
+          "value": "BE",
+          "label": "Belgique"
+        },
+        {
+          "value": "FR",
+          "label": "France"
+        },
+        {
+          "value": "CH",
+          "label": "Suisse"
+        },
+        {
+          "value": "CA",
+          "label": "Canada"
+        },
+        {
+          "value": "US",
+          "label": "États-Unis"
+        },
+        {
+          "value": "GB",
+          "label": "Royaume-Uni"
+        },
+        {
+          "value": "NL",
+          "label": "Pays-Bas"
+        },
+        {
+          "value": "DE",
+          "label": "Allemagne"
+        },
+        {
+          "value": "ES",
+          "label": "Espagne"
+        },
+        {
+          "value": "IT",
+          "label": "Italie"
+        }
+      ]
+    }
+  ]
+}

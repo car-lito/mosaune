@@ -25,7 +25,7 @@ import (
 //go:embed all:web/dist
 var frontend embed.FS
 
-const version = "0.0.56"
+const version = "0.0.57"
 
 type module struct {
 	ID    string   `json:"id"`

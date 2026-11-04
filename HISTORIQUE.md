@@ -1,3 +1,7 @@
+## 0.0.57 — configuration et transport du paquet TMDB
+
+Le paquet signé TMDB 0.7.0 déclare ses trois sources, leurs limites, la langue et la région du catalogue. Les anciens paquets restent lisibles ; les réglages personnels sont conservés lors d’un retour à une version antérieure. La migration ne remplace que l’archive d’origine 0.6.0 sans historique de remplacement.
+
 ## 0.0.56 — transport commun des fournisseurs
 
 Validation locale : 214 tests serveur et 45 tests web réussis ; contrôles Go/Svelte, exécutables Windows/Linux amd64/ARM64 et paquet CasaOS construits. Les contrats du kit restent inchangés.

@@ -15,7 +15,11 @@ import (
 )
 
 func (p *tmdbProvider) activeDetails(ctx context.Context, secret string, s MetadataSelection) (Metadata, error) {
-	selection := video.Selection{ID: s.ID, Kind: s.Kind, Season: s.Season, Episode: s.Episode, Language: appLanguage}
+	profile, profileErr := p.configuredProfile(ctx)
+	if profileErr != nil {
+		return Metadata{}, profileErr
+	}
+	selection := video.Selection{ID: s.ID, Kind: s.Kind, Season: s.Season, Episode: s.Episode, Language: profile.Language}
 	id, err := strconv.Atoi(s.ID)
 	if selection.Validate() != nil || err != nil || id <= 0 || id > 2147483647 {
 		return Metadata{}, errors.New("Sélection TMDB invalide.")

@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 4 novembre 2026 · étape 0.0.56.
+État du 5 novembre 2026 · étape 0.0.57.
 
-**Environ 70 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 71 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -12,9 +12,9 @@ La référence est exigeante : une fonction doit pouvoir être installée, désa
 | Installation, dépendances et gestion des ensembles | 20 % | 70 % | 14 points |
 | Extraction des comportements Films/Séries/Musique | 25 % | 72 % | 18 points |
 | Thèmes et contributions d’interface | 15 % | 90 % | 13,5 points |
-| Fournisseurs et connecteurs indépendants | 10 % | 60 % | 6 points |
+| Fournisseurs et connecteurs indépendants | 10 % | 70 % | 7 points |
 | Validation finale d’un noyau vide et d’une installation complète par extensions | 10 % | 0 % | 0 point |
-| **Total estimé** | **100 %** | | **69,5 points, arrondis à 70 %** |
+| **Total estimé** | **100 %** | | **environ 71 %** |
 
 ## Regroupement confirmé après la 0.0.45
 
@@ -65,6 +65,8 @@ La cible est désormais **quelques grandes extensions visibles, composées de so
 Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils ne sont pas encore les extensions médias complètes. Depuis la 0.0.46, le regroupement retire aussi l’écran choisi et sa rubrique ; il ne retire pas les fournisseurs ni le lecteur intégré. Les composants communs sont conservés même si les trois ensembles sont retirés ; leur retrait individuel reste possible.
 
 ### Interface et fournisseurs
+
+- [x] **0.0.57 :** sources réseau, limites et réglages du catalogue TMDB distribués par son paquet signé ; langue et pays configurables sans changer le serveur.
 
 - [x] **0.0.56 :** transport HTTP commun pour TMDB, MusicBrainz et leurs images, cache borné, destinations contrôlées et attente annulable. Les adaptateurs et configurations restent intégrés ; cette étape ne termine pas leur indépendance.
 

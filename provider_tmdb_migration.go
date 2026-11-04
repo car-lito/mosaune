@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"mosaune/extensionkit/configuration"
 	"mosaune/extensionkit/packageformat"
 )
 
@@ -59,7 +60,7 @@ func migrateTMDBInstalledPackage(db *sql.DB) error {
 		return err
 	}
 	if !exists && wanted {
-		pack, e := packageformat.Parse(providerDiscoveryExample, trustedProviderKey(), version)
+		pack, e := packageformat.Parse(providerTransportExample, trustedProviderKey(), version)
 		if e != nil {
 			return e
 		}
@@ -67,6 +68,9 @@ func migrateTMDBInstalledPackage(db *sql.DB) error {
 			return err
 		}
 		if err = registerProviderPackage(ctx, tx, pack, true, false); err != nil {
+			return err
+		}
+		if err = registerProviderSettings(ctx, configuration.SQLStore{DB: tx}, pack.Manifest.Settings); err != nil {
 			return err
 		}
 	}

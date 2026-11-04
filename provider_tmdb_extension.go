@@ -93,7 +93,11 @@ func (p *tmdbProvider) closeExtension() {
 	}
 }
 func (p *tmdbProvider) activeSearch(ctx context.Context, secret string, q MetadataQuery) ([]MetadataCandidate, error) {
-	query := metadata.Query{Kind: q.Kind, Title: q.Title, Year: q.Year, Language: appLanguage}
+	profile, profileErr := p.configuredProfile(ctx)
+	if profileErr != nil {
+		return nil, profileErr
+	}
+	query := metadata.Query{Kind: q.Kind, Title: q.Title, Year: q.Year, Language: profile.Language}
 	if err := query.Validate(); err != nil || (q.Kind != "films" && q.Kind != "series") {
 		return nil, errors.New("Recherche invalide.")
 	}

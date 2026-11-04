@@ -37,7 +37,7 @@ func TestRepositoryExportCanBePublishedUnchanged(t *testing.T) {
 		}
 		files[f.Name] = data
 	}
-	if len(files) != 9+len(screenPackages()) || len(files["README.md"]) == 0 {
+	if len(files) != 10+len(screenPackages()) || len(files["README.md"]) == 0 {
 		t.Fatal("incomplete export")
 	}
 	index, err := parseRepositoryIndex(files[repositoryIndexFile])
@@ -112,6 +112,7 @@ func TestRepositoryCatalogDownloadAndPermissions(t *testing.T) {
 	index.Name = "Public fixture"
 	indexRaw, _ := json.Marshal(index)
 	files := map[string][]byte{repositoryIndexFile: indexRaw, "packages/ambre.mosaune.zip": bundledThemeArchive(), "packages/salon.mosaune.zip": uiExampleArchive(), "packages/tmdb-0.4.0.mosaune.zip": providerExample, "packages/tmdb-0.4.1.mosaune.zip": providerUpdateExample, "packages/tmdb-0.5.0.mosaune.zip": providerCatalogueExample, "packages/tmdb-0.6.0.mosaune.zip": providerDiscoveryExample}
+	files["packages/tmdb-0.7.0.mosaune.zip"] = providerTransportExample
 	for _, p := range append(screenPackages(), screenExamplePackage()) {
 		files[screenArchivePath(p)] = screenArchive(p)
 	}

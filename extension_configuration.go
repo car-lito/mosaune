@@ -53,7 +53,10 @@ func (c *catalog) configurationFor(id string) (configurationBinding, bool) {
 		}
 	}
 	bound := tmdbConfiguration(c.db)
-	return configurationBinding{schema: schema, descriptor: descriptor, read: bound.Read, write: bound.Apply}, true
+	return configurationBinding{schema: schema, descriptor: descriptor, read: func(ctx context.Context) (configuration.State, error) {
+		state, e := bound.Read(ctx)
+		return projectProviderSettings(state, schema), e
+	}, write: bound.Apply}, true
 }
 
 // The host describes the effective named services, not arbitrary manifest prose.

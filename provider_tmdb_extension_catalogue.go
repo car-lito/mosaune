@@ -156,15 +156,27 @@ func cataloguePage(r videocatalog.Result) DiscoveryPage {
 	return out
 }
 func (p *tmdbProvider) activeDiscover(ctx context.Context, secret string, q DiscoveryQuery) (DiscoveryPage, error) {
-	r, e := p.catalogueExtension(ctx, secret, "discover", videocatalog.Query{Kind: q.Kind, Text: q.Query, ID: q.Seed, Page: q.Page, Language: appLanguage})
+	profile, profileErr := p.configuredProfile(ctx)
+	if profileErr != nil {
+		return DiscoveryPage{}, profileErr
+	}
+	r, e := p.catalogueExtension(ctx, secret, "discover", videocatalog.Query{Kind: q.Kind, Text: q.Query, ID: q.Seed, Page: q.Page, Language: profile.Language})
 	return cataloguePage(r), e
 }
 func (p *tmdbProvider) activeShelf(ctx context.Context, secret, shelf, kind string) (DiscoveryPage, error) {
-	r, e := p.catalogueExtension(ctx, secret, "shelf", videocatalog.Query{Kind: kind, Shelf: shelf, Page: 1, Language: appLanguage, Region: "BE"})
+	profile, profileErr := p.configuredProfile(ctx)
+	if profileErr != nil {
+		return DiscoveryPage{}, profileErr
+	}
+	r, e := p.catalogueExtension(ctx, secret, "shelf", videocatalog.Query{Kind: kind, Shelf: shelf, Page: 1, Language: profile.Language, Region: profile.Region})
 	return cataloguePage(r), e
 }
 func (p *tmdbProvider) activeProfile(ctx context.Context, secret, id string, page int) (PersonProfile, error) {
-	r, e := p.catalogueExtension(ctx, secret, "profile", videocatalog.Query{ID: id, Page: page, Language: appLanguage})
+	profile, profileErr := p.configuredProfile(ctx)
+	if profileErr != nil {
+		return PersonProfile{}, profileErr
+	}
+	r, e := p.catalogueExtension(ctx, secret, "profile", videocatalog.Query{ID: id, Page: page, Language: profile.Language})
 	if e != nil {
 		return PersonProfile{}, e
 	}
@@ -176,8 +188,12 @@ func (p *tmdbProvider) activeProfile(ctx context.Context, secret, id string, pag
 	return out, nil
 }
 func (p *tmdbProvider) activePosters(ctx context.Context, secret string, s MetadataSelection, language string) ([]PosterOption, error) {
+	profile, profileErr := p.configuredProfile(ctx)
+	if profileErr != nil {
+		return nil, profileErr
+	}
 	if language == "" {
-		language = appLanguage
+		language = profile.Language
 	}
 	r, e := p.catalogueExtension(ctx, secret, "posters", videocatalog.Query{Kind: s.Kind, ID: s.ID, Page: 1, Language: language})
 	if e != nil {

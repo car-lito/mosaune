@@ -1,4 +1,8 @@
-# Transport des fournisseurs — 0.0.56
+# Transport des fournisseurs
+
+**Depuis la 0.0.57**, le manifeste signé TMDB 0.7.0 contient un profil `transport` v1 et son formulaire `settings`. Les exemples sources sont `extension-kit/providers/tmdb/transport.json` et `transport-settings.json` ; l’outil `package-provider -transport` les inclut dans le paquet. Les sources nommées `api`, `images` et `trailers` déclarent leur URL de base, format, taille maximale, délai, cadence et durée de cache. Seule la source API peut demander le secret. L’installateur vérifie les destinations contre les autorisations existantes ; le module ne reçoit jamais le secret. Une absence de déclaration sur un ancien paquet conserve son comportement historique.
+
+Le schéma de transport est réutilisable ; les adaptateurs de fournisseur et les permissions de nouvelles origines restent à extraire. MusicBrainz utilise encore la politique du serveur décrite ci-dessous.
 
 Les programmes d’extension définissent les recherches et interprètent les réponses. Le noyau garde la responsabilité des connexions, des secrets et du stockage. TMDB, MusicBrainz, Cover Art Archive et les sources de portraits passent désormais par `fetchProviderHTTP`, dans `provider_http.go`.
 

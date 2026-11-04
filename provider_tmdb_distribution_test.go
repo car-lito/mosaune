@@ -12,7 +12,7 @@ func TestTMDBStarterIsAnOrdinaryInstalledPackage(t *testing.T) {
 	c, dir := testCatalog(t)
 	p := c.provider("tmdb").(*tmdbProvider)
 	ctx := context.Background()
-	expected, err := packageformat.Parse(providerDiscoveryExample, trustedProviderKey(), version)
+	expected, err := packageformat.Parse(providerTransportExample, trustedProviderKey(), version)
 	if err != nil {
 		t.Fatal(err)
 	}

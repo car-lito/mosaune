@@ -28,6 +28,7 @@ func run() error {
 	codePath := flag.String("code", "", "Wasm program path")
 	v := flag.String("version", "0.5.0", "provider version")
 	surfacePath := flag.String("discovery", "", "optional discovery declaration JSON (requires core 0.0.52)")
+	withTransport := flag.Bool("transport", false, "include transport profile and catalogue settings (requires core 0.0.57)")
 	flag.Parse()
 	if *keyPath == "" || *public == "" {
 		return fmt.Errorf("key and public paths required")
@@ -89,6 +90,12 @@ func run() error {
 		}
 		m.Discovery = &surface
 		m.MinCore = "0.0.52"
+	}
+	if *withTransport {
+		profile := tmdb.Transport()
+		m.Transport = &profile
+		m.Settings = tmdb.TransportSettings()
+		m.MinCore = "0.0.57"
 	}
 	data, err := packageformat.Create(m, code, key)
 	if err != nil {
