@@ -1,3 +1,13 @@
+## 0.0.56 — transport commun des fournisseurs
+
+Validation locale : 214 tests serveur et 45 tests web réussis ; contrôles Go/Svelte, exécutables Windows/Linux amd64/ARM64 et paquet CasaOS construits. Les contrats du kit restent inchangés.
+
+- TMDB, MusicBrainz et leurs sources d’images passent par un service HTTP commun : destinations autorisées, redirections contrôlées, limites de réponse, validation et cache partagé. Les contrats Wasm et les versions des familles restent inchangés.
+- Attente de cadence interruptible, même quand une autre requête occupe la file. Les erreurs d’annulation conservent leur cause ; les résultats annulés ou invalides ne sont pas enregistrés dans le cache.
+- Clé TMDB ajoutée uniquement à la requête sortante : les paramètres de l’appelant restent intacts, les clés du cache sont publiques. Messages d’erreur sans URL contenant le secret.
+- Cadences conservées (TMDB 300 ms, MusicBrainz 1 100 ms), mêmes limites de réponse et enveloppe globale du cache. Les images déjà conservées ne sont pas supprimées.
+- Le transport est un service du noyau, pas une nouvelle extension visible. Les adaptateurs, autorisations déclaratives de nouvelles sources et configurations restent à généraliser avant des fournisseurs entièrement indépendants. Aucun déploiement NAS.
+
 ## 0.0.55 — images musicales pilotées par l’extension
 
 Validation : 208 tests serveur, 45 tests web, tests du kit, contrôles Svelte/Go et trois exécutables réussis. Essai HTTP sur installation neuve avec composant 0.3.0, désactivation/réactivation et redémarrage vérifiés. Aucun déploiement NAS.

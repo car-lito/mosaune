@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -22,8 +21,7 @@ type tmdbProvider struct {
 	client         *http.Client
 	apiBase        string
 	imageBase      string
-	mu             sync.Mutex
-	next           time.Time
+	rate           providerRateGate
 }
 
 func newTMDBProvider(db *sql.DB) *tmdbProvider {
@@ -37,22 +35,7 @@ func (p *tmdbProvider) Info() ProviderInfo {
 	return ProviderInfo{ID: "tmdb", Name: "TMDB", ContractVersion: 1, Kinds: []string{"films", "series"}, RequiresCredential: true, NetworkHosts: []string{"api.themoviedb.org", "image.tmdb.org", "i.ytimg.com"}, Attribution: "This product uses the TMDB API but is not endorsed or certified by TMDB.", Website: "https://www.themoviedb.org"}
 }
 func (p *tmdbProvider) wait(ctx context.Context) error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	if ctx.Err() != nil {
-		return context.Cause(ctx)
-	}
-	if delay := time.Until(p.next); delay > 0 {
-		timer := time.NewTimer(delay)
-		defer timer.Stop()
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-timer.C:
-		}
-	}
-	p.next = time.Now().Add(300 * time.Millisecond)
-	return nil
+	return p.rate.wait(ctx, 300*time.Millisecond)
 }
 func (p *tmdbProvider) get(ctx context.Context, secret, endpoint string, params url.Values, out any) error {
 	ctx, done, e := beginProvider(ctx, p)
@@ -63,71 +46,47 @@ func (p *tmdbProvider) get(ctx context.Context, secret, endpoint string, params 
 	if secret == "" {
 		return errors.New("Configurez TMDB pour récupérer les fiches en ligne.")
 	}
-	if params == nil {
-		params = url.Values{}
-	}
+	params = cloneProviderParams(params)
+	// Caller-owned values and public cache keys must never contain credentials.
+	params.Del("api_key")
 	if !params.Has("language") {
 		params.Set("language", appLanguage)
 	}
 	key := endpoint + "?" + params.Encode()
-	var cached []byte
-	if p.db != nil && p.db.QueryRowContext(ctx, `SELECT body FROM provider_cache WHERE provider='tmdb' AND key=? AND expires>?`, key, time.Now().Unix()).Scan(&cached) == nil {
-		return json.Unmarshal(cached, out)
+	ttl := 7 * 24 * time.Hour
+	if endpoint == "/movie/now_playing" || endpoint == "/movie/upcoming" || endpoint == "/tv/popular" {
+		ttl = 6 * time.Hour
 	}
-	if err := p.wait(ctx); err != nil {
-		return err
-	}
-	if len(secret) == 32 && !strings.Contains(secret, ".") {
-		params.Set("api_key", secret)
-	}
-	req, err := http.NewRequestWithContext(ctx, "GET", p.apiBase+endpoint+"?"+params.Encode(), nil)
-	if err != nil {
-		return errors.New("Requête TMDB invalide.")
-	}
-	if params.Get("api_key") == "" {
-		req.Header.Set("Authorization", "Bearer "+secret)
-	}
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "Mosaune/"+version)
-	response, err := p.client.Do(req)
-	if err != nil {
-		return errors.New("TMDB est inaccessible. La bibliothèque locale reste disponible.")
-	}
-	defer response.Body.Close()
-	if response.StatusCode == 401 || response.StatusCode == 403 {
+	_, status, err := fetchProviderHTTP(ctx, providerHTTPCall{
+		Client: p.client, DB: p.db, Provider: "tmdb", URL: p.apiBase + key, CacheKey: key,
+		Accept: "application/json", MaxBytes: 2 << 20, TTL: ttl,
+		Authorize: providerOrigins([]string{p.apiBase}, nil), Wait: p.wait, BeforeCommit: providerCommit,
+		Prepare: func(req *http.Request) {
+			if len(secret) == 32 && !strings.Contains(secret, ".") {
+				q := req.URL.Query()
+				q.Set("api_key", secret)
+				req.URL.RawQuery = q.Encode()
+			} else {
+				req.Header.Set("Authorization", "Bearer "+secret)
+			}
+		},
+		Validate: func(data []byte) error {
+			if json.Unmarshal(data, out) != nil {
+				return errors.New("Réponse TMDB illisible.")
+			}
+			return nil
+		},
+	})
+	if status == 401 || status == 403 {
 		return errors.New("TMDB refuse cette clé. Vérifiez le jeton ou la clé API.")
 	}
-	if response.StatusCode == 429 {
+	if status == 429 {
 		return errors.New("TMDB demande une pause. Réessayez plus tard.")
 	}
-	if response.StatusCode != 200 {
-		return fmt.Errorf("Fiche TMDB indisponible (HTTP %d).", response.StatusCode)
+	if status != 0 && status != 200 {
+		return fmt.Errorf("Fiche TMDB indisponible (HTTP %d).", status)
 	}
-	data, err := readBounded(response.Body, 2<<20)
-	if err != nil {
-		return err
-	}
-	if err = json.Unmarshal(data, out); err != nil {
-		return errors.New("Réponse TMDB illisible.")
-	}
-	if cause := context.Cause(ctx); cause != nil {
-		return cause
-	}
-	if p.db != nil {
-		unlock, e := providerCommit(ctx)
-		if e != nil {
-			return e
-		}
-		defer unlock()
-		// Public metadata only: credentials are never part of the cache key or body.
-		ttl := 7 * 24 * time.Hour
-		if endpoint == "/movie/now_playing" || endpoint == "/movie/upcoming" || endpoint == "/tv/popular" {
-			ttl = 6 * time.Hour
-		}
-		_, _ = p.db.ExecContext(ctx, `DELETE FROM provider_cache WHERE expires<? AND NOT (key LIKE 'visual-image:v2:%' AND length(body)>0)`, time.Now().Unix())
-		_, _ = p.db.ExecContext(ctx, `INSERT OR REPLACE INTO provider_cache(provider,key,body,expires) SELECT 'tmdb',?,?,? WHERE (SELECT COALESCE(SUM(length(body)),0) FROM provider_cache)+? < 16777216`, key, data, time.Now().Add(ttl).Unix(), len(data))
-	}
-	return nil
+	return err
 }
 
 func tmdbKind(kind string) string {
@@ -146,39 +105,20 @@ func (p *tmdbProvider) activeArtwork(ctx context.Context, _ string, ref string) 
 	if err := p.moduleReady(); err != nil {
 		return nil, err
 	}
+	endpoint := p.imageBase + ref
+	wait := p.wait
+	origin := p.imageBase
 	if strings.HasPrefix(ref, "yt:") {
 		key := strings.TrimPrefix(ref, "yt:")
 		if !youtubeKey.MatchString(key) {
 			return nil, errors.New("Miniature invalide.")
 		}
-		req, _ := http.NewRequestWithContext(ctx, "GET", "https://i.ytimg.com/vi/"+key+"/hqdefault.jpg", nil)
-		response, err := p.client.Do(req)
-		if err != nil {
-			return nil, err
-		}
-		defer response.Body.Close()
-		if response.StatusCode != 200 {
-			return nil, errors.New("Miniature indisponible.")
-		}
-		return readBounded(response.Body, 8<<20)
-	}
-	if !artworkPath.MatchString(ref) {
+		origin = "https://i.ytimg.com"
+		endpoint = origin + "/vi/" + key + "/hqdefault.jpg"
+		wait = nil
+	} else if !artworkPath.MatchString(ref) {
 		return nil, errors.New("Image TMDB invalide.")
 	}
-	if err := p.wait(ctx); err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequestWithContext(ctx, "GET", p.imageBase+ref, nil)
-	if err != nil {
-		return nil, err
-	}
-	response, err := p.client.Do(req)
-	if err != nil {
-		return nil, errors.New("Affiche indisponible.")
-	}
-	defer response.Body.Close()
-	if response.StatusCode != 200 {
-		return nil, errors.New("Affiche indisponible.")
-	}
-	return readBounded(response.Body, 8<<20)
+	body, _, err := fetchProviderHTTP(ctx, providerHTTPCall{Client: p.client, URL: endpoint, MaxBytes: 8 << 20, Authorize: providerOrigins([]string{origin}, nil), Wait: wait})
+	return body, err
 }

@@ -1,3 +1,10 @@
+## Étape 0.0.56 — transport commun des fournisseurs
+
+- [x] Réunir les requêtes JSON et images de TMDB/MusicBrainz derrière un transport borné : autorisation, cadence, annulation, validation et cache commun.
+- [x] Séparer les secrets des paramètres publics et des clés du cache.
+- [ ] Déclarer la configuration et les destinations des fournisseurs dans leurs paquets, derrière les autorisations du noyau ; supprimer les adaptateurs spécialisés restants.
+- [ ] Connecteurs Radarr/Sonarr, profils, associations et playlists encore à extraire ; validation finale du noyau vide avant les lecteurs puis le NAS.
+
 ## Étape 0.0.51 — contrat des sources de découverte
 
 - [x] Déclarations de recherche/sélections et routage générique dans les écrans.

@@ -1,6 +1,6 @@
 # Vers un Mosaune entièrement extensible
 
-État du 3 novembre 2026 · étape 0.0.55.
+État du 4 novembre 2026 · étape 0.0.56.
 
 **Environ 70 % du découpage visé est réalisé.** Il s’agit d’une estimation d’architecture pour Films, Séries et Musique, pas du pourcentage de toutes les fonctionnalités de Mosaune ni du temps restant. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
@@ -66,6 +66,8 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 
 ### Interface et fournisseurs
 
+- [x] **0.0.56 :** transport HTTP commun pour TMDB, MusicBrainz et leurs images, cache borné, destinations contrôlées et attente annulable. Les adaptateurs et configurations restent intégrés ; cette étape ne termine pas leur indépendance.
+
 - [x] **0.0.55 :** recherche des pochettes, replis, portraits et crédits pilotée par le même composant Musique ; étapes et accès réseau bornés, cache partagé conservé.
 
 - [x] **0.0.54 :** préparation des recherches MusicBrainz (albums, association, artistes, discographies, prochaines sorties) dans le même composant Wasm ; le noyau valide puis exécute le plan borné.
@@ -81,9 +83,9 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [x] Supprimer le moteur TMDB natif dupliqué : module obligatoire, pause et désinstallation persistantes sans substitution automatique.
 - [x] Distribuer le module TMDB fourni comme un paquet signé installé ; aucun retour implicite après retrait ni activation sans réinstallation.
 - [x] Lire les recherches et sélections depuis le manifeste signé TMDB installé, avec cache, retour arrière et retrait cohérents (0.0.52).
-- [ ] Achever l’indépendance de TMDB : transport/configuration, identifiants Sonarr et interface fournisseur générique.
+- [ ] Achever l’indépendance de TMDB : adaptateur du transport, configuration, identifiants Sonarr et interface fournisseur générique.
 - [x] Extraire l’interprétation des réponses MusicBrainz (albums, éditions, pistes et artistes) dans un composant Wasm de Musique, remplaçable et désactivable.
-- [ ] Achever MusicBrainz : transport réseau, autorisation de nouvelles sources, configuration et distribution comme fournisseur indépendant.
+- [ ] Achever MusicBrainz : adaptateur du transport réseau, autorisation de nouvelles sources, configuration et distribution comme fournisseur indépendant.
 - [ ] Extraire Radarr et Sonarr derrière le même contrat de demandes/suivi.
 
 ### Condition de fin du découpage

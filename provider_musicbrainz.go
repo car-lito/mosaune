@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -21,8 +20,7 @@ type musicBrainzProvider struct {
 	db          *sql.DB
 	client      *http.Client
 	base        string
-	mu          sync.Mutex
-	next        time.Time
+	rate        providerRateGate
 }
 
 var mbID = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
@@ -41,55 +39,25 @@ func (p *musicBrainzProvider) Info() ProviderInfo {
 	return ProviderInfo{ID: "musicbrainz", Name: "MusicBrainz", ContractVersion: 1, Kinds: []string{"music"}, Website: "https://musicbrainz.org", NetworkHosts: []string{"musicbrainz.org", "coverartarchive.org", "archive.org", "www.wikidata.org", "commons.wikimedia.org", "upload.wikimedia.org", "thumb.wikimedia.org"}, Attribution: "MusicBrainz / MetaBrainz — core data CC0; supplementary data CC BY-NC-SA 3.0. Cover Art Archive : droits des images détenus par leurs ayants droit."}
 }
 func (p *musicBrainzProvider) get(ctx context.Context, endpoint string, params url.Values, out any) error {
-	if params == nil {
-		params = url.Values{}
-	}
+	params = cloneProviderParams(params)
 	params.Set("fmt", "json")
 	key := endpoint + "?" + params.Encode()
-	var cached []byte
-	if p.db != nil && p.db.QueryRowContext(ctx, `SELECT body FROM provider_cache WHERE provider='musicbrainz' AND key=? AND expires>?`, key, time.Now().Unix()).Scan(&cached) == nil {
-		return json.Unmarshal(cached, out)
+	_, status, err := fetchProviderHTTP(ctx, providerHTTPCall{
+		Client: p.client, DB: p.db, Provider: "musicbrainz", URL: p.base + key, CacheKey: key, TTL: 24 * time.Hour,
+		Accept: "application/json", MaxBytes: 2 << 20, Authorize: providerOrigins([]string{p.base}, nil),
+		Wait:         func(ctx context.Context) error { return p.rate.wait(ctx, 1100*time.Millisecond) },
+		BeforeCommit: p.owner.recognitionCommit,
+		Validate: func(data []byte) error {
+			if json.Unmarshal(data, out) != nil {
+				return errors.New("Réponse musicale illisible.")
+			}
+			return nil
+		},
+	})
+	if status != 0 && status != 200 {
+		return fmt.Errorf("MusicBrainz ne peut pas répondre pour le moment (HTTP %d). Réessayez plus tard.", status)
 	}
-	p.mu.Lock()
-	delay := time.Until(p.next)
-	if delay > 0 {
-		timer := time.NewTimer(delay)
-		select {
-		case <-ctx.Done():
-			timer.Stop()
-			p.mu.Unlock()
-			return ctx.Err()
-		case <-timer.C:
-		}
-	}
-	p.next = time.Now().Add(1100 * time.Millisecond)
-	p.mu.Unlock()
-	req, err := http.NewRequestWithContext(ctx, "GET", p.base+key, nil)
-	if err != nil {
-		return errors.New("Requête musicale invalide.")
-	}
-	req.Header.Set("User-Agent", "Mosaune/"+version+" (personal self-hosted media catalog)")
-	req.Header.Set("Accept", "application/json")
-	response, err := p.client.Do(req)
-	if err != nil {
-		return errors.New("MusicBrainz est inaccessible. Vos fichiers restent disponibles.")
-	}
-	defer response.Body.Close()
-	if response.StatusCode != 200 {
-		return fmt.Errorf("MusicBrainz ne peut pas répondre pour le moment (HTTP %d). Réessayez plus tard.", response.StatusCode)
-	}
-	data, err := readBounded(response.Body, 2<<20)
-	if err != nil {
-		return err
-	}
-	if err = json.Unmarshal(data, out); err != nil {
-		return errors.New("Réponse musicale illisible.")
-	}
-	if p.db != nil {
-		_, _ = p.db.ExecContext(ctx, `DELETE FROM provider_cache WHERE expires<? AND NOT (key LIKE 'visual-image:v2:%' AND length(body)>0)`, time.Now().Unix())
-		_, _ = p.db.ExecContext(ctx, `INSERT OR REPLACE INTO provider_cache(provider,key,body,expires) SELECT 'musicbrainz',?,?,? WHERE (SELECT COALESCE(SUM(length(body)),0) FROM provider_cache)+?<16777216`, key, data, time.Now().Add(24*time.Hour).Unix(), len(data))
-	}
-	return nil
+	return err
 }
 
 func (p *musicBrainzProvider) searchMusic(ctx context.Context, q d.Request) (DiscoveryPage, error) {
