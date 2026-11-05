@@ -1,3 +1,5 @@
+Version 0.0.59 — les composants avancés de Films et Séries proposent désormais Demandes Radarr et Sonarr, un programme partagé qui prépare les ajouts et recherches. [Contrat pour contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
+
 Version 0.0.58 — le composant Musique pilote aussi les sources réseau, délais, cadences et limites des réponses. Les familles 7.0/7.1 embarquent ce composant remplaçable. [Contrat de transport](TRANSPORT-FOURNISSEURS.md).
 
 Version 0.0.57 : le paquet TMDB définit ses sources et ses réglages. Dans Réglages → Extensions → TMDB, choisissez la langue des fiches et le pays des sorties. [Contrat de transport](TRANSPORT-FOURNISSEURS.md).

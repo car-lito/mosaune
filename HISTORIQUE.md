@@ -1,3 +1,9 @@
+## 0.0.59 — demandes de téléchargement remplaçables
+
+Les familles Films et Séries partagent le composant Demandes Radarr et Sonarr. Son programme prépare les ajouts, les saisons surveillées et les recherches. Il peut être installé, remplacé, désactivé ou retiré depuis les composants de la famille. Un remplacement invalide une confirmation antérieure. La désactivation annule les échanges actifs, y compris le suivi.
+
+Le serveur conserve les clés, les chemins existants, le contrôle des saisons autorisées et l’enregistrement préalable des demandes. Le transport HTTP et l’interprétation du suivi restent à extraire. Migration 39, familles fournies Films/Séries 1.1.0 et exemples 8.0/8.1 pour les contributeurs.
+
 ## 0.0.58 — sources musicales déclarées par l’extension
 
 Le composant musical 0.4.0 fournit son profil de transport à travers le contrat describe-transport. MusicBrainz, Wikidata, Commons et les pochettes utilisent ses déclarations de sources, délais, limites et cache. Le serveur contrôle les destinations autorisées et conserve le stockage partagé.

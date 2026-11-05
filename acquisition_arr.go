@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -46,14 +47,16 @@ func (p *tmdbProvider) AcquisitionID(ctx context.Context, secret, kind, id strin
 }
 
 type arrConfig struct {
-	ID         string `json:"id"`
-	URL        string `json:"url"`
-	Key        string `json:"key,omitempty"`
-	Configured bool   `json:"configured"`
-	Enabled    bool   `json:"enabled"`
-	Profile    int    `json:"profile"`
-	Root       string `json:"root"`
-	Library    string `json:"library"`
+	owner        *catalog
+	planChecksum string
+	ID           string `json:"id"`
+	URL          string `json:"url"`
+	Key          string `json:"key,omitempty"`
+	Configured   bool   `json:"configured"`
+	Enabled      bool   `json:"enabled"`
+	Profile      int    `json:"profile"`
+	Root         string `json:"root"`
+	Library      string `json:"library"`
 }
 
 func arrKind(id string) string {
@@ -82,6 +85,15 @@ func number(v any) int  { n, _ := v.(float64); return int(n) }
 func truth(v any) bool  { b, _ := v.(bool); return b }
 func word(v any) string { s, _ := v.(string); return s }
 func (a arrClient) call(ctx context.Context, method, path string, body, out any) error {
+	if a.config.owner != nil {
+		call, done, err := a.openSession(ctx)
+		if err != nil {
+			return err
+		}
+		defer done()
+		ctx = call
+	}
+
 	var data []byte
 	var err error
 	if body != nil {
@@ -203,49 +215,55 @@ func selectedSeasons(obj arrObject, season int) []int {
 // all unrelated season flags. Explicit episode monitoring covers seasons that
 // were already monitored but contained manually unmonitored episodes.
 func (a arrClient) submit(ctx context.Context, obj arrObject, season int) (int, error) {
+	ctx, done, err := a.openSession(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer done()
+	plan, err := a.submissionPlan(ctx, obj, season)
 	id := number(obj["id"])
-	fresh := id == 0
+	if err != nil {
+		return id, err
+	}
+	if plan.Write == "none" {
+		return id, nil
+	}
+	fresh := plan.Write == "create"
 	obj["monitored"] = true
 	if fresh {
 		obj["qualityProfileId"] = a.config.Profile
 		obj["rootFolderPath"] = a.config.Root
 		delete(obj, "path")
-	}
-	if a.config.ID == "radarr" {
-		if fresh {
-			obj["minimumAvailability"] = "released"
-			obj["addOptions"] = map[string]any{"searchForMovie": true}
+		if a.config.ID == "radarr" {
+			obj["minimumAvailability"] = plan.MinimumAvailability
+			obj["addOptions"] = map[string]any{"searchForMovie": plan.SearchOnAdd}
+		} else {
+			obj["seasonFolder"] = plan.SeasonFolder
+			if plan.SeriesType != "" {
+				obj["seriesType"] = plan.SeriesType
+			}
+			obj["addOptions"] = map[string]any{"monitor": "skip", "searchForMissingEpisodes": plan.SearchOnAdd}
 		}
-	} else {
+	}
+	if a.config.ID == "sonarr" {
 		seasons, ok := obj["seasons"].([]any)
-		if !ok || len(selectedSeasons(obj, season)) == 0 {
+		if !ok {
 			return id, errors.New("Saisons absentes de la réponse du service.")
 		}
-		for _, s := range seasons {
-			v, ok := s.(map[string]any)
+		for _, raw := range seasons {
+			current, ok := raw.(map[string]any)
 			if !ok {
 				return id, errors.New("Saison invalide dans la réponse du service.")
 			}
-			if fresh {
-				v["monitored"] = false
+			if plan.ResetSeasons {
+				current["monitored"] = false
 			}
-			if season < 0 || number(v["seasonNumber"]) == season {
-				v["monitored"] = true
+			if slices.Contains(plan.Seasons, number(current["seasonNumber"])) {
+				current["monitored"] = true
 			}
 		}
-		if fresh {
-			obj["seasonFolder"] = true
-			if word(obj["seriesType"]) == "" {
-				obj["seriesType"] = "standard"
-			}
-			obj["monitorNewItems"] = "none"
-			if season < 0 {
-				obj["monitorNewItems"] = "all"
-			}
-			obj["addOptions"] = map[string]any{"monitor": "skip", "searchForMissingEpisodes": true}
-		}
-		if !fresh && season < 0 {
-			obj["monitorNewItems"] = "all"
+		if plan.MonitorNewItems != "" {
+			obj["monitorNewItems"] = plan.MonitorNewItems
 		}
 	}
 	if fresh {
@@ -260,21 +278,18 @@ func (a arrClient) submit(ctx context.Context, obj arrObject, season int) (int, 
 		}
 		return id, nil
 	}
-	if a.config.ID == "radarr" && truth(obj["hasFile"]) {
-		return id, nil
-	}
 	if err := a.call(ctx, "PUT", a.resource()+"/"+strconv.Itoa(id), obj, nil); err != nil {
 		return id, err
 	}
 	cmd := map[string]any{"name": "MoviesSearch", "movieIds": []int{id}}
-	if a.config.ID == "sonarr" {
+	if plan.MonitorEpisodes {
 		var episodes []arrObject
 		if err := a.call(ctx, "GET", "episode?seriesId="+strconv.Itoa(id), nil, &episodes); err != nil {
 			return id, err
 		}
 		ids := []int{}
 		for _, ep := range episodes {
-			if season < 0 || number(ep["seasonNumber"]) == season {
+			if slices.Contains(plan.Seasons, number(ep["seasonNumber"])) {
 				ids = append(ids, number(ep["id"]))
 			}
 		}
@@ -283,11 +298,16 @@ func (a arrClient) submit(ctx context.Context, obj arrObject, season int) (int, 
 				return id, err
 			}
 		}
+	}
+	if plan.Search == "series" || plan.Search == "season" {
 		cmd = map[string]any{"name": "SeriesSearch", "seriesId": id}
 		if season >= 0 {
 			cmd["name"] = "SeasonSearch"
 			cmd["seasonNumber"] = season
 		}
+	}
+	if plan.Search == "" {
+		return id, nil
 	}
 	return id, a.call(ctx, "POST", "command", cmd, nil)
 }

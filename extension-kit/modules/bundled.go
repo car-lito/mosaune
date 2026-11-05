@@ -9,7 +9,7 @@ import (
 	"mosaune/extensionkit/protocol"
 )
 
-//go:embed music-results/recognizer.wasm music-results/module.json detail-experience/recognizer.wasm detail-experience/module.json detail-header/recognizer.wasm detail-header/module.json detail-information/recognizer.wasm detail-information/module.json detail-series/recognizer.wasm detail-series/module.json catalogue-films/recognizer.wasm catalogue-films/module.json catalogue-series/recognizer.wasm catalogue-series/module.json catalogue-music/recognizer.wasm catalogue-music/module.json audiotags/tags.wasm audiotags/module.json films/recognizer.wasm series/recognizer.wasm music/recognizer.wasm films/module.json series/module.json music/module.json
+//go:embed acquisition/recognizer.wasm acquisition/module.json music-results/recognizer.wasm music-results/module.json detail-experience/recognizer.wasm detail-experience/module.json detail-header/recognizer.wasm detail-header/module.json detail-information/recognizer.wasm detail-information/module.json detail-series/recognizer.wasm detail-series/module.json catalogue-films/recognizer.wasm catalogue-films/module.json catalogue-series/recognizer.wasm catalogue-series/module.json catalogue-music/recognizer.wasm catalogue-music/module.json audiotags/tags.wasm audiotags/module.json films/recognizer.wasm series/recognizer.wasm music/recognizer.wasm films/module.json series/module.json music/module.json
 var assets embed.FS
 
 func Lookup(kind string) (protocol.Descriptor, []byte, error) {
@@ -30,7 +30,7 @@ func Lookup(kind string) (protocol.Descriptor, []byte, error) {
 func Descriptor(kind string) (protocol.Descriptor, error) {
 	var d protocol.Descriptor
 	switch kind {
-	case "music-results", "films", "series", "music", "audiotags", "catalogue-films", "catalogue-series", "catalogue-music", "detail-series", "detail-information", "detail-header", "detail-experience":
+	case "acquisition", "music-results", "films", "series", "music", "audiotags", "catalogue-films", "catalogue-series", "catalogue-music", "detail-series", "detail-information", "detail-header", "detail-experience":
 	default:
 		return d, fmt.Errorf("unknown recognition module")
 	}

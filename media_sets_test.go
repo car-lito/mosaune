@@ -31,7 +31,7 @@ func TestMediaSetsLifecycleAndPreservedData(t *testing.T) {
 	}
 	before := getItems(t, c)
 	p := setPreview(t, c, "films", "prepare")
-	if len(p.Steps) != 0 || len(p.Kept) != 5 {
+	if len(p.Steps) != 0 || len(p.Kept) != 6 {
 		t.Fatal(p)
 	}
 	active, done, _, _, e := c.beginRecognition(ctx, "films")
@@ -45,7 +45,7 @@ func TestMediaSetsLifecycleAndPreservedData(t *testing.T) {
 	}
 	defer sharedDone()
 	p = setPreview(t, c, "films", "remove")
-	if len(p.Steps) != 2 || len(p.Kept) != 3 {
+	if len(p.Steps) != 2 || len(p.Kept) != 4 {
 		t.Fatal(p)
 	}
 	bad := p

@@ -36,7 +36,7 @@ func migrateRequests(db *sql.DB) error {
 	return tx.Commit()
 }
 func (c *catalog) arrConfig(ctx context.Context, id string) (arrConfig, error) {
-	cfg := arrConfig{ID: id}
+	cfg := arrConfig{ID: id, owner: c}
 	var b string
 	err := c.db.QueryRowContext(ctx, `SELECT data FROM acquisition_settings WHERE id=?`, id).Scan(&b)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -50,6 +50,7 @@ func (c *catalog) arrConfig(ctx context.Context, id string) (arrConfig, error) {
 	return cfg, err
 }
 func (c *catalog) configInput(ctx context.Context, cfg arrConfig) (arrConfig, error) {
+	cfg.owner = c
 	if arrKind(cfg.ID) == "" {
 		return cfg, errors.New("Connecteur inconnu.")
 	}
@@ -199,6 +200,12 @@ func (c *catalog) previewRequest(ctx context.Context, in requestInput) (requestP
 		return p, cfg, obj, w, 0, err
 	}
 	a := arrClient{cfg}
+	ctx, done, err := a.openSession(ctx)
+	if err != nil {
+		return p, cfg, obj, w, 0, err
+	}
+	defer done()
+	cfg.planChecksum = ctx.Value(acquisitionSessionKey{}).(*acquisitionSession).checksum
 	opt, err := a.options(ctx)
 	if err != nil {
 		return p, cfg, obj, w, 0, err
@@ -237,7 +244,7 @@ func (c *catalog) previewRequest(ctx context.Context, in requestInput) (requestP
 	}
 	// The confirmation describes the exact destination and scope. Re-read before
 	// submitting, rejecting a changed configuration instead of using stale UI data.
-	b, _ := json.Marshal([]any{cfg, in.WorkID, in.Season, external, number(obj["id"]), p})
+	b, _ := json.Marshal([]any{cfg, cfg.planChecksum, in.WorkID, in.Season, external, number(obj["id"]), p})
 	sum := sha256.Sum256(b)
 	p.Confirmation = hex.EncodeToString(sum[:])
 	return p, cfg, obj, w, external, nil
@@ -518,7 +525,13 @@ func (c *catalog) syncRequests(ctx context.Context, allowed func(string) bool, f
 	}
 }
 func (c *catalog) syncRequest(ctx context.Context, cfg arrConfig, v *acquisitionRequest, allowed func(string) bool) error {
+	cfg.owner = c
 	a := arrClient{cfg}
+	ctx, done, err := a.openSession(ctx)
+	if err != nil {
+		return err
+	}
+	defer done()
 	obj, err := a.find(ctx, v.ExternalID)
 	if err != nil {
 		return err

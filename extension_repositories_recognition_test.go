@@ -17,6 +17,9 @@ import (
 func recognitionRepositoryEntry(p packageformat.Executable) repositoryEntry {
 	m := p.Manifest
 	kind := "recognition"
+	if m.Contributions[0].Role == "acquisition.plan.v1" {
+		kind = "acquisition"
+	}
 	if m.Contributions[0].Role == "media.detail-experience.v1" {
 		kind = "detail-experience"
 	}

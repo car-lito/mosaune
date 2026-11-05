@@ -162,6 +162,7 @@ func TestRecognitionSafeModeAndNoInstalledModules(t *testing.T) {
 // version number changed. Old migrations must not see tables from the future.
 func removeRecognitionForLegacyFixture(t *testing.T, c *catalog) {
 	t.Helper()
+	recognitionChange(t, c, "acquisition", "remove")
 	removeAudioTagsForLegacyFixture(t, c)
 	for _, kind := range recognitionKinds {
 		recognitionChange(t, c, kind, "remove")

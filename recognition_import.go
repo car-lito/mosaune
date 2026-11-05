@@ -60,6 +60,9 @@ func validateRecognitionImport(p packageformat.Executable) (string, error) {
 	if len(m.Contributions) == 1 && m.Contributions[0].Role == "metadata.music-results.v1" {
 		return musicResultsImport(p)
 	}
+	if len(m.Contributions) == 1 && m.Contributions[0].Role == "acquisition.plan.v1" {
+		return acquisitionImport(p)
+	}
 	// Reserve factory identities. A local author's label is not an endorsement.
 	if strings.HasPrefix(d.ID, "mosaune.") {
 		return "", errors.New("Les identifiants mosaune.* sont réservés.")

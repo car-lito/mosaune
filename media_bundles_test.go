@@ -31,7 +31,7 @@ func TestMediaBundlesScreenAndModulesLifecycle(t *testing.T) {
 	}
 	before := getItems(t, c)
 	p := bundlePreview(t, c, "films", "prepare")
-	if p.State != "ready" || len(p.Steps) != 0 || p.InstalledVersion != "1.0.0" {
+	if p.State != "ready" || len(p.Steps) != 0 || p.InstalledVersion != "1.1.0" {
 		t.Fatal(p)
 	}
 	active, done, _, _, e := c.beginRecognition(ctx, "films")
@@ -40,7 +40,7 @@ func TestMediaBundlesScreenAndModulesLifecycle(t *testing.T) {
 	}
 	defer done()
 	p = bundlePreview(t, c, "films", "remove")
-	if len(p.Steps) != 3 || len(p.Kept) != 3 {
+	if len(p.Steps) != 3 || len(p.Kept) != 4 {
 		t.Fatal(p)
 	}
 	if e = bundleApply(c, p); e != nil {
