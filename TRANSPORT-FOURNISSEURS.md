@@ -1,30 +1,27 @@
 # Transport des fournisseurs
 
-**Depuis la 0.0.57**, le manifeste signé TMDB 0.7.0 contient un profil `transport` v1 et son formulaire `settings`. Les exemples sources sont `extension-kit/providers/tmdb/transport.json` et `transport-settings.json` ; l’outil `package-provider -transport` les inclut dans le paquet. Les sources nommées `api`, `images` et `trailers` déclarent leur URL de base, format, taille maximale, délai, cadence et durée de cache. Seule la source API peut demander le secret. L’installateur vérifie les destinations contre les autorisations existantes ; le module ne reçoit jamais le secret. Une absence de déclaration sur un ancien paquet conserve son comportement historique.
+## Déclarations des extensions
 
-Le schéma de transport est réutilisable ; les adaptateurs de fournisseur et les permissions de nouvelles origines restent à extraire. MusicBrainz utilise encore la politique du serveur décrite ci-dessous.
+Depuis la 0.0.57, le manifeste signé TMDB 0.7.0 contient un profil transport v1 et son formulaire settings. Les exemples sont dans extension-kit/providers/tmdb. Le paquet déclare les sources api, images et trailers, leurs limites, la langue et le pays du catalogue. Les secrets sont ajoutés par le serveur au moment de la connexion.
 
-Les programmes d’extension définissent les recherches et interprètent les réponses. Le noyau garde la responsabilité des connexions, des secrets et du stockage. TMDB, MusicBrainz, Cover Art Archive et les sources de portraits passent désormais par `fetchProviderHTTP`, dans `provider_http.go`.
+Depuis la 0.0.58, le composant Musique 0.4.0 annonce TransportVersion 1 dans describe-requests et fournit son profil par describe-transport. Son fichier extension-kit/providers/musicbrainz/transport.json est embarqué dans le programme Wasm. Le serveur lit le profil du composant effectivement sélectionné à chaque session de recherche ou d’image, y compris après remplacement et redémarrage.
 
-## Ce que le service garantit
+Chaque source déclare son identifiant, son URL de base, son format, sa taille maximale, son délai, sa cadence et sa durée de cache. Les sources musicales sont musicbrainz, wikidata, commons, coverart, upload et thumb. Le module peut adapter les chemins d’API et réduire les limites dans les bornes autorisées. Les noms de fichiers des images Wikimedia conservent leur encodage. Les redirections Cover Art Archive vers Archive.org sont contrôlées par le serveur.
 
-- Une destination doit être autorisée avant toute lecture du cache ou connexion. Chaque redirection repasse par la politique du client et la liste des destinations. Sans politique explicite, aucune redirection n’est suivie.
-- Une attente de cadence peut être annulée pendant la file comme pendant le délai. Les fournisseurs gardent des cadences séparées.
-- Les réponses sont bornées et validées avant d’être conservées. JSON TMDB/MusicBrainz : 2 Mio ; JSON des portraits : 512 Kio ; images : 8 Mio. Les limites d’exécution Wasm ne changent pas.
-- Le cache commun reste séparé par identifiant de fournisseur et clé publique. Il conserve ses durées existantes et son plafond de 16 Mio ; les images persistantes sont protégées du nettoyage des réponses expirées.
-- La désactivation en cours d’opération est vérifiée avant la sauvegarde, sous le verrou du cycle de vie concerné. Une réponse annulée ne devient pas une nouvelle entrée de cache.
-- La clé ou le jeton TMDB est ajouté à une requête indépendante, après le calcul de la clé publique du cache. Les paramètres reçus ne sont jamais modifiés. Les erreurs réseau ne révèlent pas l’URL authentifiée.
+## Compatibilité et cycle de vie
 
-## Ce qui reste à découper
+Les anciens modules musicaux qui annoncent uniquement la version de préparation des recherches conservent la politique de transport historique. Un module annonçant le nouveau contrat doit fournir un profil valide. Une déclaration absente ou invalide dans ce cas bloque son utilisation.
 
-`providerHTTPCall` est une interface **interne de l’hôte**, pas un service librement invocable par un programme Wasm. Les origines, clients, limites, cadence, fonctions d’authentification et espaces de cache sont encore choisis par les adaptateurs de confiance du serveur. Les programmes externes ne peuvent pas fournir leur propre politique d’autorisation.
+L’import vérifie les contrats de recherche, d’images et de transport avant installation. Les familles 7.0/7.1 nécessitent Mosaune 0.0.58. Les anciennes archives restent disponibles. La migration 38 met à jour uniquement le composant fourni 0.3.0 dont les octets stockés correspondent au registre. Elle conserve son activation et respecte les composants remplacés, modifiés ou supprimés.
 
-Les fichiers `provider_tmdb.go`, `provider_musicbrainz.go` et `provider_musicbrainz_visual.go` relient les contrats existants à ce service. La suite doit distribuer leur configuration et leurs déclarations de sources avec les paquets, en les reliant aux autorisations communes. Ajouter un fournisseur entièrement nouveau demande encore du travail dans le serveur : cette étape ne prétend pas avoir terminé cette indépendance.
+La désactivation annule les sessions et leurs connexions en cours. Les fiches et images conservées restent consultables. Le cache et les données sont communs aux composants.
 
-Aucune nouvelle carte d’extension, migration de données ou version de famille n’est nécessaire pour ce changement interne. Les familles 6.0/6.1 et le composant musical 0.3 restent compatibles.
+## Responsabilités du serveur
+
+Le service provider_http.go contrôle les destinations avant connexion et à chaque redirection, limite les réponses, applique les cadences interruptibles et valide les données avant stockage. Il fournit le cache partagé et protège les secrets. Les extensions s’exécutent avec les limites Wasm existantes.
+
+Les autorisations actuelles restent attachées aux fournisseurs connus. L’ajout de fournisseurs entièrement nouveaux, l’attribution générique de permissions réseau et les derniers adaptateurs métier restent à extraire.
 
 ## Vérification
 
-`provider_http_test.go` couvre le cache, les frontières d’origine, les redirections, la révocation, l’annulation des attentes et la confidentialité des clés. Les tests existants TMDB, musique et images vérifient les parcours complets avec des réponses simulées, sans clé personnelle ni accès au NAS.
-
-Il n’y a pas de changement visuel à tester pour cette étape.
+Les tests de transport musical couvrent un module de remplacement qui change réellement le chemin d’API et la limite de réponse, sa sélection après redémarrage, le rejet des destinations non autorisées, les noms d’images encodés et les migrations avec composants désactivés, supprimés ou modifiés. Les tests des images et recherches couvrent également la révocation des sessions et la conservation du cache.

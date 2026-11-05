@@ -1,3 +1,5 @@
+Version 0.0.58 — le composant Musique pilote aussi les sources réseau, délais, cadences et limites des réponses. Les familles 7.0/7.1 embarquent ce composant remplaçable. [Contrat de transport](TRANSPORT-FOURNISSEURS.md).
+
 Version 0.0.57 : le paquet TMDB définit ses sources et ses réglages. Dans Réglages → Extensions → TMDB, choisissez la langue des fiches et le pays des sorties. [Contrat de transport](TRANSPORT-FOURNISSEURS.md).
 **Préversion 0.0.50 :** les extensions de catalogue définissent aussi leurs résultats de recherche locale, leurs mots-clés et leurs vignettes. [Guide d’essai](ESSAYER-LA-RECHERCHE-050.md).
 

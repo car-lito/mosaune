@@ -4,6 +4,7 @@ import (
 	d "mosaune/extensionkit/capabilities/musicresults/v1"
 	"mosaune/extensionkit/modules/musicresults"
 	"mosaune/extensionkit/protocol"
+	"mosaune/extensionkit/providers/musicbrainz"
 	"mosaune/extensionkit/sdk"
 	"os"
 )
@@ -16,10 +17,20 @@ func main() {
 		if r.Capability != d.Capability {
 			return fail()
 		}
+		if r.Operation == "describe-transport" {
+			var empty struct{}
+			if protocol.DecodeOne(r.Payload, &empty) != nil {
+				return fail()
+			}
+			return musicbrainz.Transport(), nil
+		}
 		if r.Operation == "describe" || r.Operation == "describe-requests" || r.Operation == "describe-visuals" {
 			var empty struct{}
 			if protocol.DecodeOne(r.Payload, &empty) != nil {
 				return fail()
+			}
+			if r.Operation == "describe-requests" {
+				return struct{ Version, TransportVersion int }{1, 1}, nil
 			}
 			return struct{ Version int }{1}, nil
 		}

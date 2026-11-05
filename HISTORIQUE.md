@@ -1,3 +1,9 @@
+## 0.0.58 — sources musicales déclarées par l’extension
+
+Le composant musical 0.4.0 fournit son profil de transport à travers le contrat describe-transport. MusicBrainz, Wikidata, Commons et les pochettes utilisent ses déclarations de sources, délais, limites et cache. Le serveur contrôle les destinations autorisées et conserve le stockage partagé.
+
+La migration 38 met à jour le composant fourni 0.3.0 en conservant les choix d’activation. Les composants retirés, remplacés ou modifiés sont respectés. Les anciens modules utilisent leur politique historique. Les familles 7.0/7.1 distribuent le nouveau composant avec Mosaune 0.0.58 minimum.
+
 ## 0.0.57 — configuration et transport du paquet TMDB
 
 Le paquet signé TMDB 0.7.0 déclare ses trois sources, leurs limites, la langue et la région du catalogue. Les anciens paquets restent lisibles ; les réglages personnels sont conservés lors d’un retour à une version antérieure. La migration ne remplace que l’archive d’origine 0.6.0 sans historique de remplacement.

@@ -11,6 +11,7 @@ import (
 	"mosaune/extensionkit/modules"
 	"mosaune/extensionkit/packageformat"
 	"mosaune/extensionkit/registry"
+	"mosaune/extensionkit/transport"
 	"net/url"
 	"strings"
 )
@@ -100,16 +101,14 @@ func musicResultsImport(p packageformat.Executable) (string, error) {
 
 type musicResultsKey struct{}
 type musicResultsReader struct {
-	owner  *musicBrainzProvider
-	engine *cataloguer
+	owner   *musicBrainzProvider
+	engine  *cataloguer
+	profile transport.Profile
 }
 
 func checkMusicRequests(ctx context.Context, r *cataloguer) error {
-	var info struct{ Version int }
-	if e := r.call(ctx, "describe-requests", struct{}{}, &info); e != nil || info.Version != 1 {
-		return errors.New("Ce composant musical doit être mis à jour : la préparation des recherches (version 1) est requise. Vos fiches sont conservées.")
-	}
-	return nil
+	_, err := loadMusicTransport(ctx, r)
+	return err
 }
 
 func (p *musicBrainzProvider) requestMusic(ctx context.Context, q d.Request) (d.Result, error) {
@@ -177,13 +176,14 @@ func (p *musicBrainzProvider) openMusicResults(ctx context.Context) (context.Con
 			return ctx, func() {}, e
 		}
 	}
-	if e := checkMusicRequests(ctx, reader); e != nil {
+	profile, e := loadMusicTransport(ctx, reader)
+	if e != nil {
 		reader.engine.Close()
 		done()
 		release()
 		return ctx, func() {}, e
 	}
-	return context.WithValue(ctx, musicResultsKey{}, &musicResultsReader{p, reader}), func() { reader.engine.Close(); done(); release() }, nil
+	return context.WithValue(ctx, musicResultsKey{}, &musicResultsReader{owner: p, engine: reader, profile: profile}), func() { reader.engine.Close(); done(); release() }, nil
 }
 func (p *musicBrainzProvider) decodeMusic(ctx context.Context, operation, id string, page int, raw json.RawMessage) (d.Result, error) {
 	q := d.Query{Operation: operation, ID: id, Page: page, Body: raw}

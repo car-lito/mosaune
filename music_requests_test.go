@@ -84,7 +84,7 @@ func TestMusicRequestFactoryUpgrade(t *testing.T) {
 				}
 				return
 			}
-			want := "0.3.0"
+			want := "0.4.0"
 			if mode == "modified" || mode == "imported" {
 				want = "0.1.0"
 			}

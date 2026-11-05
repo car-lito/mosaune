@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "language": "fr-FR",
+  "region": "BE",
+  "sources": [
+    {"id":"musicbrainz", "baseURL":"https://musicbrainz.org/ws/2", "format":"json", "maxBytes":2097152, "timeoutMs":12000, "intervalMs":1100, "cacheSeconds":86400},
+    {"id":"wikidata", "baseURL":"https://www.wikidata.org", "format":"json", "maxBytes":524288, "timeoutMs":12000, "intervalMs":0, "cacheSeconds":604800},
+    {"id":"commons", "baseURL":"https://commons.wikimedia.org", "format":"json", "maxBytes":524288, "timeoutMs":12000, "intervalMs":0, "cacheSeconds":604800},
+    {"id":"coverart", "baseURL":"https://coverartarchive.org", "format":"image", "maxBytes":8388608, "timeoutMs":12000, "intervalMs":0, "cacheSeconds":0},
+    {"id":"upload", "baseURL":"https://upload.wikimedia.org", "format":"image", "maxBytes":8388608, "timeoutMs":12000, "intervalMs":0, "cacheSeconds":0},
+    {"id":"thumb", "baseURL":"https://thumb.wikimedia.org", "format":"image", "maxBytes":8388608, "timeoutMs":12000, "intervalMs":0, "cacheSeconds":0}
+  ]
+}

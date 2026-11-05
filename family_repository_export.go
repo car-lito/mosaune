@@ -17,7 +17,7 @@ func exportFamilyRepository(dir string) error {
 	}
 	index := repositoryIndex{Schema: 1, Name: "Mosaune — familles médias (exemples)", Packages: []repositoryEntry{}}
 	for _, kind := range []string{"films", "series", "music"} {
-		for _, release := range []string{"6.0.0", "6.1.0"} {
+		for _, release := range []string{"7.0.0", "7.1.0"} {
 			raw, err := exampleBundleArchive(kind, release)
 			if err != nil {
 				return err
@@ -41,5 +41,5 @@ func exportFamilyRepository(dir string) error {
 	if err = os.WriteFile(filepath.Join(dir, repositoryIndexFile), append(raw, '\n'), 0644); err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(dir, "README.md"), []byte("# Familles Mosaune — exemples\n\nMosaune 0.0.55 ou ultérieur pour ce catalogue. Publiez ces fichiers dans un dépôt GitHub public puis ajoutez son adresse depuis Extensions. Versions 6.0.0 et 6.1.0 pour tester installation et mise à jour. Programmes et écrans déjà extraits seulement, pas des familles métier complètes. Aucune donnée utilisateur ni configuration dans cet export. L’import ne les active pas automatiquement.\n"), 0644)
+	return os.WriteFile(filepath.Join(dir, "README.md"), []byte("# Familles Mosaune — exemples\n\nMosaune 0.0.58 ou ultérieur pour ce catalogue. Publiez ces fichiers dans un dépôt GitHub public puis ajoutez son adresse depuis Extensions. Versions 7.0.0 et 7.1.0 pour tester installation et mise à jour. Programmes et écrans déjà extraits seulement, pas des familles métier complètes. Aucune donnée utilisateur ni configuration dans cet export. L’import ne les active pas automatiquement.\n"), 0644)
 }

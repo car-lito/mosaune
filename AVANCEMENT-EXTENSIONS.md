@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 5 novembre 2026 · étape 0.0.57.
+État du 5 novembre 2026 · étape 0.0.58.
 
-**Environ 71 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 72 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -12,9 +12,9 @@ La référence est exigeante : une fonction doit pouvoir être installée, désa
 | Installation, dépendances et gestion des ensembles | 20 % | 70 % | 14 points |
 | Extraction des comportements Films/Séries/Musique | 25 % | 72 % | 18 points |
 | Thèmes et contributions d’interface | 15 % | 90 % | 13,5 points |
-| Fournisseurs et connecteurs indépendants | 10 % | 70 % | 7 points |
+| Fournisseurs et connecteurs indépendants | 10 % | 80 % | 8 points |
 | Validation finale d’un noyau vide et d’une installation complète par extensions | 10 % | 0 % | 0 point |
-| **Total estimé** | **100 %** | | **environ 71 %** |
+| **Total estimé** | **100 %** | | **environ 72 %** |
 
 ## Regroupement confirmé après la 0.0.45
 

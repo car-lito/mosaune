@@ -17,7 +17,7 @@ func checkMusicVisuals(ctx context.Context, r *cataloguer) error {
 }
 
 // The extension chooses the workflow. The host only executes validated steps
-// using its fixed origins, transport policies, shared cache and cancellation.
+// using module-declared transport policies within the host network grant.
 func (p *musicBrainzProvider) runMusicVisual(ctx context.Context, q d.VisualQuery) ([]byte, commonsPhoto, error) {
 	var empty commonsPhoto
 	if e := q.Validate(); e != nil {
@@ -64,13 +64,9 @@ func (p *musicBrainzProvider) runMusicVisual(ctx context.Context, q d.VisualQuer
 				return nil, empty, e
 			}
 		} else {
-			origins := map[string]string{"wikidata": "https://www.wikidata.org", "commons": "https://commons.wikimedia.org", "coverart": "https://coverartarchive.org"}
-			endpoint := origins[f.Source] + f.Path
-			if len(params) > 0 {
-				endpoint += "?" + params.Encode()
-			}
+
 			if f.Image {
-				data, status, err := p.fetchVisual(ctx, endpoint)
+				data, status, err := p.fetchVisual(ctx, f.Source, f.Path)
 				if err == nil {
 					if e = ctx.Err(); e != nil {
 						return nil, empty, context.Cause(ctx)
@@ -81,7 +77,7 @@ func (p *musicBrainzProvider) runMusicVisual(ctx context.Context, q d.VisualQuer
 					return nil, empty, err
 				}
 				q.Status = 404
-			} else if e = p.publicJSON(ctx, endpoint, &q.Body); e != nil {
+			} else if e = p.publicJSON(ctx, f.Source, f.Path, params, &q.Body); e != nil {
 				return nil, empty, e
 			}
 		}

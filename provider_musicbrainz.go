@@ -26,7 +26,7 @@ type musicBrainzProvider struct {
 var mbID = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
 
 func newMusicBrainzProvider(db *sql.DB) *musicBrainzProvider {
-	return &musicBrainzProvider{owner: &catalog{db: db}, resultsGate: make(chan struct{}, 1), db: db, base: "https://musicbrainz.org/ws/2", client: &http.Client{Timeout: 12 * time.Second, CheckRedirect: func(r *http.Request, via []*http.Request) error {
+	return &musicBrainzProvider{owner: &catalog{db: db}, resultsGate: make(chan struct{}, 1), db: db, client: &http.Client{Timeout: 12 * time.Second, CheckRedirect: func(r *http.Request, via []*http.Request) error {
 		host := r.URL.Hostname()
 		if len(via) > 5 || r.URL.User != nil || (r.URL.Scheme != "https" && r.URL.Scheme != "http") || r.URL.Port() != "" || !(host == "coverartarchive.org" || host == "archive.org" || strings.HasSuffix(host, ".archive.org") || host == "www.wikidata.org" || host == "commons.wikimedia.org" || host == "upload.wikimedia.org" || host == "thumb.wikimedia.org") {
 			return errors.New("Redirection refusée.")
@@ -41,19 +41,17 @@ func (p *musicBrainzProvider) Info() ProviderInfo {
 func (p *musicBrainzProvider) get(ctx context.Context, endpoint string, params url.Values, out any) error {
 	params = cloneProviderParams(params)
 	params.Set("fmt", "json")
-	key := endpoint + "?" + params.Encode()
-	_, status, err := fetchProviderHTTP(ctx, providerHTTPCall{
-		Client: p.client, DB: p.db, Provider: "musicbrainz", URL: p.base + key, CacheKey: key, TTL: 24 * time.Hour,
-		Accept: "application/json", MaxBytes: 2 << 20, Authorize: providerOrigins([]string{p.base}, nil),
-		Wait:         func(ctx context.Context) error { return p.rate.wait(ctx, 1100*time.Millisecond) },
-		BeforeCommit: p.owner.recognitionCommit,
-		Validate: func(data []byte) error {
-			if json.Unmarshal(data, out) != nil {
-				return errors.New("Réponse musicale illisible.")
-			}
-			return nil
-		},
-	})
+	call, err := p.musicCall(ctx, "musicbrainz", endpoint, params)
+	if err != nil {
+		return err
+	}
+	call.Validate = func(data []byte) error {
+		if json.Unmarshal(data, out) != nil {
+			return errors.New("Réponse musicale illisible.")
+		}
+		return nil
+	}
+	_, status, err := fetchProviderHTTP(ctx, call)
 	if status != 0 && status != 200 {
 		return fmt.Errorf("MusicBrainz ne peut pas répondre pour le moment (HTTP %d). Réessayez plus tard.", status)
 	}
