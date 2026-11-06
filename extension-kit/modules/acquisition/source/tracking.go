@@ -10,7 +10,7 @@ func track(q a.Tracking) (a.TrackingResult, error) {
 	r := a.TrackingResult{Total: total, Imported: imported, State: "waiting", Message: "En attente d’une disponibilité dans le service."}
 	if q.RemoteID == 0 {
 		r.State, r.Message = "missing", "Absent du service. Vérifiez la demande dans "+q.Connector+" ; Mosaune ne la renvoie pas automatiquement."
-		return r, r.Validate(q)
+		return r, nil
 	}
 	monitored := q.Monitored
 	if q.Connector == "sonarr" && q.Season >= 0 {
@@ -77,5 +77,7 @@ func track(q a.Tracking) (a.TrackingResult, error) {
 	if r.State == "waiting" && policy.WaitingMessage != "" {
 		r.Message = policy.WaitingMessage
 	}
-	return r, r.Validate(q)
+	// The entry point already validated the observations. The host validates
+	// every result against its evidence, avoiding a second full input walk here.
+	return r, nil
 }

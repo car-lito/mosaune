@@ -97,7 +97,9 @@ func loadFactProjector(ctx context.Context, d protocol.Descriptor, code []byte, 
 	limits.Modules = 1
 	if capability == "acquisition.plan.v1" {
 		limits.InputBytes = 1 << 20
-		limits.Timeout = 4 * time.Second
+		// The bounded 5,000-episode / 2,000-queue observation envelope needs
+		// more interpreter time on slower machines; memory stays unchanged.
+		limits.Timeout = 8 * time.Second
 	}
 	if capability == "media.detail-experience.v1" {
 		limits.Timeout = 10 * time.Second

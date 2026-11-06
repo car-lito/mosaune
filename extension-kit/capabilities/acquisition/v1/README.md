@@ -14,7 +14,7 @@ Le type de paquet de dépôt est `acquisition`. Les archives de familles peuvent
 
 ## Suivi, depuis Mosaune 0.0.60
 
-Le module 0.2.0 conserve le même rôle et ajoute `tracking-info` (réponse `{"Version":1}`) et `track`. Ce dernier reçoit `Tracking` et renvoie `TrackingResult`, définis dans `tracking.go`. Les observations contiennent uniquement des identifiants internes au service, saisons, épisodes, tailles et états : aucun titre, chemin, clé, adresse ou identifiant de téléchargement. Le serveur lit au plus 20 pages de 100 éléments et 5 000 épisodes, avec une entrée Wasm plafonnée à 1 Mio, 64 Mio de mémoire et quatre secondes par appel.
+Le module 0.2.0 conserve le même rôle et ajoute `tracking-info` (réponse `{"Version":1}`) et `track`. Ce dernier reçoit `Tracking` et renvoie `TrackingResult`, définis dans `tracking.go`. Les observations contiennent uniquement des identifiants internes au service, saisons, épisodes, tailles et états : aucun titre, chemin, clé, adresse ou identifiant de téléchargement. Le serveur lit au plus 20 pages de 100 éléments et 5 000 épisodes, avec une entrée Wasm plafonnée à 1 Mio, 64 Mio de mémoire et huit secondes par appel. Ce délai couvre le cas maximal dans l’interpréteur sur les machines plus lentes ; les limites de taille et de mémoire restent fixes.
 
 Le programme décide des états et messages, de la pertinence des entrées de file et du calcul de progression. `waitingMessage` dans `policy.json` permet un exemple simple de personnalisation. Les compteurs sont vérifiés contre les observations du périmètre confirmé ; `available` nécessite réellement tous les fichiers locaux lisibles. Le serveur peut appeler `track` une seconde fois après le contrôle des fichiers. Le module ne déclenche aucun téléchargement ni scan.
 
