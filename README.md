@@ -1,3 +1,5 @@
+Version 0.0.61 — le composant Demandes fournit désormais les routes et les limites réseau de Radarr/Sonarr. Les clés restent dans Mosaune. [Contrat pour contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
+
 Version 0.0.60 — le composant partagé Demandes Radarr et Sonarr interprète aussi le suivi : progression, saisons, blocages et disponibilité. Le serveur vérifie les fichiers locaux avant de les annoncer disponibles. [Contrat pour contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
 
 Version 0.0.58 — le composant Musique pilote aussi les sources réseau, délais, cadences et limites des réponses. Les familles 7.0/7.1 embarquent ce composant remplaçable. [Contrat de transport](TRANSPORT-FOURNISSEURS.md).
@@ -19,7 +21,7 @@ Version 0.0.57 : le paquet TMDB définit ses sources et ses réglages. Dans Rég
 
 **Étape 0.0.43 :** [catalogue, profils et affiches dans TMDB 0.5.0](ESSAYER-TMDB-043.md).
 
-Écrans médias : [composition remplaçable — 0.0.42](ESSAYER-LES-ECRANS-042.md). [Checklist du découpage : environ 76 %](AVANCEMENT-EXTENSIONS.md).
+Écrans médias : [composition remplaçable — 0.0.42](ESSAYER-LES-ECRANS-042.md). [Checklist du découpage : environ 78 %](AVANCEMENT-EXTENSIONS.md).
 
 # Mosaune
 

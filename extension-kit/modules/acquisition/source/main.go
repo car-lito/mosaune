@@ -72,6 +72,17 @@ func main() {
 		if r.Capability != a.Capability {
 			return fail()
 		}
+		if r.Operation == "describe-transport" {
+			var q a.TransportQuery
+			if protocol.DecodeOne(r.Payload, &q) != nil {
+				return fail()
+			}
+			p, err := transport(q.Connector)
+			if err != nil {
+				return fail()
+			}
+			return p, nil
+		}
 		if r.Operation == "describe" || r.Operation == "tracking-info" {
 			var empty struct{}
 			if protocol.DecodeOne(r.Payload, &empty) != nil {

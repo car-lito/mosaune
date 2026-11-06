@@ -1,0 +1,132 @@
+{
+  "radarr": {
+    "version": 1,
+    "prefix": "api/v3",
+    "timeoutSeconds": 12,
+    "maxBytes": 8388608,
+    "routes": {
+      "status": {
+        "method": "GET",
+        "path": "system/status"
+      },
+      "profiles": {
+        "method": "GET",
+        "path": "qualityprofile"
+      },
+      "roots": {
+        "method": "GET",
+        "path": "rootfolder"
+      },
+      "find": {
+        "method": "GET",
+        "path": "movie",
+        "query": {
+          "tmdbId": "{id}"
+        }
+      },
+      "lookup": {
+        "method": "GET",
+        "path": "movie/lookup",
+        "query": {
+          "term": "tmdb:{id}"
+        }
+      },
+      "queue": {
+        "method": "GET",
+        "path": "queue",
+        "query": {
+          "pageSize": "100",
+          "page": "{page}",
+          "includeUnknownSeriesItems": "false",
+          "includeUnknownMovieItems": "false"
+        }
+      },
+      "create": {
+        "method": "POST",
+        "path": "movie"
+      },
+      "update": {
+        "method": "PUT",
+        "path": "movie/{id}"
+      },
+      "search": {
+        "method": "POST",
+        "path": "command"
+      }
+    }
+  },
+  "sonarr": {
+    "version": 1,
+    "prefix": "api/v3",
+    "timeoutSeconds": 12,
+    "maxBytes": 8388608,
+    "routes": {
+      "status": {
+        "method": "GET",
+        "path": "system/status"
+      },
+      "profiles": {
+        "method": "GET",
+        "path": "qualityprofile"
+      },
+      "roots": {
+        "method": "GET",
+        "path": "rootfolder"
+      },
+      "find": {
+        "method": "GET",
+        "path": "series",
+        "query": {
+          "tvdbId": "{id}"
+        }
+      },
+      "lookup": {
+        "method": "GET",
+        "path": "series/lookup",
+        "query": {
+          "term": "tvdb:{id}"
+        }
+      },
+      "queue": {
+        "method": "GET",
+        "path": "queue",
+        "query": {
+          "pageSize": "100",
+          "page": "{page}",
+          "includeUnknownSeriesItems": "false",
+          "includeUnknownMovieItems": "false"
+        }
+      },
+      "create": {
+        "method": "POST",
+        "path": "series"
+      },
+      "update": {
+        "method": "PUT",
+        "path": "series/{id}"
+      },
+      "search": {
+        "method": "POST",
+        "path": "command"
+      },
+      "episodes": {
+        "method": "GET",
+        "path": "episode",
+        "query": {
+          "seriesId": "{id}"
+        }
+      },
+      "episodefiles": {
+        "method": "GET",
+        "path": "episodefile",
+        "query": {
+          "seriesId": "{id}"
+        }
+      },
+      "monitor": {
+        "method": "PUT",
+        "path": "episode/monitor"
+      }
+    }
+  }
+}

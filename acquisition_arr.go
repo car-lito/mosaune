@@ -1,18 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // Each acquisition adapter owns its remote API. Metadata providers only resolve
@@ -84,52 +78,6 @@ type arrObject map[string]any
 func number(v any) int  { n, _ := v.(float64); return int(n) }
 func truth(v any) bool  { b, _ := v.(bool); return b }
 func word(v any) string { s, _ := v.(string); return s }
-func (a arrClient) call(ctx context.Context, method, path string, body, out any) error {
-	if a.config.owner != nil {
-		call, done, err := a.openSession(ctx)
-		if err != nil {
-			return err
-		}
-		defer done()
-		ctx = call
-	}
-
-	var data []byte
-	var err error
-	if body != nil {
-		data, err = json.Marshal(body)
-		if err != nil {
-			return errors.New("Demande invalide.")
-		}
-	}
-	req, err := http.NewRequestWithContext(ctx, method, a.config.URL+"/api/v3/"+path, bytes.NewReader(data))
-	if err != nil {
-		return errors.New("Adresse du service invalide.")
-	}
-	req.Header.Set("X-Api-Key", a.config.Key)
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Content-Type", "application/json")
-	client := http.Client{Timeout: 12 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return errors.New("redirection refusée") }}
-	resp, err := client.Do(req)
-	if err != nil {
-		return errors.New("Service inaccessible ou réponse trop lente. Vérifiez son adresse et son accès réseau.")
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode == 401 || resp.StatusCode == 403 {
-		return errors.New("Le service refuse la clé API.")
-	}
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("Le service a refusé l’opération (HTTP %d). Consultez ses événements.", resp.StatusCode)
-	}
-	b, err := io.ReadAll(io.LimitReader(resp.Body, (8<<20)+1))
-	if err != nil || len(b) > 8<<20 {
-		return errors.New("Réponse du service incomplète ou trop volumineuse.")
-	}
-	if out != nil && json.Unmarshal(b, out) != nil {
-		return errors.New("Réponse inattendue : vérifiez l’URL du service.")
-	}
-	return nil
-}
 
 type arrOption struct {
 	ID   int    `json:"id"`
@@ -142,27 +90,26 @@ type arrOptions struct {
 }
 
 func (a arrClient) options(ctx context.Context) (arrOptions, error) {
+	ctx, done, err := a.openSession(ctx)
+	if err != nil {
+		return arrOptions{}, err
+	}
+	defer done()
 	var status struct {
 		AppName string `json:"appName"`
 	}
 	var result arrOptions
-	if err := a.call(ctx, "GET", "system/status", nil, &status); err != nil {
+	if err := a.exchange(ctx, "status", 0, 0, nil, &status); err != nil {
 		return result, err
 	}
 	if !strings.EqualFold(status.AppName, a.config.ID) {
 		return result, errors.New("Ce service ne correspond pas au connecteur choisi.")
 	}
-	if err := a.call(ctx, "GET", "qualityprofile", nil, &result.Profiles); err != nil {
+	if err := a.exchange(ctx, "profiles", 0, 0, nil, &result.Profiles); err != nil {
 		return result, err
 	}
-	err := a.call(ctx, "GET", "rootfolder", nil, &result.Roots)
+	err = a.exchange(ctx, "roots", 0, 0, nil, &result.Roots)
 	return result, err
-}
-func (a arrClient) resource() string {
-	if a.config.ID == "radarr" {
-		return "movie"
-	}
-	return "series"
 }
 func (a arrClient) identifier() string {
 	if a.config.ID == "radarr" {
@@ -172,7 +119,7 @@ func (a arrClient) identifier() string {
 }
 func (a arrClient) find(ctx context.Context, id int) (arrObject, error) {
 	var all []arrObject
-	err := a.call(ctx, "GET", a.resource()+"?"+a.identifier()+"="+strconv.Itoa(id), nil, &all)
+	err := a.exchange(ctx, "find", id, 0, nil, &all)
 	if err != nil {
 		return nil, err
 	}
@@ -184,12 +131,8 @@ func (a arrClient) find(ctx context.Context, id int) (arrObject, error) {
 	return nil, nil
 }
 func (a arrClient) lookup(ctx context.Context, id int) (arrObject, error) {
-	prefix := "tmdb:"
-	if a.config.ID == "sonarr" {
-		prefix = "tvdb:"
-	}
 	var all []arrObject
-	if err := a.call(ctx, "GET", a.resource()+"/lookup?term="+url.QueryEscape(prefix+strconv.Itoa(id)), nil, &all); err != nil {
+	if err := a.exchange(ctx, "lookup", id, 0, nil, &all); err != nil {
 		return nil, err
 	}
 	for _, v := range all {
@@ -268,7 +211,7 @@ func (a arrClient) submit(ctx context.Context, obj arrObject, season int) (int, 
 	}
 	if fresh {
 		var saved arrObject
-		err := a.call(ctx, "POST", a.resource(), obj, &saved)
+		err := a.exchange(ctx, "create", 0, 0, obj, &saved)
 		if err != nil {
 			return 0, err
 		}
@@ -278,13 +221,13 @@ func (a arrClient) submit(ctx context.Context, obj arrObject, season int) (int, 
 		}
 		return id, nil
 	}
-	if err := a.call(ctx, "PUT", a.resource()+"/"+strconv.Itoa(id), obj, nil); err != nil {
+	if err := a.exchange(ctx, "update", id, 0, obj, nil); err != nil {
 		return id, err
 	}
 	cmd := map[string]any{"name": "MoviesSearch", "movieIds": []int{id}}
 	if plan.MonitorEpisodes {
 		var episodes []arrObject
-		if err := a.call(ctx, "GET", "episode?seriesId="+strconv.Itoa(id), nil, &episodes); err != nil {
+		if err := a.exchange(ctx, "episodes", id, 0, nil, &episodes); err != nil {
 			return id, err
 		}
 		ids := []int{}
@@ -294,7 +237,7 @@ func (a arrClient) submit(ctx context.Context, obj arrObject, season int) (int, 
 			}
 		}
 		if len(ids) > 0 {
-			if err := a.call(ctx, "PUT", "episode/monitor", map[string]any{"episodeIds": ids, "monitored": true}, nil); err != nil {
+			if err := a.exchange(ctx, "monitor", 0, 0, map[string]any{"episodeIds": ids, "monitored": true}, nil); err != nil {
 				return id, err
 			}
 		}
@@ -309,5 +252,5 @@ func (a arrClient) submit(ctx context.Context, obj arrObject, season int) (int, 
 	if plan.Search == "" {
 		return id, nil
 	}
-	return id, a.call(ctx, "POST", "command", cmd, nil)
+	return id, a.exchange(ctx, "search", 0, 0, cmd, nil)
 }

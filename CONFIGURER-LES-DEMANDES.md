@@ -76,3 +76,5 @@ Références des contrats : [API Radarr](https://radarr.video/docs/api/), [API S
 Depuis la 0.0.59, activez le composant « Demandes Radarr et Sonarr » dans les composants avancés de Films ou Séries. Un seul programme est partagé par les deux familles. Sa désactivation suspend les échanges Mosaune avec ces services. Vous pouvez choisir un remplaçant depuis la même fiche.
 
 Depuis la 0.0.60, le composant partagé de demandes interprète aussi le suivi. Sa version fournie est 0.2.0 ; un remplaçant plus ancien peut demander une mise à jour pour afficher la progression. Aucun repli automatique ne réactive le composant fourni. Les fichiers doivent toujours être lisibles et identifiés dans Mosaune avant d’être annoncés disponibles.
+
+Depuis la 0.0.61, utilisez le composant fourni 0.3.0 ou un remplaçant compatible avec les opérations réseau. Une ancienne extension sans ces déclarations doit être mise à jour avant de tester la connexion, envoyer une demande ou suivre les téléchargements. Les services déjà configurés conservent leurs adresses et clés ; le composant officiel est mis à jour sans changer son activation.

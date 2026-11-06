@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 6 novembre 2026 · étape 0.0.60.
+État du 6 novembre 2026 · étape 0.0.61.
 
-**Environ 76 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 78 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -10,11 +10,11 @@ La référence est exigeante : une fonction doit pouvoir être installée, désa
 |---|---:|---:|---:|
 | Moteur, contrats, registre et isolation | 20 % | 90 % | 18 points |
 | Installation, dépendances et gestion des ensembles | 20 % | 70 % | 14 points |
-| Extraction des comportements Films/Séries/Musique | 25 % | 84 % | 21 points |
+| Extraction des comportements Films/Séries/Musique | 25 % | 92 % | 23 points |
 | Thèmes et contributions d’interface | 15 % | 90 % | 13,5 points |
 | Fournisseurs et connecteurs indépendants | 10 % | 90 % | 9 points |
 | Validation finale d’un noyau vide et d’une installation complète par extensions | 10 % | 0 % | 0 point |
-| **Total estimé** | **100 %** | | **environ 76 %** |
+| **Total estimé** | **100 %** | | **environ 78 %** |
 
 ## Regroupement confirmé après la 0.0.45
 
@@ -65,6 +65,8 @@ La cible est désormais **quelques grandes extensions visibles, composées de so
 Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils ne sont pas encore les extensions médias complètes. Depuis la 0.0.46, le regroupement retire aussi l’écran choisi et sa rubrique ; il ne retire pas les fournisseurs ni le lecteur intégré. Les composants communs sont conservés même si les trois ensembles sont retirés ; leur retrait individuel reste possible.
 
 ### Interface et fournisseurs
+
+- [x] **0.0.61 :** routes HTTP, paramètres d’API, délais et tailles de réponse Radarr/Sonarr déclarés par le composant partagé. L’hôte exécute des opérations nommées sur le serveur configuré, sans exposer la clé au module. Ancien composant sans transport : mise à jour requise, aucun repli natif. Sérialisation des objets distants et formulaires encore intégrés.
 
 - [x] **0.0.60 :** interprétation du suivi Radarr/Sonarr dans le même composant partagé : progression, saisons, blocages et états de disponibilité. Les fichiers lisibles restent vérifiés par le serveur ; aucun repli natif si le composant ne sait pas suivre. Adaptateurs HTTP et formulaires encore intégrés.
 

@@ -8,14 +8,17 @@ import (
 	"mosaune/extensionkit/packageformat"
 	"mosaune/extensionkit/protocol"
 	"strings"
+	"sync"
 )
 
 type acquisitionSessionKey struct{}
 type acquisitionSession struct {
-	owner      *catalog
-	descriptor protocol.Descriptor
-	code       []byte
-	checksum   string
+	owner       *catalog
+	descriptor  protocol.Descriptor
+	code        []byte
+	checksum    string
+	transportMu sync.Mutex
+	transports  map[string]a.Transport
 }
 
 func acquisitionImport(p packageformat.Executable) (string, error) {

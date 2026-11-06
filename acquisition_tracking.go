@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	a "mosaune/extensionkit/capabilities/acquisition/v1"
-	"strconv"
 )
 
 func (client arrClient) trackingReader(ctx context.Context) (*cataloguer, error) {
@@ -39,7 +38,7 @@ func (client arrClient) trackingObservations(ctx context.Context, v acquisitionR
 		return q, nil, errors.New("Identifiant distant absent du suivi.")
 	}
 	if client.config.ID == "sonarr" {
-		if err := client.call(ctx, "GET", "episode?seriesId="+strconv.Itoa(q.RemoteID), nil, &episodes); err != nil {
+		if err := client.exchange(ctx, "episodes", q.RemoteID, 0, nil, &episodes); err != nil {
 			return q, nil, err
 		}
 		if len(episodes) > 5000 {
@@ -65,8 +64,7 @@ func (client arrClient) trackingObservations(ctx context.Context, v acquisitionR
 			Records []arrObject `json:"records"`
 			Total   int         `json:"totalRecords"`
 		}
-		path := "queue?pageSize=100&page=" + strconv.Itoa(page) + "&includeUnknownSeriesItems=false&includeUnknownMovieItems=false"
-		if err := client.call(ctx, "GET", path, nil, &remote); err != nil {
+		if err := client.exchange(ctx, "queue", 0, page, nil, &remote); err != nil {
 			return q, nil, err
 		}
 		if len(remote.Records) > 100 || remote.Total < 0 || remote.Total > 2000 {

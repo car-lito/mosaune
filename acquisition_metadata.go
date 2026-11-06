@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"path"
-	"strconv"
 	"strings"
 )
 
@@ -50,7 +49,7 @@ func (c *catalog) prioritizeImport(ctx context.Context, a arrClient, v acquisiti
 		return nil
 	}
 	var files []arrObject
-	if err := a.call(ctx, "GET", "episodefile?seriesId="+strconv.Itoa(v.RemoteID), nil, &files); err != nil {
+	if err := a.exchange(ctx, "episodefiles", v.RemoteID, 0, nil, &files); err != nil {
 		return err
 	}
 	for _, file := range files {

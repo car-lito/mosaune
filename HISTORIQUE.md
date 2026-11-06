@@ -1,3 +1,7 @@
+## 0.0.61 — opérations réseau des connecteurs déclarées par l’extension
+
+Le composant partagé 0.3.0 fournit les routes Radarr/Sonarr, leurs paramètres numériques, délais et limites de réponse. Le serveur appelle des opérations nommées et conserve les clés, le serveur et le sous-chemin configurés. Destinations absolues, traversées de chemins, changements de méthode et redirections sont refusés. Profil chargé une fois par session puis oublié ; désactivation et remplacement interrompent les appels. Migration41 et familles10.0/10.1. Un ancien remplaçant sans profil réseau exige une mise à jour, sans routes natives de secours. Les objets métier des API, formulaires et configuration restent à extraire.
+
 ## 0.0.60 — suivi des demandes remplaçable
 
 Le composant partagé Radarr/Sonarr 0.2.0 interprète désormais les épisodes, les files de téléchargement et les fichiers locaux vérifiés : progression, blocages, importation et disponibilité partielle ou complète. Les observations et résultats sont bornés. Un ancien composant sans suivi doit être mis à jour, sans repli natif. Migration 40 avec désactivations, retraits et choix tiers conservés ; familles 9.0/9.1. Les échanges HTTP, les formulaires et le rapprochement des chemins restent intégrés.

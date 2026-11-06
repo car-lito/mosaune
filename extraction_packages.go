@@ -60,6 +60,13 @@ func validateExtractionCode(ctx context.Context, p packageformat.Executable) err
 					err = errors.New("Version de suivi incompatible.")
 				}
 			}
+			if err == nil && packageformat.Compare(p.Manifest.MinCore, "0.0.61") >= 0 {
+				for _, connector := range []string{"radarr", "sonarr"} {
+					if _, err = readAcquisitionTransport(ctx, reader, connector); err != nil {
+						break
+					}
+				}
+			}
 			reader.engine.Close()
 		}
 		return err

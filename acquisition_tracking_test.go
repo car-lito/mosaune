@@ -67,7 +67,8 @@ func TestAcquisitionTrackingFactoryUpgrade(t *testing.T) {
 				}
 				return
 			}
-			want := "0.2.0"
+			current, _ := modules.Descriptor("acquisition")
+			want := current.Version
 			if mode == "modified" || mode == "imported" {
 				want = "0.1.0"
 			}

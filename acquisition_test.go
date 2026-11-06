@@ -372,7 +372,7 @@ func TestAcquisitionURLAndRedirectSafety(t *testing.T) {
 	defer target.Close()
 	source := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { http.Redirect(w, r, target.URL, 302) }))
 	defer source.Close()
-	err := (arrClient{arrConfig{URL: source.URL, Key: "fixture-secret"}}).call(testContext(context.Background()), "GET", "system/status", nil, nil)
+	err := (arrClient{arrConfig{ID: "radarr", URL: source.URL, Key: "fixture-secret"}}).exchange(testContext(context.Background()), "status", 0, 0, nil, nil)
 	if err == nil || touched || strings.Contains(err.Error(), "fixture-secret") {
 		t.Fatal(err, touched)
 	}
