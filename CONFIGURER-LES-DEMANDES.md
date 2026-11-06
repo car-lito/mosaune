@@ -74,3 +74,5 @@ Un double clic ne crée pas une deuxième demande identique. Les demandes et leu
 Références des contrats : [API Radarr](https://radarr.video/docs/api/), [API Sonarr](https://sonarr.tv/docs/api/), [identifiants externes TMDB](https://developer.themoviedb.org/reference/tv-series-external-ids).
 
 Depuis la 0.0.59, activez le composant « Demandes Radarr et Sonarr » dans les composants avancés de Films ou Séries. Un seul programme est partagé par les deux familles. Sa désactivation suspend les échanges Mosaune avec ces services. Vous pouvez choisir un remplaçant depuis la même fiche.
+
+Depuis la 0.0.60, le composant partagé de demandes interprète aussi le suivi. Sa version fournie est 0.2.0 ; un remplaçant plus ancien peut demander une mise à jour pour afficher la progression. Aucun repli automatique ne réactive le composant fourni. Les fichiers doivent toujours être lisibles et identifiés dans Mosaune avant d’être annoncés disponibles.

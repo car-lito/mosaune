@@ -72,12 +72,23 @@ func main() {
 		if r.Capability != a.Capability {
 			return fail()
 		}
-		if r.Operation == "describe" {
+		if r.Operation == "describe" || r.Operation == "tracking-info" {
 			var empty struct{}
 			if protocol.DecodeOne(r.Payload, &empty) != nil {
 				return fail()
 			}
 			return struct{ Version int }{1}, nil
+		}
+		if r.Operation == "track" {
+			var q a.Tracking
+			if protocol.DecodeOne(r.Payload, &q) != nil || q.Validate() != nil {
+				return fail()
+			}
+			out, err := track(q)
+			if err != nil {
+				return fail()
+			}
+			return out, nil
 		}
 		var q a.Query
 		if r.Operation != "plan" || protocol.DecodeOne(r.Payload, &q) != nil || q.Validate() != nil {

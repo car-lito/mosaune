@@ -532,123 +532,28 @@ func (c *catalog) syncRequest(ctx context.Context, cfg arrConfig, v *acquisition
 		return err
 	}
 	defer done()
+	reader, err := a.trackingReader(ctx)
+	if err != nil {
+		return err
+	}
+	defer reader.engine.Close()
 	obj, err := a.find(ctx, v.ExternalID)
 	if err != nil {
 		return err
 	}
-	if obj == nil {
-		v.State = "missing"
-		v.Message = "Absent du service. Vérifiez la demande dans " + cfg.ID + " ; Mosaune ne la renvoie pas automatiquement."
-		return nil
+	observations, episodes, err := a.trackingObservations(ctx, *v, obj)
+	if err != nil {
+		return err
 	}
-	v.RemoteID = number(obj["id"])
-	v.Imported = 0
-	v.Total = 1
-	v.Progress = 0
+	if err = applyAcquisitionTracking(ctx, reader, observations, v); err != nil {
+		return err
+	}
 	importedEpisodes := map[string]bool{}
-	episodeSeasons := map[int]int{}
-	var episodes []arrObject
-	if cfg.ID == "radarr" {
-		if truth(obj["hasFile"]) {
-			v.Imported = 1
-		}
-	} else {
-		if err = a.call(ctx, "GET", "episode?seriesId="+strconv.Itoa(v.RemoteID), nil, &episodes); err != nil {
-			return err
-		}
-		v.Total = 0
-		for _, ep := range episodes {
-			season := number(ep["seasonNumber"])
-			episodeSeasons[number(ep["id"])] = season
-			if v.Season >= 0 && season != v.Season {
-				continue
-			}
-			v.Total++
-			if truth(ep["hasFile"]) {
-				v.Imported++
-				importedEpisodes[strconv.Itoa(season)+":"+strconv.Itoa(number(ep["episodeNumber"]))] = true
-			}
+	for _, ep := range observations.Episodes {
+		if ep.HasFile && (v.Season < 0 || ep.Season == v.Season) {
+			importedEpisodes[strconv.Itoa(ep.Season)+":"+strconv.Itoa(ep.Number)] = true
 		}
 	}
-	queued := false
-	blocked := false
-	var size, left float64
-	for page := 1; page <= 20; page++ {
-		var q struct {
-			Records []arrObject `json:"records"`
-			Total   int         `json:"totalRecords"`
-		}
-		path := "queue?pageSize=100&page=" + strconv.Itoa(page) + "&includeUnknownSeriesItems=false&includeUnknownMovieItems=false"
-		if err = a.call(ctx, "GET", path, nil, &q); err != nil {
-			return err
-		}
-		for _, entry := range q.Records {
-			match := cfg.ID == "radarr" && number(entry["movieId"]) == v.RemoteID || cfg.ID == "sonarr" && number(entry["seriesId"]) == v.RemoteID
-			if match && cfg.ID == "sonarr" && v.Season >= 0 {
-				s, ok := episodeSeasons[number(entry["episodeId"])]
-				if ok {
-					match = s == v.Season
-				} else {
-					raw, ok := entry["seasonNumber"]
-					match = ok && number(raw) == v.Season
-				}
-			}
-			if !match {
-				continue
-			}
-			queued = true
-			s, _ := entry["size"].(float64)
-			l, _ := entry["sizeleft"].(float64)
-			size += s
-			left += l
-			status := word(entry["trackedDownloadStatus"])
-			blocked = blocked || status == "warning" || status == "error"
-		}
-		if page*100 >= q.Total {
-			break
-		}
-		if page == 20 {
-			return errors.New("File du service trop volumineuse pour ce prototype ; consultez le service.")
-		}
-	}
-	if size > 0 {
-		v.Progress = (size - left) * 100 / size
-		if v.Progress < 0 {
-			v.Progress = 0
-		}
-		if v.Progress > 100 {
-			v.Progress = 100
-		}
-	}
-	v.State = "waiting"
-	v.Message = "En attente d’une disponibilité dans le service."
-	monitored := truth(obj["monitored"])
-	if cfg.ID == "sonarr" && v.Season >= 0 {
-		seasons, _ := obj["seasons"].([]any)
-		for _, raw := range seasons {
-			s, ok := raw.(map[string]any)
-			if ok && number(s["seasonNumber"]) == v.Season {
-				monitored = monitored && truth(s["monitored"])
-			}
-		}
-	}
-	if !monitored {
-		v.State = "unmonitored"
-		v.Message = "La surveillance est désactivée dans le service."
-	}
-	if v.Uncertain {
-		v.State = "uncertain"
-		v.Message = "Envoi non confirmé. L’œuvre existe dans le service, mais vérifiez sa surveillance et sa recherche avant de relancer."
-	}
-	if queued {
-		v.State = "downloading"
-		v.Message = "Téléchargement en cours ou en attente d’importation."
-		if blocked {
-			v.State = "blocked"
-			v.Message = "Le service signale un blocage. Consultez sa file d’activité."
-		}
-	}
-	v.Local = 0
 	if v.Imported > 0 {
 		c.metadataMu.Lock()
 		defer c.metadataMu.Unlock()
@@ -712,18 +617,8 @@ func (c *catalog) syncRequest(ctx context.Context, cfg arrConfig, v *acquisition
 		if v.Kind == "series" {
 			v.Local = len(localEpisodes)
 		}
-		if v.Local > 0 {
-			if v.Total > 0 && v.Local >= v.Total {
-				v.State = "available"
-				v.Message = "Disponible dans votre bibliothèque."
-			} else if !queued {
-				v.State = "partial"
-				v.Message = "Des épisodes sont disponibles. La série ou la saison n’est pas encore complète."
-			}
-		} else if !queued {
-			v.State = "imported"
-			v.Message = "Importé par le service, mais pas encore lisible et identifié dans Mosaune. Vérifiez le dossier associé ; analyse automatique toutes les cinq minutes."
-		}
+		observations.Local = v.Local
+		return applyAcquisitionTracking(ctx, reader, observations, v)
 	}
 	return nil
 }

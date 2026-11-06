@@ -51,6 +51,15 @@ func validateExtractionCode(ctx context.Context, p packageformat.Executable) err
 	if kind == "acquisition" {
 		reader, err := loadFactProjector(ctx, p.Manifest.Module, p.Code, "acquisition.plan.v1")
 		if err == nil {
+			if packageformat.Compare(p.Manifest.MinCore, "0.0.60") >= 0 {
+				var info struct {
+					Version int `json:"version"`
+				}
+				err = reader.call(ctx, "tracking-info", struct{}{}, &info)
+				if err == nil && info.Version != 1 {
+					err = errors.New("Version de suivi incompatible.")
+				}
+			}
 			reader.engine.Close()
 		}
 		return err

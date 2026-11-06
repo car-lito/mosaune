@@ -1,3 +1,7 @@
+## 0.0.60 — suivi des demandes remplaçable
+
+Le composant partagé Radarr/Sonarr 0.2.0 interprète désormais les épisodes, les files de téléchargement et les fichiers locaux vérifiés : progression, blocages, importation et disponibilité partielle ou complète. Les observations et résultats sont bornés. Un ancien composant sans suivi doit être mis à jour, sans repli natif. Migration 40 avec désactivations, retraits et choix tiers conservés ; familles 9.0/9.1. Les échanges HTTP, les formulaires et le rapprochement des chemins restent intégrés.
+
 ## 0.0.59 — demandes de téléchargement remplaçables
 
 Les familles Films et Séries partagent le composant Demandes Radarr et Sonarr. Son programme prépare les ajouts, les saisons surveillées et les recherches. Il peut être installé, remplacé, désactivé ou retiré depuis les composants de la famille. Un remplacement invalide une confirmation antérieure. La désactivation annule les échanges actifs, y compris le suivi.

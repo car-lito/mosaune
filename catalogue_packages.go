@@ -95,6 +95,10 @@ func loadFactProjector(ctx context.Context, d protocol.Descriptor, code []byte, 
 	}
 	limits := runtime.DefaultLimits()
 	limits.Modules = 1
+	if capability == "acquisition.plan.v1" {
+		limits.InputBytes = 1 << 20
+		limits.Timeout = 4 * time.Second
+	}
 	if capability == "media.detail-experience.v1" {
 		limits.Timeout = 10 * time.Second
 		limits.InputBytes = 1 << 20
