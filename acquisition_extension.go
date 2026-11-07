@@ -19,6 +19,7 @@ type acquisitionSession struct {
 	checksum    string
 	transportMu sync.Mutex
 	transports  map[string]a.Transport
+	formats     map[string]a.WireFormat
 }
 
 func acquisitionImport(p packageformat.Executable) (string, error) {

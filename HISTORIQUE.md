@@ -1,3 +1,7 @@
+## 0.0.63 — formats des connecteurs dans le composant partagé
+
+Le composant acquisition 0.5.0 déclare les champs JSON des réponses et des écritures, les objets imbriqués et les noms des recherches. Mosaune traduit ce format vers un vocabulaire commun sans transmettre les données privées au module. Les champs inconnus sont conservés, les grands entiers ne sont plus arrondis et les collisions/clé JSON dupliquées sont refusées. Une ancienne extension sans format exige une mise à jour, sans repli silencieux. Migration43 et familles12.0/12.1. La coordination métier et le stockage des réglages des connecteurs restent à extraire.
+
 ## 0.0.62 — formulaires des connecteurs déclarés par l’extension
 
 Le composant partagé 0.4.0 fournit titres, instructions, libellés, ordre et limites des champs. Le serveur contrôle les sources des listes et les secrets, refuse les formulaires périmés avant le réseau et garde la pause accessible sans composant actif. Migration42, familles11.0/11.1. Les formats des objets API et la configuration métier restent à extraire.

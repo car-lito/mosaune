@@ -1,0 +1,132 @@
+{
+  "radarr": {
+    "version": 1,
+    "fields": {
+      "status": {
+        "appName": "appName"
+      },
+      "profile": {
+        "id": "id",
+        "name": "name"
+      },
+      "root": {
+        "id": "id",
+        "path": "path"
+      },
+      "resource": {
+        "id": "id",
+        "externalId": "tmdbId",
+        "title": "title",
+        "path": "path",
+        "hasFile": "hasFile",
+        "monitored": "monitored",
+        "qualityProfileId": "qualityProfileId",
+        "rootFolderPath": "rootFolderPath",
+        "addOptions": "addOptions",
+        "minimumAvailability": "minimumAvailability",
+        "movieFile": "movieFile"
+      },
+      "file": {
+        "id": "id",
+        "relativePath": "relativePath"
+      },
+      "queue": {
+        "records": "records",
+        "totalRecords": "totalRecords"
+      },
+      "row": {
+        "resourceId": "movieId",
+        "episodeId": "episodeId",
+        "seasonNumber": "seasonNumber",
+        "size": "size",
+        "sizeleft": "sizeleft",
+        "trackedDownloadStatus": "trackedDownloadStatus"
+      },
+      "addOptions": {
+        "searchForMovie": "searchForMovie"
+      },
+      "search": {
+        "name": "name",
+        "movieIds": "movieIds"
+      }
+    },
+    "commands": {
+      "movie": "MoviesSearch"
+    }
+  },
+  "sonarr": {
+    "version": 1,
+    "fields": {
+      "status": {
+        "appName": "appName"
+      },
+      "profile": {
+        "id": "id",
+        "name": "name"
+      },
+      "root": {
+        "id": "id",
+        "path": "path"
+      },
+      "resource": {
+        "id": "id",
+        "externalId": "tvdbId",
+        "title": "title",
+        "path": "path",
+        "hasFile": "hasFile",
+        "monitored": "monitored",
+        "qualityProfileId": "qualityProfileId",
+        "rootFolderPath": "rootFolderPath",
+        "addOptions": "addOptions",
+        "seasons": "seasons",
+        "seasonFolder": "seasonFolder",
+        "seriesType": "seriesType",
+        "monitorNewItems": "monitorNewItems"
+      },
+      "file": {
+        "id": "id",
+        "relativePath": "relativePath"
+      },
+      "queue": {
+        "records": "records",
+        "totalRecords": "totalRecords"
+      },
+      "row": {
+        "resourceId": "seriesId",
+        "episodeId": "episodeId",
+        "seasonNumber": "seasonNumber",
+        "size": "size",
+        "sizeleft": "sizeleft",
+        "trackedDownloadStatus": "trackedDownloadStatus"
+      },
+      "season": {
+        "seasonNumber": "seasonNumber",
+        "monitored": "monitored"
+      },
+      "episode": {
+        "id": "id",
+        "seasonNumber": "seasonNumber",
+        "episodeNumber": "episodeNumber",
+        "hasFile": "hasFile",
+        "episodeFileId": "episodeFileId"
+      },
+      "addOptions": {
+        "monitor": "monitor",
+        "searchForMissingEpisodes": "searchForMissingEpisodes"
+      },
+      "search": {
+        "name": "name",
+        "seriesId": "seriesId",
+        "seasonNumber": "seasonNumber"
+      },
+      "monitor": {
+        "episodeIds": "episodeIds",
+        "monitored": "monitored"
+      }
+    },
+    "commands": {
+      "series": "SeriesSearch",
+      "season": "SeasonSearch"
+    }
+  }
+}

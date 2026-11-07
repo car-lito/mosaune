@@ -1,6 +1,6 @@
 # Préparation et suivi des demandes
 
-Le rôle `acquisition.plan.v1` cible `video` et nécessite Mosaune 0.0.59. Une seule implémentation est sélectionnée pour Films et Séries. Le module fourni est dans `modules/acquisition/source` et fait partie des archives de familles 11.0/11.1 (Mosaune 0.0.62).
+Le rôle `acquisition.plan.v1` cible `video` et nécessite Mosaune 0.0.59. Une seule implémentation est sélectionnée pour Films et Séries. Le module fourni est dans `modules/acquisition/source` et fait partie des archives de familles 12.0/12.1 (Mosaune 0.0.63).
 
 Le programme répond à `describe` avec une version de contrat égale à 1. L’opération `plan` reçoit le connecteur, l’identifiant distant, la présence d’un fichier, le périmètre des saisons et le type de série. Elle renvoie un `Plan`. Les structures et leur validation sont définies dans `acquisition.go`.
 
@@ -10,7 +10,7 @@ Le fichier `policy.json` fourni contient `searchMode`. La valeur `auto` déclenc
 
 L’installation utilise le cycle de vie commun des programmes. L’activation et la sélection sont explicites. Le retrait conserve les demandes enregistrées. Une confirmation préparée avant le remplacement doit être vérifiée à nouveau. La désactivation annule les connexions actives et bloque les nouvelles connexions du connecteur. Le plan ne rejoue aucune opération après une erreur d’envoi.
 
-Le type de paquet de dépôt est `acquisition`. Les archives de familles peuvent inclure ce composant sous l’emplacement `acquisition` avec `shared` activé. La sérialisation des objets des API, la configuration métier restent à extraire.
+Le type de paquet de dépôt est `acquisition`. Les archives de familles peuvent inclure ce composant sous l’emplacement `acquisition` avec `shared` activé. Le stockage de configuration et la coordination métier restent à extraire.
 
 ## Suivi, depuis Mosaune 0.0.60
 
@@ -37,3 +37,15 @@ Le composant 0.4.0 ajoute `describe-settings`, avec l’entrée publique `{"conn
 Le programme ne reçoit aucune valeur saisie, clé, adresse, chemin ou option privée. Les libellés restent du texte échappé, les styles ceux du thème. L’hôte fournit les entrées URL/mot de passe et les listes dynamiques : un binding ne permet pas de lire un autre stockage ou d’ajouter un accès réseau. Ce contrat spécialisé réutilise le cycle de vie des demandes ; il ne remplace pas le contrat général configuration des autres extensions. Des contrôles supplémentaires nécessiteront une évolution versionnée du contrat.
 
 GET /api/v1/acquisition/settings retourne form et formRevision par connecteur, ou formError si indisponible. Les clients renvoient formRevision (sans form ni formError) avec POST test et PUT settings. L’empreinte couvre le programme sélectionné, le connecteur et le formulaire. Un formulaire périmé ou absent est refusé avant le réseau. Une désactivation interrompt la session ; la pause reste possible. Les formulaires ne sont pas stockés avec les clés. Un paquet minCore 0.0.62 doit fournir deux formulaires valides ; les anciens paquets exigent une mise à jour pour modifier les réglages, sans formulaire natif de secours. La migration42 conserve retraits, désactivations et remplaçants. Familles11.0/11.1.
+
+## Formats JSON, depuis Mosaune 0.0.63
+
+Le composant 0.5.0 fournit describe-wire, avec la même entrée publique connector. Il retourne WireFormat (wire.go) : champs JSON par objet et noms des commandes de recherche. Voir modules/acquisition/source/wire.json. Un paquet minCore 0.0.63 doit déclarer des formats valides pour les deux connecteurs. L’ancien paquet sans ce contrat ne peut pas utiliser de format natif de secours : aucun échange réseau n’est lancé.
+
+Les objets status/profile/root/resource/file/queue/row, ainsi que season/episode/monitor pour Sonarr, forment le vocabulaire public des demandes. Leur structure et leurs valeurs sémantiques restent définies par ce contrat versionné ; l’auteur choisit le nom distant de chaque champ. externalId représente l’identifiant du fournisseur, resourceId celui de la ressource dans une file. Les objets imbriqués addOptions, movieFile, seasons et records sont traduits récursivement. Les noms de recherche movie/series/season correspondent aux commandes déclarées. Aucun champ nécessaire ne peut être omis, fusionné avec un autre ou défini deux fois. Ce contrat couvre les API compatibles avec ces structures, pas un langage de transformation arbitraire ; une autre structure nécessitera une nouvelle version du contrat.
+
+Le serveur applique cette déclaration aux données dans les deux sens. Le programme ne reçoit pas les réponses, adresses, clés, chemins ni objets à écrire. Les champs inconnus sont conservés en valeur, y compris les entiers supérieurs à la précision d’un flottant. L’ordre et les espaces du JSON ne sont pas conservés. Les clés dupliquées, collisions entre champs connus et inconnus (y compris la casse), formes incompatibles et commandes non déclarées sont refusées. Plafonds : 8 Mio, profondeur48 et200000 valeurs, en plus de la limite réseau de chaque connecteur. Ces règles n’autorisent aucun nouvel appel : le plan confirmé, les méthodes et les identifiants restent contrôlés par l’hôte. Choisir un composant lui confie l’adaptation à l’API du service configuré, comme pour les routes.
+
+Le format est chargé avec le transport une fois par session et invalidé avec son composant. La migration43 met à jour uniquement le composant fourni intact, conserve les états et respecte les remplaçants. Familles12.0/12.1 ; les archives antérieures restent immuables. Les tests remplacent les champs d’identification, de surveillance et la commande de recherche d’une API fictive, redémarrent le catalogue, puis vérifient la conservation de la destination, du profil et d’un grand entier inconnu.
+
+Il reste de la coordination métier et du stockage de configuration dans le serveur. Cette étape ne constitue pas encore un connecteur autonome complet.

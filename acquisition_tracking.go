@@ -71,12 +71,9 @@ func (client arrClient) trackingObservations(ctx context.Context, v acquisitionR
 			return q, nil, errors.New("File du service trop volumineuse pour ce prototype ; consultez le service.")
 		}
 		for _, row := range remote.Records {
-			key := "movieId"
-			if client.config.ID == "sonarr" {
-				key = "seriesId"
-			}
-			size, _ := row["size"].(float64)
-			left, _ := row["sizeleft"].(float64)
+			key := "resourceId"
+			size := arrFloat(row["size"])
+			left := arrFloat(row["sizeleft"])
 			item := a.QueueItem{RemoteID: number(row[key]), EpisodeID: number(row["episodeId"]), Size: size, Remaining: left, Status: word(row["trackedDownloadStatus"])}
 			if raw, ok := row["seasonNumber"]; ok && raw != nil {
 				n := number(raw)

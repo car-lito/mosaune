@@ -80,3 +80,5 @@ Depuis la 0.0.60, le composant partagé de demandes interprète aussi le suivi. 
 Depuis la 0.0.61, utilisez le composant fourni 0.3.0 ou un remplaçant compatible avec les opérations réseau. Une ancienne extension sans ces déclarations doit être mise à jour avant de tester la connexion, envoyer une demande ou suivre les téléchargements. Les services déjà configurés conservent leurs adresses et clés ; le composant officiel est mis à jour sans changer son activation.
 
 Depuis la 0.0.62, la configuration nécessite les formulaires du composant 0.4.0 ou d’un remplaçant compatible. Votre adresse et votre clé sont conservées. Après un changement de composant, cliquez sur « Recharger les réglages ». Un ancien composant peut toujours être mis en pause.
+
+Depuis la 0.0.63, le composant de demandes doit aussi déclarer les formats des données du service (composant fourni 0.5.0). Les anciens remplaçants sans cette déclaration demandent une mise à jour avant tout échange réseau. Vos adresses, clés et destinations restent conservées.

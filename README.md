@@ -1,4 +1,4 @@
-Version 0.0.62 — formulaires et guides Radarr/Sonarr fournis par le composant partagé. [Essayer les réglages](ESSAYER-LES-CONNECTEURS-062.md).
+Version 0.0.63 — formats JSON et noms des commandes Radarr/Sonarr déclarés par l’extension partagée. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
 
 Version 0.0.60 — le composant partagé Demandes Radarr et Sonarr interprète aussi le suivi : progression, saisons, blocages et disponibilité. Le serveur vérifie les fichiers locaux avant de les annoncer disponibles. [Contrat pour contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
 

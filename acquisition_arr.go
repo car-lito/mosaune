@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/url"
 	"slices"
@@ -75,7 +76,22 @@ func cleanArrURL(raw string) (string, error) {
 type arrClient struct{ config arrConfig }
 type arrObject map[string]any
 
-func number(v any) int  { n, _ := v.(float64); return int(n) }
+func number(v any) int {
+	if n, ok := v.(json.Number); ok {
+		i, _ := n.Int64()
+		return int(i)
+	}
+	n, _ := v.(float64)
+	return int(n)
+}
+func arrFloat(v any) float64 {
+	if n, ok := v.(json.Number); ok {
+		f, _ := n.Float64()
+		return f
+	}
+	n, _ := v.(float64)
+	return n
+}
 func truth(v any) bool  { b, _ := v.(bool); return b }
 func word(v any) string { s, _ := v.(string); return s }
 
@@ -111,12 +127,6 @@ func (a arrClient) options(ctx context.Context) (arrOptions, error) {
 	err = a.exchange(ctx, "roots", 0, 0, nil, &result.Roots)
 	return result, err
 }
-func (a arrClient) identifier() string {
-	if a.config.ID == "radarr" {
-		return "tmdbId"
-	}
-	return "tvdbId"
-}
 func (a arrClient) find(ctx context.Context, id int) (arrObject, error) {
 	var all []arrObject
 	err := a.exchange(ctx, "find", id, 0, nil, &all)
@@ -124,7 +134,7 @@ func (a arrClient) find(ctx context.Context, id int) (arrObject, error) {
 		return nil, err
 	}
 	for _, v := range all {
-		if number(v[a.identifier()]) == id {
+		if number(v["externalId"]) == id {
 			return v, nil
 		}
 	}
@@ -136,7 +146,7 @@ func (a arrClient) lookup(ctx context.Context, id int) (arrObject, error) {
 		return nil, err
 	}
 	for _, v := range all {
-		if number(v[a.identifier()]) == id {
+		if number(v["externalId"]) == id {
 			return v, nil
 		}
 	}
@@ -224,7 +234,7 @@ func (a arrClient) submit(ctx context.Context, obj arrObject, season int) (int, 
 	if err := a.exchange(ctx, "update", id, 0, obj, nil); err != nil {
 		return id, err
 	}
-	cmd := map[string]any{"name": "MoviesSearch", "movieIds": []int{id}}
+	cmd := map[string]any{"name": "movie", "movieIds": []int{id}}
 	if plan.MonitorEpisodes {
 		var episodes []arrObject
 		if err := a.exchange(ctx, "episodes", id, 0, nil, &episodes); err != nil {
@@ -243,9 +253,9 @@ func (a arrClient) submit(ctx context.Context, obj arrObject, season int) (int, 
 		}
 	}
 	if plan.Search == "series" || plan.Search == "season" {
-		cmd = map[string]any{"name": "SeriesSearch", "seriesId": id}
+		cmd = map[string]any{"name": "series", "seriesId": id}
 		if season >= 0 {
-			cmd["name"] = "SeasonSearch"
+			cmd["name"] = "season"
 			cmd["seasonNumber"] = season
 		}
 	}

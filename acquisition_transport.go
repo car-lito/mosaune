@@ -40,11 +40,19 @@ func (client arrClient) transportProfile(ctx context.Context) (a.Transport, erro
 	}
 	defer r.engine.Close()
 	p, err := readAcquisitionTransport(ctx, r, client.config.ID)
+	var format a.WireFormat
+	if err == nil {
+		format, err = readAcquisitionWire(ctx, r, client.config.ID)
+	}
 	if err == nil {
 		if s.transports == nil {
 			s.transports = map[string]a.Transport{}
 		}
 		s.transports[client.config.ID] = p
+		if s.formats == nil {
+			s.formats = map[string]a.WireFormat{}
+		}
+		s.formats[client.config.ID] = format
 	}
 	return p, err
 }
@@ -56,6 +64,10 @@ func (client arrClient) exchange(ctx context.Context, operation string, id, page
 	}
 	defer done()
 	p, err := client.transportProfile(ctx)
+	if err != nil {
+		return err
+	}
+	format, err := client.wireProfile(ctx)
 	if err != nil {
 		return err
 	}
@@ -78,6 +90,10 @@ func (client arrClient) exchange(ctx context.Context, operation string, id, page
 		data, err = json.Marshal(body)
 		if err != nil || len(data) > 8<<20 {
 			return errors.New("Demande invalide ou trop volumineuse.")
+		}
+		data, err = format.Convert(client.config.ID, operation, true, data)
+		if err != nil {
+			return errors.New("Données de demande incompatibles avec le connecteur.")
 		}
 	} else if method != "GET" {
 		return errors.New("Modification sans contenu refusée.")
@@ -105,8 +121,16 @@ func (client arrClient) exchange(ctx context.Context, operation string, id, page
 	if err != nil || int64(len(b)) > p.MaxBytes {
 		return errors.New("Réponse du service incomplète ou trop volumineuse.")
 	}
-	if out != nil && json.Unmarshal(b, out) != nil {
-		return errors.New("Réponse inattendue : vérifiez l’URL du service.")
+	if out != nil {
+		b, err = format.Convert(client.config.ID, operation, false, b)
+		if err != nil {
+			return errors.New("Données du service ambiguës ou incompatibles avec le connecteur.")
+		}
+		decoder := json.NewDecoder(bytes.NewReader(b))
+		decoder.UseNumber()
+		if decoder.Decode(out) != nil {
+			return errors.New("Réponse inattendue : vérifiez l’URL du service.")
+		}
 	}
 	return ctx.Err()
 }

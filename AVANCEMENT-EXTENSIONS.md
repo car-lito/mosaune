@@ -1,6 +1,6 @@
 # Vers un Mosaune entièrement extensible
 
-État du 7 novembre 2026 · étape 0.0.62.
+État du 7 novembre 2026 · étape 0.0.63.
 
 **Environ 78 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
@@ -94,7 +94,8 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [ ] Achever MusicBrainz : adaptateur du transport réseau, autorisation de nouvelles sources, configuration et distribution comme fournisseur indépendant.
 - [x] 0.0.59 — préparation des ajouts, saisons et recherches Radarr/Sonarr dans un composant partagé installable et remplaçable. Activation et retrait contrôlent les échanges, y compris le suivi.
 - [x] 0.0.60–0.0.62 — suivi, routes HTTP et formulaires Radarr/Sonarr pilotés par le composant partagé.
-- [ ] Extraire les formats des objets API et achever la configuration indépendante des connecteurs.
+- [x] 0.0.63 — formats des objets API Radarr/Sonarr déclarés par le composant partagé, lecture/écriture et commandes.
+- [ ] Achever la coordination métier, le stockage de configuration et l’indépendance des connecteurs.
 
 - [x] **0.0.62 :** formulaires déclaratifs, guides, ordre des champs, limites de saisie et rejet des formulaires périmés. Même composant partagé, sans nouvelle extension visible.
 

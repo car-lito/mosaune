@@ -74,6 +74,13 @@ func validateExtractionCode(ctx context.Context, p packageformat.Executable) err
 					}
 				}
 			}
+			if err == nil && packageformat.Compare(p.Manifest.MinCore, "0.0.63") >= 0 {
+				for _, connector := range []string{"radarr", "sonarr"} {
+					if _, err = readAcquisitionWire(ctx, reader, connector); err != nil {
+						break
+					}
+				}
+			}
 			reader.engine.Close()
 		}
 		return err

@@ -72,6 +72,17 @@ func main() {
 		if r.Capability != a.Capability {
 			return fail()
 		}
+		if r.Operation == "describe-wire" {
+			var q a.TransportQuery
+			if protocol.DecodeOne(r.Payload, &q) != nil {
+				return fail()
+			}
+			format, err := wireFormat(q.Connector)
+			if err != nil {
+				return fail()
+			}
+			return format, nil
+		}
 		if r.Operation == "describe-settings" {
 			var q a.TransportQuery
 			if protocol.DecodeOne(r.Payload, &q) != nil {
