@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	a "mosaune/extensionkit/capabilities/acquisition/v1"
 	"net/url"
-	"slices"
 	"strconv"
 	"strings"
 )
@@ -164,103 +164,74 @@ func selectedSeasons(obj arrObject, season int) []int {
 	return result
 }
 
-// Never PUT a reduced resource: preserve existing paths, quality profiles and
-// all unrelated season flags. Explicit episode monitoring covers seasons that
-// were already monitored but contained manually unmonitored episodes.
-func (a arrClient) submit(ctx context.Context, obj arrObject, season int) (int, error) {
-	ctx, done, err := a.openSession(ctx)
+// The installed module supplies the entire bounded sequence. The host only
+// resolves private bindings and executes validated operations, stopping on error.
+func (client arrClient) submit(ctx context.Context, obj arrObject, season int) (int, error) {
+	ctx, done, err := client.openSession(ctx)
 	if err != nil {
 		return 0, err
 	}
 	defer done()
-	plan, err := a.submissionPlan(ctx, obj, season)
+	workflow, err := client.submissionWorkflow(ctx, obj, season)
 	id := number(obj["id"])
 	if err != nil {
 		return id, err
 	}
-	if plan.Write == "none" {
-		return id, nil
-	}
-	fresh := plan.Write == "create"
-	obj["monitored"] = true
-	if fresh {
-		obj["qualityProfileId"] = a.config.Profile
-		obj["rootFolderPath"] = a.config.Root
-		delete(obj, "path")
-		if a.config.ID == "radarr" {
-			obj["minimumAvailability"] = plan.MinimumAvailability
-			obj["addOptions"] = map[string]any{"searchForMovie": plan.SearchOnAdd}
-		} else {
-			obj["seasonFolder"] = plan.SeasonFolder
-			if plan.SeriesType != "" {
-				obj["seriesType"] = plan.SeriesType
-			}
-			obj["addOptions"] = map[string]any{"monitor": "skip", "searchForMissingEpisodes": plan.SearchOnAdd}
-		}
-	}
-	if a.config.ID == "sonarr" {
-		seasons, ok := obj["seasons"].([]any)
-		if !ok {
-			return id, errors.New("Saisons absentes de la réponse du service.")
-		}
-		for _, raw := range seasons {
-			current, ok := raw.(map[string]any)
-			if !ok {
-				return id, errors.New("Saison invalide dans la réponse du service.")
-			}
-			if plan.ResetSeasons {
-				current["monitored"] = false
-			}
-			if slices.Contains(plan.Seasons, number(current["seasonNumber"])) {
-				current["monitored"] = true
-			}
-		}
-		if plan.MonitorNewItems != "" {
-			obj["monitorNewItems"] = plan.MonitorNewItems
-		}
-	}
-	if fresh {
-		var saved arrObject
-		err := a.exchange(ctx, "create", 0, 0, obj, &saved)
-		if err != nil {
-			return 0, err
-		}
-		id = number(saved["id"])
-		if id <= 0 {
-			return 0, errors.New("Le service n’a pas confirmé l’identifiant ajouté.")
-		}
-		return id, nil
-	}
-	if err := a.exchange(ctx, "update", id, 0, obj, nil); err != nil {
-		return id, err
-	}
-	cmd := map[string]any{"name": "movie", "movieIds": []int{id}}
-	if plan.MonitorEpisodes {
-		var episodes []arrObject
-		if err := a.exchange(ctx, "episodes", id, 0, nil, &episodes); err != nil {
-			return id, err
-		}
-		ids := []int{}
-		for _, ep := range episodes {
-			if slices.Contains(plan.Seasons, number(ep["seasonNumber"])) {
-				ids = append(ids, number(ep["id"]))
-			}
-		}
-		if len(ids) > 0 {
-			if err := a.exchange(ctx, "monitor", 0, 0, map[string]any{"episodeIds": ids, "monitored": true}, nil); err != nil {
+	bindings := a.Bindings{ID: id, Season: season, Profile: client.config.Profile, Root: client.config.Root}
+	for _, action := range workflow.Actions {
+		switch action.Operation {
+		case "create", "update":
+			resource, err := action.Resource(map[string]any(obj), workflow.Plan, bindings)
+			if err != nil {
 				return id, err
 			}
+			if action.Operation == "create" {
+				var saved arrObject
+				if err = client.exchange(ctx, "create", 0, 0, resource, &saved); err != nil {
+					return 0, err
+				}
+				id = number(saved["id"])
+				if id <= 0 {
+					return 0, errors.New("Le service n’a pas confirmé l’identifiant ajouté.")
+				}
+				bindings.ID = id
+			} else if err = client.exchange(ctx, "update", id, 0, resource, nil); err != nil {
+				return id, err
+			}
+		case "monitor":
+			var episodes []arrObject
+			if err = client.exchange(ctx, "episodes", id, 0, nil, &episodes); err != nil {
+				return id, err
+			}
+			records := make([]map[string]any, 0, len(episodes))
+			for _, ep := range episodes {
+				records = append(records, map[string]any(ep))
+			}
+			bindings.Episodes, err = a.SelectedEpisodes(records, workflow.Plan.Seasons)
+			if err != nil {
+				return id, err
+			}
+			if len(bindings.Episodes) == 0 {
+				continue
+			}
+			body, err := action.Resolve(bindings)
+			if err != nil {
+				return id, err
+			}
+			if err = client.exchange(ctx, "monitor", 0, 0, body, nil); err != nil {
+				return id, err
+			}
+		case "search":
+			body, err := action.Resolve(bindings)
+			if err != nil {
+				return id, err
+			}
+			if err = client.exchange(ctx, "search", 0, 0, body, nil); err != nil {
+				return id, err
+			}
+		default:
+			return id, errors.New("Opération du programme d’envoi inconnue.")
 		}
 	}
-	if plan.Search == "series" || plan.Search == "season" {
-		cmd = map[string]any{"name": "series", "seriesId": id}
-		if season >= 0 {
-			cmd["name"] = "season"
-			cmd["seasonNumber"] = season
-		}
-	}
-	if plan.Search == "" {
-		return id, nil
-	}
-	return id, a.exchange(ctx, "search", 0, 0, cmd, nil)
+	return id, nil
 }

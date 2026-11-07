@@ -105,7 +105,7 @@ func main() {
 			}
 			return p, nil
 		}
-		if r.Operation == "describe" || r.Operation == "tracking-info" {
+		if r.Operation == "describe" || r.Operation == "tracking-info" || r.Operation == "workflow-info" {
 			var empty struct{}
 			if protocol.DecodeOne(r.Payload, &empty) != nil {
 				return fail()
@@ -124,8 +124,15 @@ func main() {
 			return out, nil
 		}
 		var q a.Query
-		if r.Operation != "plan" || protocol.DecodeOne(r.Payload, &q) != nil || q.Validate() != nil {
+		if (r.Operation != "plan" && r.Operation != "submission-workflow") || protocol.DecodeOne(r.Payload, &q) != nil || q.Validate() != nil {
 			return fail()
+		}
+		if r.Operation == "submission-workflow" {
+			w, err := workflow(q)
+			if err != nil {
+				return fail()
+			}
+			return w, nil
 		}
 		p, err := plan(q)
 		if err != nil {

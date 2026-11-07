@@ -82,3 +82,5 @@ Depuis la 0.0.61, utilisez le composant fourni 0.3.0 ou un remplaçant compatibl
 Depuis la 0.0.62, la configuration nécessite les formulaires du composant 0.4.0 ou d’un remplaçant compatible. Votre adresse et votre clé sont conservées. Après un changement de composant, cliquez sur « Recharger les réglages ». Un ancien composant peut toujours être mis en pause.
 
 Depuis la 0.0.63, le composant de demandes doit aussi déclarer les formats des données du service (composant fourni 0.5.0). Les anciens remplaçants sans cette déclaration demandent une mise à jour avant tout échange réseau. Vos adresses, clés et destinations restent conservées.
+
+Depuis la 0.0.64, l’envoi nécessite aussi le programme du composant fourni 0.6.0 ou d’un remplaçant compatible. Les anciens remplaçants sans cette fonction doivent être mis à jour ; Mosaune ne se substitue pas à eux pour envoyer une demande.

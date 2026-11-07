@@ -81,6 +81,13 @@ func validateExtractionCode(ctx context.Context, p packageformat.Executable) err
 					}
 				}
 			}
+			if err == nil && packageformat.Compare(p.Manifest.MinCore, "0.0.64") >= 0 {
+				var info struct{ Version int }
+				err = reader.call(ctx, "workflow-info", struct{}{}, &info)
+				if err == nil && info.Version != 1 {
+					err = errors.New("Version du programme d’envoi incompatible.")
+				}
+			}
 			reader.engine.Close()
 		}
 		return err

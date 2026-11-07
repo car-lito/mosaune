@@ -1,4 +1,4 @@
-Version 0.0.63 — formats JSON et noms des commandes Radarr/Sonarr déclarés par l’extension partagée. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
+Version 0.0.64 — le composant partagé fournit maintenant le programme d’envoi des demandes Radarr/Sonarr. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
 
 Version 0.0.60 — le composant partagé Demandes Radarr et Sonarr interprète aussi le suivi : progression, saisons, blocages et disponibilité. Le serveur vérifie les fichiers locaux avant de les annoncer disponibles. [Contrat pour contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
 

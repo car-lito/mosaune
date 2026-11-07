@@ -1,5 +1,5 @@
 {
   "id": "mosaune.acquisition.plan",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "capabilities": ["acquisition.plan.v1"]
 }

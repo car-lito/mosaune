@@ -1,6 +1,6 @@
 # Préparation et suivi des demandes
 
-Le rôle `acquisition.plan.v1` cible `video` et nécessite Mosaune 0.0.59. Une seule implémentation est sélectionnée pour Films et Séries. Le module fourni est dans `modules/acquisition/source` et fait partie des archives de familles 12.0/12.1 (Mosaune 0.0.63).
+Le rôle `acquisition.plan.v1` cible `video` et nécessite Mosaune 0.0.59. Une seule implémentation est sélectionnée pour Films et Séries. Le module fourni est dans `modules/acquisition/source` et fait partie des archives de familles 13.0/13.1 (Mosaune 0.0.64).
 
 Le programme répond à `describe` avec une version de contrat égale à 1. L’opération `plan` reçoit le connecteur, l’identifiant distant, la présence d’un fichier, le périmètre des saisons et le type de série. Elle renvoie un `Plan`. Les structures et leur validation sont définies dans `acquisition.go`.
 
@@ -49,3 +49,15 @@ Le serveur applique cette déclaration aux données dans les deux sens. Le progr
 Le format est chargé avec le transport une fois par session et invalidé avec son composant. La migration43 met à jour uniquement le composant fourni intact, conserve les états et respecte les remplaçants. Familles12.0/12.1 ; les archives antérieures restent immuables. Les tests remplacent les champs d’identification, de surveillance et la commande de recherche d’une API fictive, redémarrent le catalogue, puis vérifient la conservation de la destination, du profil et d’un grand entier inconnu.
 
 Il reste de la coordination métier et du stockage de configuration dans le serveur. Cette étape ne constitue pas encore un connecteur autonome complet.
+
+## Programme d’envoi, depuis Mosaune 0.0.64
+
+Le composant 0.6.0 ajoute workflow-info (Version1), et submission-workflow, qui reçoit Query et renvoie Workflow. L’entrée reste limitée aux identifiants numériques, saisons et indicateurs déjà utilisés par plan ; aucune clé, adresse, destination ou ressource complète n’est envoyée au programme. L’opération plan reste disponible pour les clients précédents.
+
+Workflow contient le plan et jusqu’à trois actions ordonnées create/update, monitor, search. Le composant construit les champs à écrire, les champs à retirer à la création et les références privées. Valeurs de type Value : soit literal JSON, soit ref symbolique. Références disponibles : destination.profile, destination.root, resource.id, resource.ids, requested.season et selected.episodes. L’hôte vérifie que chaque référence est utilisée au bon endroit ; fournir un identifiant littéral, changer le chemin/profil d’une ressource existante, modifier une saison non demandée, ignorer une étape requise ou ajouter une action est refusé avant le premier échange.
+
+La validation n’est pas un programme de secours : aucun scénario n’est exécuté sans réponse du composant installé. L’exécuteur résout les valeurs privées, préserve les champs inconnus et s’arrête au premier échec. La surveillance filtre les épisodes sur les saisons du plan, refuse les identifiants invalides/dupliqués et reste limitée à5000épisodes. La préparation copie la ressource et ses saisons sans muter les objets de départ. Le composant peut choisir de ne pas lancer de recherche via sa politique ; il ne peut pas remplacer un plan confirmé par une opération plus large.
+
+Un paquet minCore0.0.64 doit déclarer workflow-info version1 ; chaque réponse submission-workflow est validée intégralement lors de l’envoi. Un ancien paquet peut être conservé mais doit être mis à jour avant un nouvel envoi. Le suivi et la pause gardent leurs contrats distincts. Migration44 conserve désactivations/retraits/remplaçants ; familles13.0/13.1, archives précédentes inchangées. Le SDK contient les règles d’autorisation et les utilitaires de copie/résolution ; la construction du programme reste dans modules/acquisition/source/workflow.go.
+
+Le stockage des réglages, la préparation des observations de suivi et certaines étapes de prévisualisation restent dans le serveur. Les connecteurs ne sont pas encore des familles entièrement autonomes.

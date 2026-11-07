@@ -53,8 +53,8 @@ func (client arrClient) openSession(ctx context.Context) (context.Context, func(
 	return context.WithValue(ctx, acquisitionSessionKey{}, session), done, nil
 }
 
-func (client arrClient) submissionPlan(ctx context.Context, obj arrObject, season int) (a.Plan, error) {
-	var plan a.Plan
+func (client arrClient) submissionWorkflow(ctx context.Context, obj arrObject, season int) (a.Workflow, error) {
+	var plan a.Workflow
 	session, ok := ctx.Value(acquisitionSessionKey{}).(*acquisitionSession)
 	if !ok || session.owner != client.config.owner {
 		return plan, errors.New("Session de demandes absente.")
@@ -74,8 +74,8 @@ func (client arrClient) submissionPlan(ctx context.Context, obj arrObject, seaso
 		return plan, err
 	}
 	defer reader.engine.Close()
-	if err = reader.call(ctx, "plan", query, &plan); err != nil {
-		return plan, err
+	if err = reader.call(ctx, "submission-workflow", query, &plan); err != nil {
+		return plan, errors.New("Le composant de demandes doit être mis à jour pour fournir le programme d’envoi.")
 	}
 	if err = plan.Validate(query); err != nil {
 		return plan, errors.New("Le composant propose une demande hors du périmètre autorisé.")

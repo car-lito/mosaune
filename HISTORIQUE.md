@@ -1,3 +1,7 @@
+## 0.0.64 — programme d’envoi fourni par l’extension
+
+Le composant acquisition 0.6.0 construit les actions, les champs et les références nécessaires aux créations, mises à jour, surveillances et recherches. Le serveur valide leur périmètre puis résout les destinations et identifiants privés. Aucun envoi natif de secours ; un ancien composant doit être mis à jour. Les ressources existantes et les saisons non demandées sont préservées ; les épisodes dupliqués ou invalides sont refusés. Migration44, familles13.0/13.1. Le stockage de configuration et la préparation du suivi restent à extraire.
+
 ## 0.0.63 — formats des connecteurs dans le composant partagé
 
 Le composant acquisition 0.5.0 déclare les champs JSON des réponses et des écritures, les objets imbriqués et les noms des recherches. Mosaune traduit ce format vers un vocabulaire commun sans transmettre les données privées au module. Les champs inconnus sont conservés, les grands entiers ne sont plus arrondis et les collisions/clé JSON dupliquées sont refusées. Une ancienne extension sans format exige une mise à jour, sans repli silencieux. Migration43 et familles12.0/12.1. La coordination métier et le stockage des réglages des connecteurs restent à extraire.
