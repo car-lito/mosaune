@@ -67,7 +67,8 @@ func TestAcquisitionTransportFactoryUpgrade(t *testing.T) {
 				}
 				return
 			}
-			want := "0.3.0"
+			current, _, _ := modules.Lookup("acquisition")
+			want := current.Version
 			if mode == "modified" || mode == "imported" {
 				want = "0.2.0"
 			}

@@ -1,3 +1,7 @@
+## 0.0.62 — formulaires des connecteurs déclarés par l’extension
+
+Le composant partagé 0.4.0 fournit titres, instructions, libellés, ordre et limites des champs. Le serveur contrôle les sources des listes et les secrets, refuse les formulaires périmés avant le réseau et garde la pause accessible sans composant actif. Migration42, familles11.0/11.1. Les formats des objets API et la configuration métier restent à extraire.
+
 ## 0.0.61 — opérations réseau des connecteurs déclarées par l’extension
 
 Le composant partagé 0.3.0 fournit les routes Radarr/Sonarr, leurs paramètres numériques, délais et limites de réponse. Le serveur appelle des opérations nommées et conserve les clés, le serveur et le sous-chemin configurés. Destinations absolues, traversées de chemins, changements de méthode et redirections sont refusés. Profil chargé une fois par session puis oublié ; désactivation et remplacement interrompent les appels. Migration41 et familles10.0/10.1. Un ancien remplaçant sans profil réseau exige une mise à jour, sans routes natives de secours. Les objets métier des API, formulaires et configuration restent à extraire.

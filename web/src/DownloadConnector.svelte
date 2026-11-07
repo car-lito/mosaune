@@ -3,14 +3,16 @@
  export let initial:DownloadConfig;export let token:string;export let libraries:{id:string;name:string;kind:string;path?:string}[];export let refresh:()=>Promise<void>;
  let config:DownloadConfig={...initial,key:''};let options:DownloadOptions|undefined;let busy=false;let message='';let error='';let verified='';
  let addingFolder=false;let folderPath='';let folderName='';let addedFolders:typeof libraries=[];
- $: name=config.id==='radarr'?'Radarr':'Sonarr';
+ $: name=config.form?.title??config.id;
  $: kind=config.id==='radarr'?'films':'series';
  $: folderLabel=kind==='films'?'films':'séries';
  $: folders=[...libraries,...addedFolders.filter(a=>!libraries.some(l=>l.id===a.id))].filter(l=>l.kind===kind);
  $: selectedFolder=folders.find(l=>l.id===config.library);
  $: signature=config.url+'\n'+config.key;
- async function test(){busy=true;message='';error='';try{const data=await acquisition<{config:DownloadConfig;options:DownloadOptions}>(token,'test','POST',config);options=data.options;config.url=data.config.url;verified=config.url+'\n'+config.key;if(!options.profiles.some(p=>p.id===config.profile))config.profile=options.profiles[0]?.id??0;if(!options.roots.some(p=>p.path===config.root))config.root=options.roots[0]?.path??'';message='Connexion réussie. Aucun téléchargement demandé.';}catch(e){error=e instanceof Error?e.message:'Connexion impossible.';options=undefined;}finally{busy=false;}}
- async function save(){busy=true;message='';error='';try{const data=await acquisition<{config:DownloadConfig;options:DownloadOptions}>(token,'settings','PUT',{...config,enabled:true});config={...data.config,key:''};options=data.options;verified=config.url+'\n';message='Réglages enregistrés. Le connecteur est actif.';}catch(e){error=e instanceof Error?e.message:'Enregistrement impossible.';}finally{busy=false;}}
+ function payload(){const {form,formError,...input}=config;return input;}
+ async function reload(){busy=true;error='';try{const all=await acquisition<DownloadConfig[]>(token,'settings');const current=all.find(c=>c.id===config.id);if(!current)throw new Error('Connecteur indisponible.');config={...current,key:''};options=undefined;verified='';}catch(e){error=e instanceof Error?e.message:'Réglages indisponibles.';}finally{busy=false;}}
+ async function test(){busy=true;message='';error='';try{const data=await acquisition<{config:DownloadConfig;options:DownloadOptions}>(token,'test','POST',payload());options=data.options;config={...data.config,key:config.key};verified=config.url+'\n'+config.key;if(!options.profiles.some(p=>p.id===config.profile))config.profile=options.profiles[0]?.id??0;if(!options.roots.some(p=>p.path===config.root))config.root=options.roots[0]?.path??'';message='Connexion réussie. Aucun téléchargement demandé.';}catch(e){error=e instanceof Error?e.message:'Connexion impossible.';options=undefined;}finally{busy=false;}}
+ async function save(){busy=true;message='';error='';try{const data=await acquisition<{config:DownloadConfig;options:DownloadOptions}>(token,'settings','PUT',{...payload(),enabled:true});config={...data.config,key:''};options=data.options;verified=config.url+'\n';message='Réglages enregistrés. Le connecteur est actif.';}catch(e){error=e instanceof Error?e.message:'Enregistrement impossible.';}finally{busy=false;}}
  async function pause(){busy=true;error='';try{await acquisition(token,config.id+'/pause','POST',{});config.enabled=false;message='Suivi Mosaune en pause. Les téléchargements déjà envoyés continuent dans '+name+'.';}catch(e){error=e instanceof Error?e.message:'Pause impossible.';}finally{busy=false;}}
  async function addFolder(){
   if(busy)return;busy=true;message='';error='';
@@ -25,17 +27,30 @@
 </script>
 <section class="download-connector">
  <div class="download-heading"><h3>{name} <small>· {config.id==='radarr'?'Films':'Séries'}</small></h3><span class="download-badge">{config.enabled?'Actif':'À configurer / en pause'}</span></div>
- <div class="download-fields"><label>Adresse de {name}<input type="url" bind:value={config.url} disabled={busy} placeholder={config.id==='radarr'?'http://adresse-du-nas:7878':'http://adresse-du-nas:8989'} autocomplete="off"/></label><label>Clé API<input type="password" bind:value={config.key} disabled={busy} placeholder={config.configured?'Déjà enregistrée · laisser vide pour la garder':'À copier depuis les réglages du service'} autocomplete="new-password"/></label></div>
+ {#if config.form}
+ {#if config.form.instructions.length}<details class="download-guide"><summary>Configurer {name}</summary><ol>{#each config.form.instructions as instruction}<li>{instruction}</li>{/each}</ol></details>{/if}
+ <div class="download-fields">
+  {#each config.form.fields.filter(f=>f.binding==='url'||f.binding==='key') as field (field.binding)}
+   <label>{field.label}<input type={field.binding==='key'?'password':'url'} value={field.binding==='key'?config.key:config.url} oninput={e=>{if(field.binding==='key')config.key=e.currentTarget.value;else config.url=e.currentTarget.value;}} disabled={busy} maxlength={field.maxLength} placeholder={field.binding==='key'&&config.configured?'Déjà enregistrée · laisser vide pour la garder':field.placeholder} autocomplete={field.binding==='key'?'new-password':'off'}/>{#if field.help}<small>{field.help}</small>{/if}</label>
+  {/each}
+ </div>
  <button class="secondary" disabled={busy||!config.url} onclick={test}>{busy?'Patientez…':'Tester la connexion'}</button>
  {#if options&&verified===signature}
   <div class="download-fields">
-   <label>Profil qualité<select bind:value={config.profile} disabled={busy}>{#each options.profiles as p}<option value={p.id}>{p.name}</option>{/each}</select></label>
-   <label>Dossier de destination dans {name}<select bind:value={config.root} disabled={busy}>{#each options.roots as p}<option value={p.path}>{p.path}</option>{/each}</select></label>
-   <div class="download-folder-choice">
-    <label>Dossier correspondant dans Mosaune<select bind:value={config.library} disabled={busy||!folders.length}><option value="">{folders.length?'Choisir un dossier déjà ajouté…':`Aucun dossier de ${folderLabel} ajouté`}</option>{#each folders as l}<option value={l.id}>{l.name}{l.path?` — ${l.path}`:''}</option>{/each}</select></label>
-    {#if !folders.length}<p class="folder-help">Ajoutez d’abord le dossier de {folderLabel} que Mosaune pourra lire. Cette liste contient uniquement vos bibliothèques de {folderLabel}.</p>{:else if selectedFolder?.path}<p class="folder-help download-folder-path">{selectedFolder.path}</p>{/if}
-    <button class="text-action" disabled={busy} aria-expanded={addingFolder} onclick={()=>addingFolder=!addingFolder}>{addingFolder?'Fermer l’ajout':`+ Ajouter un dossier de ${folderLabel}`}</button>
-   </div>
+   {#each config.form.fields.filter(f=>f.binding!=='url'&&f.binding!=='key') as field (field.binding)}
+    <div class="download-folder-choice">
+     {#if field.binding==='profile'}
+      <label>{field.label}<select bind:value={config.profile} disabled={busy}>{#each options.profiles as p}<option value={p.id}>{p.name}</option>{/each}</select></label>
+     {:else if field.binding==='root'}
+      <label>{field.label}<select bind:value={config.root} disabled={busy}>{#each options.roots as p}<option value={p.path}>{p.path}</option>{/each}</select></label>
+     {:else if field.binding==='library'}
+      <label>{field.label}<select bind:value={config.library} disabled={busy||!folders.length}><option value="">{folders.length?'Choisir un dossier déjà ajouté…':'Aucun dossier de '+folderLabel+' ajouté'}</option>{#each folders as l}<option value={l.id}>{l.name}{l.path?' — '+l.path:''}</option>{/each}</select></label>
+      {#if selectedFolder?.path}<p class="folder-help download-folder-path">{selectedFolder.path}</p>{/if}
+      <button class="text-action" disabled={busy} aria-expanded={addingFolder} onclick={()=>addingFolder=!addingFolder}>{addingFolder?'Fermer l’ajout':'+ Ajouter un dossier de '+folderLabel}</button>
+     {/if}
+     {#if field.help}<p class="folder-help">{field.help}</p>{/if}
+    </div>
+   {/each}
   </div>
   {#if addingFolder}
    <form class="download-folder-form" onsubmit={e=>{e.preventDefault();void addFolder();}}>
@@ -49,6 +64,8 @@
   <p class="folder-help">Choisissez le dossier Mosaune qui permet de lire les fichiers une fois importés. Sur votre PC, il peut s’agir du partage réseau du NAS. Les nouveaux ajouts utiliseront le profil et la destination ci-dessus ; les œuvres déjà présentes dans {name} garderont les leurs.</p>
   <button class="primary" disabled={busy||!selectedFolder||!config.root||!config.profile} onclick={save}>Enregistrer et activer</button>
  {/if}
+ {:else}<p class="playback-error" role="alert">{config.formError||'Formulaire du connecteur indisponible.'}</p>{/if}
+ <button class="text-action" disabled={busy} onclick={reload}>Recharger les réglages</button>
  {#if config.enabled}<button class="text-action" disabled={busy} onclick={pause}>Mettre le suivi en pause</button>{/if}
  {#if message}<p class="notice" role="status">{message}</p>{/if}{#if error}<p class="playback-error" role="alert">{error}</p>{/if}
 </section>

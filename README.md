@@ -1,4 +1,4 @@
-Version 0.0.61 — le composant Demandes fournit désormais les routes et les limites réseau de Radarr/Sonarr. Les clés restent dans Mosaune. [Contrat pour contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
+Version 0.0.62 — formulaires et guides Radarr/Sonarr fournis par le composant partagé. [Essayer les réglages](ESSAYER-LES-CONNECTEURS-062.md).
 
 Version 0.0.60 — le composant partagé Demandes Radarr et Sonarr interprète aussi le suivi : progression, saisons, blocages et disponibilité. Le serveur vérifie les fichiers locaux avant de les annoncer disponibles. [Contrat pour contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
 

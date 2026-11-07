@@ -9,7 +9,7 @@ import (
 	"mosaune/extensionkit/registry"
 )
 
-const catalogSchemaVersion = 41
+const catalogSchemaVersion = 42
 
 // TMDB packages and recognition packages share this registry. Other built-in
 // functions/themes still have their existing lifecycles until extracted.

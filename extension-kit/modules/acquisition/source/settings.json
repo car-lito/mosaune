@@ -1,0 +1,76 @@
+{
+  "radarr": {
+    "version": 1,
+    "title": "Radarr",
+    "instructions": [
+      "Dans Radarr, ouvrez Settings → General → Security et copiez la clé API.",
+      "Indiquez l’adresse accessible depuis le serveur Mosaune, puis testez la connexion. Ce test ne lance aucun téléchargement.",
+      "Choisissez un profil qualité, la destination dans Radarr et le dossier Mosaune contenant les mêmes fichiers. Les œuvres déjà présentes dans le service gardent leurs réglages."
+    ],
+    "fields": [
+      {
+        "binding": "url",
+        "label": "Adresse de Radarr",
+        "placeholder": "http://adresse-du-nas:7878",
+        "maxLength": 2048
+      },
+      {
+        "binding": "key",
+        "label": "Clé API",
+        "placeholder": "À copier depuis les réglages du service",
+        "help": "Laisser vide pour conserver la clé enregistrée à cette adresse.",
+        "maxLength": 200
+      },
+      {
+        "binding": "profile",
+        "label": "Profil qualité"
+      },
+      {
+        "binding": "root",
+        "label": "Dossier de destination dans Radarr"
+      },
+      {
+        "binding": "library",
+        "label": "Dossier correspondant dans Mosaune",
+        "help": "Choisissez le dossier que le serveur Mosaune peut lire une fois les fichiers importés."
+      }
+    ]
+  },
+  "sonarr": {
+    "version": 1,
+    "title": "Sonarr",
+    "instructions": [
+      "Dans Sonarr, ouvrez Settings → General → Security et copiez la clé API.",
+      "Indiquez l’adresse accessible depuis le serveur Mosaune, puis testez la connexion. Ce test ne lance aucun téléchargement.",
+      "Choisissez un profil qualité, la destination dans Sonarr et le dossier Mosaune contenant les mêmes fichiers. Les œuvres déjà présentes dans le service gardent leurs réglages."
+    ],
+    "fields": [
+      {
+        "binding": "url",
+        "label": "Adresse de Sonarr",
+        "placeholder": "http://adresse-du-nas:8989",
+        "maxLength": 2048
+      },
+      {
+        "binding": "key",
+        "label": "Clé API",
+        "placeholder": "À copier depuis les réglages du service",
+        "help": "Laisser vide pour conserver la clé enregistrée à cette adresse.",
+        "maxLength": 200
+      },
+      {
+        "binding": "profile",
+        "label": "Profil qualité"
+      },
+      {
+        "binding": "root",
+        "label": "Dossier de destination dans Sonarr"
+      },
+      {
+        "binding": "library",
+        "label": "Dossier correspondant dans Mosaune",
+        "help": "Choisissez le dossier que le serveur Mosaune peut lire une fois les fichiers importés."
+      }
+    ]
+  }
+}

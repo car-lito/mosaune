@@ -261,7 +261,7 @@ func acquisitionRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 		if !guard(w, r) {
 			return
 		}
-		result := []arrConfig{}
+		result := []acquisitionSettingsView{}
 		for _, id := range []string{"radarr", "sonarr"} {
 			if allowed(arrKind(id)) {
 				cfg, err := c.arrConfig(r.Context(), id)
@@ -270,7 +270,7 @@ func acquisitionRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 					return
 				}
 				cfg.Key = ""
-				result = append(result, cfg)
+				result = append(result, c.acquisitionSettings(r.Context(), cfg))
 			}
 		}
 		sendJSON(w, 200, result)
@@ -280,7 +280,10 @@ func acquisitionRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 			if !guard(w, r) {
 				return
 			}
-			var input arrConfig
+			var input struct {
+				arrConfig
+				FormRevision string `json:"formRevision"`
+			}
 			if !readJSON(w, r, &input) {
 				return
 			}
@@ -293,12 +296,32 @@ func acquisitionRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 				return
 			}
 			defer c.requestMu.Unlock()
-			cfg, err := c.configInput(r.Context(), input)
+			cfg, err := c.configInput(r.Context(), input.arrConfig)
 			if err != nil {
 				problem(w, 400, err.Error())
 				return
 			}
-			opt, err := (arrClient{cfg}).options(r.Context())
+			client := arrClient{cfg}
+			ctx, done, err := client.openSession(r.Context())
+			defer done()
+			if err != nil {
+				problem(w, 400, err.Error())
+				return
+			}
+			form, revision, err := client.settingsForm(ctx)
+			if err != nil {
+				problem(w, 400, err.Error())
+				return
+			}
+			if input.FormRevision == "" || input.FormRevision != revision {
+				problem(w, 409, "Le formulaire a changé. Rechargez les réglages du connecteur.")
+				return
+			}
+			if err = form.ValidateConnection(cfg.URL, cfg.Key); err != nil {
+				problem(w, 400, err.Error())
+				return
+			}
+			opt, err := client.options(ctx)
 			if err != nil {
 				problem(w, 400, err.Error())
 				return
@@ -312,15 +335,19 @@ func acquisitionRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 					problem(w, 400, err.Error())
 					return
 				}
+				if ctx.Err() != nil {
+					problem(w, 409, "Le composant a été désactivé. Rechargez les réglages.")
+					return
+				}
 				b, _ := json.Marshal(cfg)
-				_, err = c.db.ExecContext(r.Context(), `INSERT INTO acquisition_settings(id,data) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data`, cfg.ID, b)
+				_, err = c.db.ExecContext(ctx, `INSERT INTO acquisition_settings(id,data) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data`, cfg.ID, b)
 				if err != nil {
 					problem(w, 500, "Réglages non enregistrés.")
 					return
 				}
 			}
 			cfg.Key = ""
-			sendJSON(w, 200, map[string]any{"config": cfg, "options": opt})
+			sendJSON(w, 200, map[string]any{"config": acquisitionSettingsView{arrConfig: cfg, Form: &form, FormRevision: revision}, "options": opt})
 		})
 	}
 	mux.HandleFunc("POST /api/v1/acquisition/{id}/pause", func(w http.ResponseWriter, r *http.Request) {

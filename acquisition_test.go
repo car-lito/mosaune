@@ -126,7 +126,7 @@ func setupAcquisition(t *testing.T, kind string) (*catalog, http.Handler, string
 	t.Cleanup(server.Close)
 	cfg := arrConfig{ID: id, URL: server.URL, Key: "fixture-secret", Enabled: true, Profile: 1, Root: "/new", Library: l.ID}
 	h, token := handlerFor(t, c, "video,music")
-	resp := call(t, h, "PUT", "/api/v1/acquisition/settings", token, cfg)
+	resp := call(t, h, "PUT", "/api/v1/acquisition/settings", token, c.acquisitionTestInput(t, cfg))
 	if resp.Code != 200 {
 		t.Fatal(resp.Code, resp.Body.String())
 	}

@@ -1,4 +1,5 @@
-export type DownloadConfig={id:string;url:string;key?:string;configured:boolean;enabled:boolean;profile:number;root:string;library:string};
+export type DownloadForm={version:number;title:string;instructions:string[];fields:{binding:'url'|'key'|'profile'|'root'|'library';label:string;help?:string;placeholder?:string;maxLength?:number}[]};
+export type DownloadConfig={id:string;url:string;key?:string;configured:boolean;enabled:boolean;profile:number;root:string;library:string;form?:DownloadForm;formRevision?:string;formError?:string};
 export type DownloadOptions={profiles:{id:number;name:string}[];roots:{id:number;path:string}[]};
 export type DownloadRequest={id:string;workId:string;title:string;kind:string;connector:string;season:number;state:string;message:string;created:number;updated:number;imported:number;total:number;local:number;progress:number;uncertain:boolean};
 export const requestStates:Record<string,string>={waiting:'En attente',downloading:'En téléchargement',blocked:'À vérifier',imported:'Importé · dossier à vérifier',available:'Disponible',partial:'Partiellement disponible',unreachable:'Service inaccessible',uncertain:'Envoi à vérifier',missing:'Absent du service',paused:'Suivi en pause',unmonitored:'Surveillance désactivée'};

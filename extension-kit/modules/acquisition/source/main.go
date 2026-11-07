@@ -72,6 +72,17 @@ func main() {
 		if r.Capability != a.Capability {
 			return fail()
 		}
+		if r.Operation == "describe-settings" {
+			var q a.TransportQuery
+			if protocol.DecodeOne(r.Payload, &q) != nil {
+				return fail()
+			}
+			form, err := settings(q.Connector)
+			if err != nil {
+				return fail()
+			}
+			return form, nil
+		}
 		if r.Operation == "describe-transport" {
 			var q a.TransportQuery
 			if protocol.DecodeOne(r.Payload, &q) != nil {
