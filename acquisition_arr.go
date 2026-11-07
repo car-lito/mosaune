@@ -84,14 +84,6 @@ func number(v any) int {
 	n, _ := v.(float64)
 	return int(n)
 }
-func arrFloat(v any) float64 {
-	if n, ok := v.(json.Number); ok {
-		f, _ := n.Float64()
-		return f
-	}
-	n, _ := v.(float64)
-	return n
-}
 func truth(v any) bool  { b, _ := v.(bool); return b }
 func word(v any) string { s, _ := v.(string); return s }
 

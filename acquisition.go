@@ -568,7 +568,7 @@ func (c *catalog) syncRequest(ctx context.Context, cfg arrConfig, v *acquisition
 	if err != nil {
 		return err
 	}
-	observations, episodes, err := a.trackingObservations(ctx, *v, obj)
+	observations, episodes, err := a.trackingObservations(ctx, reader, *v, obj)
 	if err != nil {
 		return err
 	}

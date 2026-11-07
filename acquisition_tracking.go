@@ -22,67 +22,64 @@ func (client arrClient) trackingReader(ctx context.Context) (*cataloguer, error)
 		r.engine.Close()
 		return nil, errors.New("Le composant de demandes installé ne prend pas en charge le suivi. Mettez-le à jour ou choisissez un composant compatible.")
 	}
+	if _, err = readAcquisitionObservations(ctx, r, a.ObservationQuery{Connector: client.config.ID}); err != nil {
+		r.engine.Close()
+		return nil, err
+	}
 	return r, nil
 }
 
-// Copy only observations needed by the installed policy. Full responses, paths,
-// API keys, titles and download identifiers never cross the module boundary.
-func (client arrClient) trackingObservations(ctx context.Context, v acquisitionRequest, obj arrObject) (a.Tracking, []arrObject, error) {
-	q := a.Tracking{Connector: client.config.ID, Season: v.Season, Uncertain: v.Uncertain}
+func readAcquisitionObservations(ctx context.Context, r *cataloguer, query a.ObservationQuery) (a.ObservationPlan, error) {
+	var p a.ObservationPlan
+	if err := r.call(ctx, "observation-plan", query, &p); err != nil {
+		return p, errors.New("Le composant de demandes installé ne fournit pas de plan de suivi compatible. Mettez-le à jour.")
+	}
+	return p, p.Validate(query)
+}
+
+// Full responses and private paths remain in the host. The installed component
+// chooses bounded reads; the shared contract projects only typed evidence.
+func (client arrClient) trackingObservations(ctx context.Context, reader *cataloguer, v acquisitionRequest, obj arrObject) (a.Tracking, []arrObject, error) {
+	query := a.ObservationQuery{Connector: client.config.ID, RemoteID: number(obj["id"])}
+	p, err := readAcquisitionObservations(ctx, reader, query)
+	if err != nil {
+		return a.Tracking{}, nil, err
+	}
+	q, err := p.Begin(query, v.Season, v.Uncertain, obj)
+	if err != nil {
+		return q, nil, err
+	}
 	var episodes []arrObject
-	if obj == nil {
-		return q, episodes, nil
-	}
-	q.RemoteID, q.HasFile, q.Monitored = number(obj["id"]), truth(obj["hasFile"]), truth(obj["monitored"])
-	if q.RemoteID <= 0 {
-		return q, nil, errors.New("Identifiant distant absent du suivi.")
-	}
-	if client.config.ID == "sonarr" {
-		if err := client.exchange(ctx, "episodes", q.RemoteID, 0, nil, &episodes); err != nil {
-			return q, nil, err
-		}
-		if len(episodes) > 5000 {
-			return q, nil, errors.New("Trop d’épisodes dans cette réponse de suivi.")
-		}
-		for _, ep := range episodes {
-			q.Episodes = append(q.Episodes, a.Episode{ID: number(ep["id"]), Season: number(ep["seasonNumber"]), Number: number(ep["episodeNumber"]), HasFile: truth(ep["hasFile"])})
-		}
-		seasons, _ := obj["seasons"].([]any)
-		if len(seasons) > 1001 {
-			return q, nil, errors.New("Trop de saisons dans cette réponse de suivi.")
-		}
-		for _, raw := range seasons {
-			s, ok := raw.(map[string]any)
-			if !ok {
-				return q, nil, errors.New("Saison invalide dans la réponse du service.")
+	for _, read := range p.Reads {
+		switch read.Operation {
+		case "episodes":
+			if err = client.exchange(ctx, read.Operation, q.RemoteID, 0, nil, &episodes); err != nil {
+				return q, nil, err
 			}
-			q.Seasons = append(q.Seasons, a.Season{Number: number(s["seasonNumber"]), Monitored: truth(s["monitored"])})
-		}
-	}
-	for page := 1; page <= 20; page++ {
-		var remote struct {
-			Records []arrObject `json:"records"`
-			Total   int         `json:"totalRecords"`
-		}
-		if err := client.exchange(ctx, "queue", 0, page, nil, &remote); err != nil {
-			return q, nil, err
-		}
-		if len(remote.Records) > 100 || remote.Total < 0 || remote.Total > 2000 {
-			return q, nil, errors.New("File du service trop volumineuse pour ce prototype ; consultez le service.")
-		}
-		for _, row := range remote.Records {
-			key := "resourceId"
-			size := arrFloat(row["size"])
-			left := arrFloat(row["sizeleft"])
-			item := a.QueueItem{RemoteID: number(row[key]), EpisodeID: number(row["episodeId"]), Size: size, Remaining: left, Status: word(row["trackedDownloadStatus"])}
-			if raw, ok := row["seasonNumber"]; ok && raw != nil {
-				n := number(raw)
-				item.Season = &n
+			rows := make([]map[string]any, len(episodes))
+			for i := range episodes {
+				rows[i] = episodes[i]
 			}
-			q.Queue = append(q.Queue, item)
-		}
-		if page*100 >= remote.Total {
-			break
+			if err = q.ObserveEpisodes(rows, read.Limit); err != nil {
+				return q, nil, err
+			}
+		case "queue":
+			for page := 1; page <= read.Limit; page++ {
+				var remote struct {
+					Records []map[string]any `json:"records"`
+					Total   int              `json:"totalRecords"`
+				}
+				if err = client.exchange(ctx, read.Operation, 0, page, nil, &remote); err != nil {
+					return q, nil, err
+				}
+				more, err := q.ObserveQueue(remote.Records, remote.Total, page, read.Limit)
+				if err != nil {
+					return q, nil, err
+				}
+				if !more {
+					break
+				}
+			}
 		}
 	}
 	return q, episodes, q.Validate()

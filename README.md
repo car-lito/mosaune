@@ -1,3 +1,5 @@
+Version 0.0.65 — le composant partagé pilote aussi les lectures nécessaires au suivi Radarr/Sonarr et leurs limites. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
+
 Version 0.0.64 — le composant partagé fournit maintenant le programme d’envoi des demandes Radarr/Sonarr. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
 
 Version 0.0.60 — le composant partagé Demandes Radarr et Sonarr interprète aussi le suivi : progression, saisons, blocages et disponibilité. Le serveur vérifie les fichiers locaux avant de les annoncer disponibles. [Contrat pour contributeurs](extension-kit/capabilities/acquisition/v1/README.md).

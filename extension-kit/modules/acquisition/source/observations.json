@@ -1,0 +1,4 @@
+{
+  "radarr": {"version":1,"seasons":false,"reads":[{"operation":"queue","limit":20}]},
+  "sonarr": {"version":1,"seasons":true,"reads":[{"operation":"episodes","limit":5000},{"operation":"queue","limit":20}]}
+}

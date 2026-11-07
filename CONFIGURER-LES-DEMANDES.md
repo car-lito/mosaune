@@ -84,3 +84,5 @@ Depuis la 0.0.62, la configuration nécessite les formulaires du composant 0.4.0
 Depuis la 0.0.63, le composant de demandes doit aussi déclarer les formats des données du service (composant fourni 0.5.0). Les anciens remplaçants sans cette déclaration demandent une mise à jour avant tout échange réseau. Vos adresses, clés et destinations restent conservées.
 
 Depuis la 0.0.64, l’envoi nécessite aussi le programme du composant fourni 0.6.0 ou d’un remplaçant compatible. Les anciens remplaçants sans cette fonction doivent être mis à jour ; Mosaune ne se substitue pas à eux pour envoyer une demande.
+
+Depuis la0.0.65, le suivi nécessite le composant fourni0.7.0 ou un remplaçant proposant `observation-plan`. Les anciennes versions officielles intactes sont mises à jour en conservant leur état ; les composants retirés ou personnalisés ne sont pas remplacés. Si une limite de collecte est dépassée, le suivi signale une erreur et conserve les demandes, sans renvoyer de téléchargement.

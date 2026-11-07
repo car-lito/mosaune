@@ -1,20 +1,12 @@
 # Vers un Mosaune entièrement extensible
 
-État du 7 novembre 2026 · étape 0.0.64.
+État du 7 novembre 2026 · étape 0.0.65.
 
-**Environ 78 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 85 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
-| Chantier | Poids | Estimation réalisée | Contribution au total |
-|---|---:|---:|---:|
-| Moteur, contrats, registre et isolation | 20 % | 90 % | 18 points |
-| Installation, dépendances et gestion des ensembles | 20 % | 70 % | 14 points |
-| Extraction des comportements Films/Séries/Musique | 25 % | 92 % | 23 points |
-| Thèmes et contributions d’interface | 15 % | 90 % | 13,5 points |
-| Fournisseurs et connecteurs indépendants | 10 % | 90 % | 9 points |
-| Validation finale d’un noyau vide et d’une installation complète par extensions | 10 % | 0 % | 0 point |
-| **Total estimé** | **100 %** | | **environ 78 %** |
+Ce pourcentage est indicatif, sans pondération chiffrée par chantier. La validation du noyau seul et des familles indépendantes reste une condition de fin à part entière.
 
 ## Regroupement confirmé après la 0.0.45
 
@@ -96,7 +88,8 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [x] 0.0.60–0.0.62 — suivi, routes HTTP et formulaires Radarr/Sonarr pilotés par le composant partagé.
 - [x] 0.0.63 — formats des objets API Radarr/Sonarr déclarés par le composant partagé, lecture/écriture et commandes.
 - [x] 0.0.64 — programme d’envoi et préparation des écritures fournis par le composant partagé ; exécuteur hôte borné et validation avant tout envoi.
-- [ ] Achever la préparation du suivi, le stockage de configuration et l’indépendance des connecteurs.
+- [x] 0.0.65 — plan de collecte du suivi installé, limites contrôlées, projection privée dans le contrat commun et absence de repli natif.
+- [ ] Achever le stockage de configuration, les prévisualisations, le rapprochement local et l’indépendance des connecteurs.
 
 - [x] **0.0.62 :** formulaires déclaratifs, guides, ordre des champs, limites de saisie et rejet des formulaires périmés. Même composant partagé, sans nouvelle extension visible.
 

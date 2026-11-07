@@ -1,3 +1,7 @@
+## 0.0.65 — collecte du suivi pilotée par le composant installé
+
+Le composant acquisition 0.7.0 fournit un plan de lectures borné : épisodes, saisons et pagination de la file. Les objets privés sont projetés en observations typées par le contrat commun côté hôte. Limites dépassées et pages intermédiaires incomplètes arrêtent le suivi ; aucun repli natif si le composant est ancien. Migration45 conservant retraits, désactivations et remplacements ; familles14.0/14.1. Le stockage des réglages, les prévisualisations et le rapprochement local restent à extraire. Le budget global des tests du serveur passe de20 à30minutes : la suite Windows précédente avait atteint sa limite globale pendant un test lancé depuis4secondes, sans échec d’assertion signalé.
+
 ## 0.0.64 — programme d’envoi fourni par l’extension
 
 Le composant acquisition 0.6.0 construit les actions, les champs et les références nécessaires aux créations, mises à jour, surveillances et recherches. Le serveur valide leur périmètre puis résout les destinations et identifiants privés. Aucun envoi natif de secours ; un ancien composant doit être mis à jour. Les ressources existantes et les saisons non demandées sont préservées ; les épisodes dupliqués ou invalides sont refusés. Migration44, familles13.0/13.1. Le stockage de configuration et la préparation du suivi restent à extraire.

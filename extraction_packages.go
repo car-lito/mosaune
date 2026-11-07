@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	a "mosaune/extensionkit/capabilities/acquisition/v1"
 	tags "mosaune/extensionkit/capabilities/audiotags/v1"
 	"mosaune/extensionkit/packageformat"
 	"strings"
@@ -86,6 +87,18 @@ func validateExtractionCode(ctx context.Context, p packageformat.Executable) err
 				err = reader.call(ctx, "workflow-info", struct{}{}, &info)
 				if err == nil && info.Version != 1 {
 					err = errors.New("Version du programme d’envoi incompatible.")
+				}
+			}
+			if err == nil && packageformat.Compare(p.Manifest.MinCore, "0.0.65") >= 0 {
+				for _, connector := range []string{"radarr", "sonarr"} {
+					for _, id := range []int{0, 1} {
+						if _, err = readAcquisitionObservations(ctx, reader, a.ObservationQuery{Connector: connector, RemoteID: id}); err != nil {
+							break
+						}
+					}
+					if err != nil {
+						break
+					}
 				}
 			}
 			reader.engine.Close()

@@ -61,3 +61,12 @@ La validation n’est pas un programme de secours : aucun scénario n’est exé
 Un paquet minCore0.0.64 doit déclarer workflow-info version1 ; chaque réponse submission-workflow est validée intégralement lors de l’envoi. Un ancien paquet peut être conservé mais doit être mis à jour avant un nouvel envoi. Le suivi et la pause gardent leurs contrats distincts. Migration44 conserve désactivations/retraits/remplaçants ; familles13.0/13.1, archives précédentes inchangées. Le SDK contient les règles d’autorisation et les utilitaires de copie/résolution ; la construction du programme reste dans modules/acquisition/source/workflow.go.
 
 Le stockage des réglages, la préparation des observations de suivi et certaines étapes de prévisualisation restent dans le serveur. Les connecteurs ne sont pas encore des familles entièrement autonomes.
+
+
+### Plan de collecte (serveur 0.0.65, composant fourni 0.7.0)
+
+`observation-plan(ObservationQuery) → ObservationPlan` reçoit uniquement le connecteur et l’identifiant distant. Version1 : une ressource absente (ID0) ne déclenche aucune lecture ; un film exige la file ; une série exige épisodes, saisons et file. Le composant choisit l’ordre des lectures et les limites (épisodes1–5000, file1–20pages de100). Ces exigences évitent de déclarer une disponibilité sur des preuves omises. Le manifeste fourni embarque ces choix dans `source/observations.json` ; un remplaçant peut les calculer dans son programme.
+
+L’hôte valide le plan avant exécution. Les helpers `Begin`, `ObserveEpisodes` et `ObserveQueue` tournent côté hôte : ils projettent les objets canoniques vers `Tracking`, contrôlent types, identifiants, doublons et tailles. Les clés API, chemins, titres et identifiants de téléchargement restent privés. Une file dépassant la limite ou une page intermédiaire incomplète produit une erreur, pas un résultat partiel présenté comme complet. Une file évoluant pendant la pagination ne constitue pas un instantané atomique.
+
+Un premier appel avec ID0 vérifie la disponibilité du plan avant la recherche distante. À l’import, les paquets annonçant minCore0.0.65 sont contrôlés pour les deux connecteurs, avec et sans ressource ; chaque résultat est également validé à l’exécution. Aucun plan natif de secours. Les contrôles de fichiers locaux, quotas de cadence, réglages persistants et prévisualisations restent encore dans le serveur ; cette étape ne rend pas le connecteur entièrement autonome.

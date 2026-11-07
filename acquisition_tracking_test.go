@@ -166,7 +166,17 @@ func TestAcquisitionTrackingPagination(t *testing.T) {
 	}))
 	defer server.Close()
 	client := arrClient{arrConfig{ID: "radarr", URL: server.URL, Key: "private-key"}}
-	q, _, err := client.trackingObservations(context.Background(), acquisitionRequest{Season: -1}, arrObject{"id": float64(12), "monitored": true})
+	ctx, done, err := client.openSession(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer done()
+	reader, err := client.trackingReader(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reader.engine.Close()
+	q, _, err := client.trackingObservations(ctx, reader, acquisitionRequest{Season: -1}, arrObject{"id": float64(12), "monitored": true})
 	if err != nil || pages != 2 || len(q.Queue) != 101 || q.Queue[100].Remaining != 25 {
 		t.Fatal(q, err, pages)
 	}
@@ -176,7 +186,7 @@ func TestAcquisitionTrackingPagination(t *testing.T) {
 	}
 	total = 2001
 	pages = 0
-	if _, _, err = client.trackingObservations(context.Background(), acquisitionRequest{Season: -1}, arrObject{"id": float64(12)}); err == nil || pages != 1 {
+	if _, _, err = client.trackingObservations(ctx, reader, acquisitionRequest{Season: -1}, arrObject{"id": float64(12)}); err == nil || pages != 1 {
 		t.Fatal("queue bound ignored", err, pages)
 	}
 }
