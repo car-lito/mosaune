@@ -8,9 +8,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	a "mosaune/extensionkit/acquisitionconfig"
+	"mosaune/extensionkit/configuration"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -34,44 +35,6 @@ func migrateRequests(db *sql.DB) error {
 		return e
 	}
 	return tx.Commit()
-}
-func (c *catalog) arrConfig(ctx context.Context, id string) (arrConfig, error) {
-	cfg := arrConfig{ID: id, owner: c}
-	var b string
-	err := c.db.QueryRowContext(ctx, `SELECT data FROM acquisition_settings WHERE id=?`, id).Scan(&b)
-	if errors.Is(err, sql.ErrNoRows) {
-		return cfg, nil
-	}
-	if err != nil {
-		return cfg, err
-	}
-	err = json.Unmarshal([]byte(b), &cfg)
-	cfg.Configured = cfg.Key != ""
-	return cfg, err
-}
-func (c *catalog) configInput(ctx context.Context, cfg arrConfig) (arrConfig, error) {
-	cfg.owner = c
-	if arrKind(cfg.ID) == "" {
-		return cfg, errors.New("Connecteur inconnu.")
-	}
-	normalized, err := cleanArrURL(cfg.URL)
-	if err != nil {
-		return cfg, err
-	}
-	cfg.URL = normalized
-	old, err := c.arrConfig(ctx, cfg.ID)
-	if err != nil {
-		return cfg, err
-	}
-	cfg.Key = strings.TrimSpace(cfg.Key)
-	if cfg.Key == "" && old.URL == cfg.URL {
-		cfg.Key = old.Key
-	}
-	if cfg.Key == "" || len(cfg.Key) > 200 || strings.ContainsAny(cfg.Key, "\r\n") {
-		return cfg, errors.New("Saisissez la clé API du service. Une nouvelle adresse nécessite sa clé.")
-	}
-	cfg.Configured = true
-	return cfg, nil
 }
 func validChoices(cfg arrConfig, opt arrOptions) bool {
 	p, r := false, false
@@ -339,13 +302,17 @@ func acquisitionRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 					problem(w, 409, "Le composant a été désactivé. Rechargez les réglages.")
 					return
 				}
-				b, _ := json.Marshal(cfg)
-				_, err = c.db.ExecContext(ctx, `INSERT INTO acquisition_settings(id,data) VALUES(?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data`, cfg.ID, b)
+				err = c.saveAcquisitionConfiguration(ctx, &cfg)
 				if err != nil {
-					problem(w, 500, "Réglages non enregistrés.")
+					if errors.Is(err, configuration.ErrConflict) {
+						problem(w, 409, "Les réglages ont changé. Rechargez le formulaire.")
+					} else {
+						problem(w, 500, "Réglages non enregistrés.")
+					}
 					return
 				}
 			}
+			revision = acquisitionFormRevision(ctx, cfg.ID, form, cfg.revision)
 			cfg.Key = ""
 			sendJSON(w, 200, map[string]any{"config": acquisitionSettingsView{arrConfig: cfg, Form: &form, FormRevision: revision}, "options": opt})
 		})
@@ -364,14 +331,7 @@ func acquisitionRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 			return
 		}
 		defer c.requestMu.Unlock()
-		cfg, err := c.arrConfig(r.Context(), id)
-		if err != nil {
-			problem(w, 500, "Réglages indisponibles.")
-			return
-		}
-		cfg.Enabled = false
-		b, _ := json.Marshal(cfg)
-		if _, err = c.db.ExecContext(r.Context(), `UPDATE acquisition_settings SET data=? WHERE id=?`, b, id); err != nil {
+		if err := (a.ConfigurationStore{DB: c.db}).Pause(r.Context(), id); err != nil {
 			problem(w, 500, "Pause non enregistrée.")
 			return
 		}

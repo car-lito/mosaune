@@ -70,3 +70,7 @@ Le stockage des réglages, la préparation des observations de suivi et certaine
 L’hôte valide le plan avant exécution. Les helpers `Begin`, `ObserveEpisodes` et `ObserveQueue` tournent côté hôte : ils projettent les objets canoniques vers `Tracking`, contrôlent types, identifiants, doublons et tailles. Les clés API, chemins, titres et identifiants de téléchargement restent privés. Une file dépassant la limite ou une page intermédiaire incomplète produit une erreur, pas un résultat partiel présenté comme complet. Une file évoluant pendant la pagination ne constitue pas un instantané atomique.
 
 Un premier appel avec ID0 vérifie la disponibilité du plan avant la recherche distante. À l’import, les paquets annonçant minCore0.0.65 sont contrôlés pour les deux connecteurs, avec et sans ressource ; chaque résultat est également validé à l’exécution. Aucun plan natif de secours. Les contrôles de fichiers locaux, quotas de cadence, réglages persistants et prévisualisations restent encore dans le serveur ; cette étape ne rend pas le connecteur entièrement autonome.
+
+### Réglages persistants — 0.0.66
+
+L’adaptateur hôte `extension-kit/acquisitionconfig` utilise maintenant le stockage commun des extensions. Il est séparé des types compilés dans le Wasm : aucun accès SQL ni clé ne devient disponible au programme invité. Le protocole du composant reste compatible avec la version 0.7.0. Voir [le contrat de stockage](../../../acquisitionconfig/README.md).

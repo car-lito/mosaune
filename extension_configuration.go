@@ -20,6 +20,11 @@ type configurationBinding struct {
 }
 
 func (c *catalog) configurationFor(id string) (configurationBinding, bool) {
+	// Connector settings belong to a shared capability. They must pass through
+	// its destination checks, never the generic module settings write endpoint.
+	if id == "mosaune.acquisition.radarr" || id == "mosaune.acquisition.sonarr" {
+		return configurationBinding{}, false
+	}
 	if id != bundled.Descriptor().ID {
 		// Only a host-registered installed module may expose its settings. A
 		// guessed owner ID or a row alone cannot create an accessible extension.

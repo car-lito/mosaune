@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	cfg "mosaune/extensionkit/acquisitionconfig"
 	a "mosaune/extensionkit/capabilities/acquisition/v1"
-	"net/url"
 	"strconv"
 	"strings"
 )
@@ -42,6 +42,7 @@ func (p *tmdbProvider) AcquisitionID(ctx context.Context, secret, kind, id strin
 }
 
 type arrConfig struct {
+	revision     int64
 	owner        *catalog
 	planChecksum string
 	ID           string `json:"id"`
@@ -63,15 +64,7 @@ func arrKind(id string) string {
 	}
 	return ""
 }
-func cleanArrURL(raw string) (string, error) {
-	u, e := url.Parse(strings.TrimSpace(raw))
-	if e != nil || u.Hostname() == "" || (u.Scheme != "http" && u.Scheme != "https") || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
-		return "", errors.New("Indiquez l’URL HTTP ou HTTPS du service, sans clé, identifiants ni paramètres.")
-	}
-	u.Path = strings.TrimSuffix(strings.TrimRight(u.Path, "/"), "/api/v3")
-	u.RawPath = ""
-	return strings.TrimRight(u.String(), "/"), nil
-}
+func cleanArrURL(raw string) (string, error) { return cfg.NormalizeAddress(raw) }
 
 type arrClient struct{ config arrConfig }
 type arrObject map[string]any

@@ -32,3 +32,7 @@ Les formulaires envoient la révision affichée. En cas de conflit, l’administ
 ## Vérifications
 
 Les tests utilisent SQLite et des clés factices : propriétaires isolés, réouverture de la base, réponses sans secrets, refus des changements de type, corruption conservée plutôt que réinitialisée, concurrence, écritures sans effet partiel, migrations réussies et refusées, échec de mise à jour annulant archive et registre, conservation de la clé lors du retrait du paquet et routes génériques réservées à l’administrateur.
+
+## Consommateurs acquisition — 0.0.66
+
+Les connexions Radarr et Sonarr utilisent désormais ce stockage via `acquisitionconfig`, avec des propriétaires de capacité partagés entre implémentations. L’adaptateur hôte contrôle leurs accès ; les routes génériques de configuration ne peuvent pas modifier ces propriétaires. `ReadWithSecret` fournit à un service de confiance une valeur secrète et son état public issus de la même lecture SQL, pour éviter de mélanger une ancienne destination et une nouvelle clé. Il ne doit jamais être exposé aux modules ou sérialisé dans une réponse HTTP.

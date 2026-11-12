@@ -130,7 +130,7 @@ func TestAcquisitionSettingsAPI(t *testing.T) {
 		t.Fatal("secret lost", err)
 	}
 	var stored string
-	if err = c.db.QueryRow("SELECT data FROM acquisition_settings WHERE id=?", cfg.ID).Scan(&stored); err != nil {
+	if err = c.db.QueryRow("SELECT values_json FROM extension_configuration WHERE owner=?", "mosaune.acquisition."+cfg.ID).Scan(&stored); err != nil {
 		t.Fatal(err)
 	}
 	if strings.Contains(stored, "formRevision") || strings.Contains(stored, "instructions") {

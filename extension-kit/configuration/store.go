@@ -174,13 +174,16 @@ func (b Bound) Read(ctx context.Context) (State, error) {
 	if err != nil {
 		return State{}, err
 	}
+	return publicState(v), nil
+}
+func publicState(v stored) State {
 	state := State{Schema: v.schema, Revision: v.revision, Values: v.values, SecretsConfigured: map[string]bool{}}
 	for _, f := range v.schema.Fields {
 		if f.Type == "secret" {
 			_, state.SecretsConfigured[f.ID] = v.secrets[f.ID]
 		}
 	}
-	return state, nil
+	return state
 }
 func (b Bound) Apply(ctx context.Context, patch Patch) error {
 	v, err := b.load(ctx)
@@ -250,4 +253,23 @@ func (b Bound) Remove(ctx context.Context, revision int64) error {
 		return ErrConflict
 	}
 	return nil
+}
+
+// ReadWithSecret is host-only: one snapshot prevents pairing an old destination
+// with a newly changed credential. Never expose this method to a guest or API.
+func (b Bound) ReadWithSecret(ctx context.Context, field string) (State, string, error) {
+	v, err := b.load(ctx)
+	if err != nil {
+		return State{}, "", err
+	}
+	for _, f := range v.schema.Fields {
+		if f.ID == field && f.Type == "secret" {
+			var secret string
+			if raw, ok := v.secrets[field]; ok && json.Unmarshal(raw, &secret) != nil {
+				return State{}, "", ErrStored
+			}
+			return publicState(v), secret, nil
+		}
+	}
+	return State{}, "", errors.New("unknown secret field")
 }

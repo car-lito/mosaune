@@ -44,11 +44,16 @@ func (client arrClient) settingsForm(ctx context.Context) (a.Settings, string, e
 	if err != nil {
 		return form, "", err
 	}
-	b, _ := json.Marshal([]any{s.checksum, client.config.ID, form})
-	hash := sha256.Sum256(b)
-	return form, hex.EncodeToString(hash[:]), nil
+	return form, acquisitionFormRevision(ctx, client.config.ID, form, client.config.revision), nil
 }
 func (c *catalog) acquisitionSettings(ctx context.Context, cfg arrConfig) acquisitionSettingsView {
+	// Bind displayed values and their stamp to the same stored snapshot.
+	current, err := c.arrConfig(ctx, cfg.ID)
+	if err != nil {
+		cfg.Key = ""
+		return acquisitionSettingsView{arrConfig: cfg, FormError: "Réglages indisponibles."}
+	}
+	cfg = current
 	cfg.Key = ""
 	view := acquisitionSettingsView{arrConfig: cfg}
 	client := arrClient{cfg}
@@ -65,4 +70,14 @@ func (c *catalog) acquisitionSettings(ctx context.Context, cfg arrConfig) acquis
 		view.FormError = err.Error()
 	}
 	return view
+}
+
+func acquisitionFormRevision(ctx context.Context, id string, form a.Settings, revision int64) string {
+	s, ok := ctx.Value(acquisitionSessionKey{}).(*acquisitionSession)
+	if !ok {
+		return ""
+	}
+	b, _ := json.Marshal([]any{s.checksum, id, form, revision})
+	hash := sha256.Sum256(b)
+	return hex.EncodeToString(hash[:])
 }

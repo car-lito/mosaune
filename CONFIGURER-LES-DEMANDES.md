@@ -86,3 +86,5 @@ Depuis la 0.0.63, le composant de demandes doit aussi déclarer les formats des 
 Depuis la 0.0.64, l’envoi nécessite aussi le programme du composant fourni 0.6.0 ou d’un remplaçant compatible. Les anciens remplaçants sans cette fonction doivent être mis à jour ; Mosaune ne se substitue pas à eux pour envoyer une demande.
 
 Depuis la0.0.65, le suivi nécessite le composant fourni0.7.0 ou un remplaçant proposant `observation-plan`. Les anciennes versions officielles intactes sont mises à jour en conservant leur état ; les composants retirés ou personnalisés ne sont pas remplacés. Si une limite de collecte est dépassée, le suivi signale une erreur et conserve les demandes, sans renvoyer de téléchargement.
+
+En 0.0.66, vos réglages sont migrés automatiquement vers le stockage commun des extensions. Si un autre onglet a enregistré des changements ou mis le connecteur en pause, rechargez le formulaire avant de sauvegarder. Une clé laissée vide est conservée uniquement si l’adresse normalisée reste identique. Aucun nouveau réglage ni paquet à installer pour cette migration.

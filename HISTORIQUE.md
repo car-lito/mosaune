@@ -1,3 +1,7 @@
+## 0.0.66 — réglages des connecteurs dans le stockage commun
+
+Radarr et Sonarr utilisent désormais `extension_configuration`, via un adaptateur hôte partagé dans le kit. Migration 46 atomique, retrait des anciennes copies de clés, conservation des destinations et de la pause, refus des données incompatibles et des conflits. Adresse et clé sont lues dans un même instantané. Le formulaire inclut la révision des réglages : une autre sauvegarde ou une pause invalide les anciens formulaires. Aucun secret transmis au programme invité. Le module acquisition 0.7.0 et les familles 14.x restent compatibles et ne sont pas republiés. Les prévisualisations, le rapprochement local et la suppression définitive des réglages partagés restent à découpler.
+
 ## 0.0.65 — collecte du suivi pilotée par le composant installé
 
 Le composant acquisition 0.7.0 fournit un plan de lectures borné : épisodes, saisons et pagination de la file. Les objets privés sont projetés en observations typées par le contrat commun côté hôte. Limites dépassées et pages intermédiaires incomplètes arrêtent le suivi ; aucun repli natif si le composant est ancien. Migration45 conservant retraits, désactivations et remplacements ; familles14.0/14.1. Le stockage des réglages, les prévisualisations et le rapprochement local restent à extraire. Le budget global des tests du serveur passe de20 à30minutes : la suite Windows précédente avait atteint sa limite globale pendant un test lancé depuis4secondes, sans échec d’assertion signalé.
