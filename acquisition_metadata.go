@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
+	policy "mosaune/extensionkit/capabilities/acquisition/v1"
 	"path"
 	"strings"
 )
@@ -32,46 +34,97 @@ func mappedImport(root, dir, file string) (string, bool) {
 	}
 	return relative, true
 }
-func (c *catalog) prioritizeImport(ctx context.Context, a arrClient, v acquisitionRequest, obj arrObject, episodes []arrObject) error {
+func readAcquisitionImports(ctx context.Context, r *cataloguer, q policy.PreviewQuery) (policy.ImportPlan, error) {
+	var p policy.ImportPlan
+	if err := r.call(ctx, "import-plan", q, &p); err != nil {
+		return p, errors.New("Mettez à jour le composant de demandes pour associer les fichiers importés.")
+	}
+	return p, p.Validate(q)
+}
+func (c *catalog) prioritizeImport(ctx context.Context, client arrClient, v acquisitionRequest, obj arrObject, episodes []arrObject) error {
+	client.config.owner = c
+	ctx, done, err := client.openSession(ctx)
+	if err != nil {
+		return err
+	}
+	defer done()
+	session := ctx.Value(acquisitionSessionKey{}).(*acquisitionSession)
+	reader, err := loadFactProjector(ctx, session.descriptor, session.code, policy.Capability)
+	if err != nil {
+		return err
+	}
+	defer reader.engine.Close()
+	scope := policy.PreviewQuery{Kind: v.Kind, Season: v.Season}
+	plan, err := readAcquisitionImports(ctx, reader, scope)
+	if err != nil {
+		return err
+	}
+	if plan.Mode == "deferred" {
+		return nil
+	}
 	root := v.Root
-	if root == "" && v.Library == a.config.Library {
-		root = a.config.Root
-	} // pre-0.0.11 requests
+	if root == "" && v.Library == client.config.Library {
+		root = client.config.Root
+	}
 	dir := word(obj["path"])
 	if _, ok := mappedImport(root, dir, "probe"); !ok {
 		return nil
 	}
+	var files []map[string]any
 	if v.Kind == "films" {
-		file, _ := obj["movieFile"].(map[string]any)
-		if rel, ok := mappedImport(root, dir, word(file["relativePath"])); ok {
-			return c.prioritizeMedia(ctx, v.Library, rel, v.WorkID, 0, 0)
+		if f, ok := obj["movieFile"].(map[string]any); ok {
+			files = append(files, f)
 		}
-		return nil
 	}
-	var files []arrObject
-	if err := a.exchange(ctx, "episodefiles", v.RemoteID, 0, nil, &files); err != nil {
+	for _, op := range plan.Reads {
+		if err = client.exchange(ctx, op, v.RemoteID, 0, nil, &files); err != nil {
+			return err
+		}
+	}
+	rows := make([]map[string]any, len(episodes))
+	for i := range episodes {
+		rows[i] = episodes[i]
+	}
+	candidates, err := policy.ProjectImportCandidates(scope, rows, files)
+	if err != nil {
 		return err
 	}
-	for _, file := range files {
-		matches := []arrObject{}
-		for _, ep := range episodes {
-			if truth(ep["hasFile"]) && number(ep["episodeFileId"]) > 0 && number(ep["episodeFileId"]) == number(file["id"]) {
-				matches = append(matches, ep)
-			}
+	paths := map[int]string{}
+	pathCounts := map[string]int{}
+	facts := []policy.ImportCandidate{}
+	for _, candidate := range candidates {
+		if rel, ok := mappedImport(root, dir, word(files[candidate.Slot]["relativePath"])); ok {
+			paths[candidate.Slot] = rel
+			pathCounts[rel]++
 		}
-		// Multi-episode files need the normal multi-episode review, not one guessed identity.
-		if len(matches) != 1 {
-			continue
+	}
+	for _, candidate := range candidates {
+		if rel, ok := paths[candidate.Slot]; ok && pathCounts[rel] == 1 {
+			facts = append(facts, candidate)
 		}
-		ep := matches[0]
-		season := number(ep["seasonNumber"])
-		if v.Season >= 0 && v.Season != season {
-			continue
+	}
+	query := policy.ImportQuery{Scope: scope, Candidates: facts}
+	if err = query.Validate(); err != nil {
+		return err
+	}
+	var selected policy.ImportResult
+	if err = reader.call(ctx, "match-imports", query, &selected); err != nil {
+		return err
+	}
+	if err = selected.Validate(query, plan); err != nil {
+		return err
+	}
+	bySlot := map[int]policy.ImportCandidate{}
+	for _, f := range facts {
+		bySlot[f.Slot] = f
+	}
+	for _, slot := range selected.Slots {
+		if err = ctx.Err(); err != nil {
+			return err
 		}
-		if rel, ok := mappedImport(root, dir, word(file["relativePath"])); ok {
-			if err := c.prioritizeMedia(ctx, v.Library, rel, v.WorkID, season, number(ep["episodeNumber"])); err != nil {
-				return err
-			}
+		f := bySlot[slot]
+		if err = c.prioritizeMedia(ctx, v.Library, paths[slot], v.WorkID, f.Season, f.Episode); err != nil {
+			return err
 		}
 	}
 	return nil

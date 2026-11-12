@@ -85,3 +85,14 @@ L’adaptateur hôte `extension-kit/acquisitionconfig` utilise maintenant le sto
 Le serveur valide le plan puis exécute ses lectures avec le transport installé. `PreviewPlan.Project` tourne côté hôte : destination/profil existants pour une ressource connue, valeurs configurées pour une nouvelle ; saisons uniques, entières, bornées et limitées à la demande, triées pour un aperçu stable. Les clés et objets privés ne traversent pas le module. Une réponse de lookup contenant un identifiant interne déjà attribué est refusée pour éviter de confondre création et mise à jour.
 
 Chaque plan est validé à l’exécution ; un paquet minCore0.0.67 est testé à l’import pour films, série entière et saison. Un ancien paquet peut être conservé mais ne prépare plus de demande sans cette opération. La confirmation est recalculée avant l’envoi et lie l’œuvre, le périmètre, les destinations, le programme et la révision des réglages. La bibliothèque locale, les permissions, la résolution d’identité du fournisseur et les identifiants secrets restent des responsabilités hôte. Les aperçus ne réalisent aucune écriture distante.
+
+## Association des imports (cœur 0.0.68)
+
+Le composant acquisition 0.9.0 ajoute deux opérations :
+
+- `import-plan` reçoit PreviewQuery (kind/season) et fournit ImportPlan v1 : mode `verified` ou `deferred`, limit 1..5000, reads vide sauf `episodefiles` pour les séries en mode verified.
+- `match-imports` reçoit ImportQuery : scope et candidats (slot, season, episode). Retour ImportResult avec les slots choisis. Le composant peut choisir un sous-ensemble ou différer l’association.
+
+Les chemins, adresses, identifiants distants, clés et objets réseau restent dans l’hôte. ProjectImportCandidates est une réduction de preuves exécutée côté hôte, pas dans le module. Les fichiers/épisodes sont plafonnés à 5000 ; les identifiants de fichiers ou d’épisodes ambigus et fichiers multi-épisodes sont exclus. Les chemins sont vérifiés dans la destination exacte, les doublons de chemins exclus. Aucune sortie ne peut créer un candidat, choisir une autre saison ou répéter un slot. La session d’extension est annulable, et le protocole est vérifié à l’import des paquets minCore >=0.0.68 et à l’exécution. Aucun repli natif.
+
+La famille conserve le même composant partagé, sans nouvelle carte visible. Les opérations physiques sur les fichiers et la vérification finale de leur disponibilité restent sous contrôle du serveur. Le contrat est encore limité aux objets canoniques films/séries ; il ne constitue pas un connecteur universel.

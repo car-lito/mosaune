@@ -72,6 +72,28 @@ func main() {
 		if r.Capability != a.Capability {
 			return fail()
 		}
+		if r.Operation == "import-plan" {
+			var q a.PreviewQuery
+			if protocol.DecodeOne(r.Payload, &q) != nil {
+				return fail()
+			}
+			p, err := importPlan(q)
+			if err != nil {
+				return fail()
+			}
+			return p, nil
+		}
+		if r.Operation == "match-imports" {
+			var q a.ImportQuery
+			if protocol.DecodeOne(r.Payload, &q) != nil {
+				return fail()
+			}
+			p, err := matchImports(q)
+			if err != nil {
+				return fail()
+			}
+			return p, nil
+		}
 		if r.Operation == "preparation-plan" {
 			var q a.PreviewQuery
 			if protocol.DecodeOne(r.Payload, &q) != nil {

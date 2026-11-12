@@ -223,7 +223,7 @@ func TestAcquisitionPriorityUsesExactPath(t *testing.T) {
 	c.providers = []MetadataProvider{p}
 	cfg := arrConfig{Library: l.ID, Root: "/movies"}
 	obj := arrObject{"path": "/movies/Arrival", "movieFile": map[string]any{"relativePath": "opaque.mp4"}}
-	if e = c.prioritizeImport(ctx, arrClient{cfg}, acquisitionRequest{Library: l.ID, WorkID: work, Kind: "films", Root: "/movies"}, obj, nil); e != nil {
+	if e = c.prioritizeImport(ctx, arrClient{cfg}, acquisitionRequest{Library: l.ID, WorkID: work, Kind: "films", Season: -1, Root: "/movies"}, obj, nil); e != nil {
 		t.Fatal(e)
 	}
 	c.metadataStep(ctx, allKinds)

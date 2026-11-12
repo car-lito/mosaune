@@ -108,6 +108,22 @@ func validateExtractionCode(ctx context.Context, p packageformat.Executable) err
 					}
 				}
 			}
+			if err == nil && packageformat.Compare(p.Manifest.MinCore, "0.0.68") >= 0 {
+				for _, query := range []a.PreviewQuery{{Kind: "films", Season: -1}, {Kind: "series", Season: 1}} {
+					var plan a.ImportPlan
+					if plan, err = readAcquisitionImports(ctx, reader, query); err != nil {
+						break
+					}
+					q := a.ImportQuery{Scope: query, Candidates: []a.ImportCandidate{}}
+					var out a.ImportResult
+					if err = reader.call(ctx, "match-imports", q, &out); err != nil {
+						break
+					}
+					if err = out.Validate(q, plan); err != nil {
+						break
+					}
+				}
+			}
 			reader.engine.Close()
 		}
 		return err

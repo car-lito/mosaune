@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 12 novembre 2026 · étape 0.0.67.
+État du 13 novembre 2026 · étape 0.0.68.
 
-**Environ 87 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 88 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -91,7 +91,8 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [x] 0.0.65 — plan de collecte du suivi installé, limites contrôlées, projection privée dans le contrat commun et absence de repli natif.
 - [x] 0.0.66 — stockage commun des réglages, séparation des secrets, migration atomique, lecture cohérente et protection contre les formulaires périmés.
 - [x] 0.0.67 — préparation des aperçus pilotée par le composant installé : lectures bornées, politique des ressources absentes, libellés, destinations et saisons vérifiées côté hôte.
-- [ ] Achever le rapprochement local, le retrait définitif des réglages partagés et l’indépendance des connecteurs.
+- [x] 0.0.68 — association des imports pilotée par le composant installé, candidats bornés sans chemins privés, refus des ambiguïtés et des choix hors saison.
+- [ ] Achever la vérification de disponibilité locale, le retrait définitif des réglages partagés et l’indépendance des connecteurs.
 
 - [x] **0.0.62 :** formulaires déclaratifs, guides, ordre des champs, limites de saisie et rejet des formulaires périmés. Même composant partagé, sans nouvelle extension visible.
 

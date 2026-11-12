@@ -1,3 +1,7 @@
+## 0.0.68 — association des imports extensible
+
+Acquisition 0.9.0 expose un plan de lecture des fichiers importés et une sélection de candidats sans chemins privés. L’hôte vérifie les chemins, identités, doublons et saisons avant toute priorité de métadonnées. Les fichiers multi-épisodes restent confiés à la vérification habituelle. Migration conservatrice 48, familles 16.x ; remplacement, désactivation et absence de protocole testés. La vérification finale de disponibilité locale et l’autonomie complète des connecteurs restent à achever.
+
 ## 0.0.67 — préparation des demandes pilotée par l’extension
 
 Acquisition 0.8.0 déclare le connecteur, l’ordre des lectures préalables, la recherche ou le refus des médias absents et les libellés de secours. Le plan est exigé avant tout appel distant de préparation. Le contrat commun résout côté hôte la destination privée et les saisons exactes ; identifiants, profils ou saisons incohérents sont refusés. La confirmation inclut aussi la révision persistante des réglages. Migration47 conservatrice, familles15.0/15.1. Les anciens remplaçants sans préparation doivent être mis à jour, sans repli natif. Le rapprochement des fichiers locaux, le retrait définitif des réglages et la généralisation à d’autres connecteurs restent à terminer.
