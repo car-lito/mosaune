@@ -80,11 +80,7 @@ func number(v any) int {
 func truth(v any) bool  { b, _ := v.(bool); return b }
 func word(v any) string { s, _ := v.(string); return s }
 
-type arrOption struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Path string `json:"path"`
-}
+type arrOption = a.Choice
 type arrOptions struct {
 	Profiles []arrOption `json:"profiles"`
 	Roots    []arrOption `json:"roots"`

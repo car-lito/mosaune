@@ -72,6 +72,17 @@ func main() {
 		if r.Capability != a.Capability {
 			return fail()
 		}
+		if r.Operation == "preparation-plan" {
+			var q a.PreviewQuery
+			if protocol.DecodeOne(r.Payload, &q) != nil {
+				return fail()
+			}
+			p, err := previewPlan(q)
+			if err != nil {
+				return fail()
+			}
+			return p, nil
+		}
 		if r.Operation == "observation-plan" {
 			var q a.ObservationQuery
 			if protocol.DecodeOne(r.Payload, &q) != nil {

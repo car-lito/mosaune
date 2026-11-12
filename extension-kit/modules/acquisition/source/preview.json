@@ -1,0 +1,4 @@
+{
+ "films":{"version":1,"connector":"radarr","reads":["status","profiles","roots","find"],"missing":"lookup","missingMessage":"Ce composant accepte uniquement les films déjà présents dans le service.","seasonMessage":"Cette saison n’est pas référencée dans le service.","profilePrefix":"Profil #"},
+ "series":{"version":1,"connector":"sonarr","reads":["status","profiles","roots","find"],"missing":"lookup","missingMessage":"Ce composant accepte uniquement les séries déjà présentes dans le service.","seasonMessage":"Cette saison n’est pas référencée dans Sonarr.","profilePrefix":"Profil #"}
+}

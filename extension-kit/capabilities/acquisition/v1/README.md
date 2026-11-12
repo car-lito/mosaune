@@ -74,3 +74,14 @@ Un premier appel avec ID0 vérifie la disponibilité du plan avant la recherche 
 ### Réglages persistants — 0.0.66
 
 L’adaptateur hôte `extension-kit/acquisitionconfig` utilise maintenant le stockage commun des extensions. Il est séparé des types compilés dans le Wasm : aucun accès SQL ni clé ne devient disponible au programme invité. Le protocole du composant reste compatible avec la version 0.7.0. Voir [le contrat de stockage](../../../acquisitionconfig/README.md).
+
+
+### Préparation de l’aperçu — serveur 0.0.67 / composant 0.8.0
+
+`preparation-plan(PreviewQuery{kind,season}) → PreviewPlan` est appelé avant la résolution d’identité et les échanges avec le service. Le programme ne reçoit ni chemins, ni titres, ni profils, ni clé. Le plan doit annoncer version1 et le connecteur compatible avec le média : radarr pour films, sonarr pour séries. Le protocole reste limité à ces deux familles de services.
+
+`reads` contient exactement status, profiles, roots et find, sans doublons, avec status en premier. Les trois autres lectures peuvent changer d’ordre. `missing` vaut lookup ou reject : la deuxième politique refuse les ressources absentes sans lancer de recherche de fiche ni aucun ajout. Les textes missingMessage, seasonMessage et profilePrefix sont bornés, sans HTML exécuté. Le composant fourni déclare ces choix dans `source/preview.json` ; un remplaçant peut calculer un plan selon le média et la saison demandés.
+
+Le serveur valide le plan puis exécute ses lectures avec le transport installé. `PreviewPlan.Project` tourne côté hôte : destination/profil existants pour une ressource connue, valeurs configurées pour une nouvelle ; saisons uniques, entières, bornées et limitées à la demande, triées pour un aperçu stable. Les clés et objets privés ne traversent pas le module. Une réponse de lookup contenant un identifiant interne déjà attribué est refusée pour éviter de confondre création et mise à jour.
+
+Chaque plan est validé à l’exécution ; un paquet minCore0.0.67 est testé à l’import pour films, série entière et saison. Un ancien paquet peut être conservé mais ne prépare plus de demande sans cette opération. La confirmation est recalculée avant l’envoi et lie l’œuvre, le périmètre, les destinations, le programme et la révision des réglages. La bibliothèque locale, les permissions, la résolution d’identité du fournisseur et les identifiants secrets restent des responsabilités hôte. Les aperçus ne réalisent aucune écriture distante.

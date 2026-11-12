@@ -20,6 +20,7 @@ type fakeArr struct {
 	id           string
 	object       arrObject
 	writes       []string
+	reads        []string
 	queue        []arrObject
 	episodes     []arrObject
 	episodeFiles []arrObject
@@ -47,6 +48,8 @@ func (f *fakeArr) handler(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Method != "GET" {
 		f.writes = append(f.writes, r.Method+" "+path)
+	} else {
+		f.reads = append(f.reads, path)
 	}
 	var output any = map[string]any{}
 	switch {

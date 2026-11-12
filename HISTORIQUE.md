@@ -1,3 +1,7 @@
+## 0.0.67 — préparation des demandes pilotée par l’extension
+
+Acquisition 0.8.0 déclare le connecteur, l’ordre des lectures préalables, la recherche ou le refus des médias absents et les libellés de secours. Le plan est exigé avant tout appel distant de préparation. Le contrat commun résout côté hôte la destination privée et les saisons exactes ; identifiants, profils ou saisons incohérents sont refusés. La confirmation inclut aussi la révision persistante des réglages. Migration47 conservatrice, familles15.0/15.1. Les anciens remplaçants sans préparation doivent être mis à jour, sans repli natif. Le rapprochement des fichiers locaux, le retrait définitif des réglages et la généralisation à d’autres connecteurs restent à terminer.
+
 ## 0.0.66 — réglages des connecteurs dans le stockage commun
 
 Radarr et Sonarr utilisent désormais `extension_configuration`, via un adaptateur hôte partagé dans le kit. Migration 46 atomique, retrait des anciennes copies de clés, conservation des destinations et de la pause, refus des données incompatibles et des conflits. Adresse et clé sont lues dans un même instantané. Le formulaire inclut la révision des réglages : une autre sauvegarde ou une pause invalide les anciens formulaires. Aucun secret transmis au programme invité. Le module acquisition 0.7.0 et les familles 14.x restent compatibles et ne sont pas republiés. Les prévisualisations, le rapprochement local et la suppression définitive des réglages partagés restent à découpler.

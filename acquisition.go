@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	a "mosaune/extensionkit/acquisitionconfig"
+	policy "mosaune/extensionkit/capabilities/acquisition/v1"
 	"mosaune/extensionkit/configuration"
 	"net/http"
 	"strconv"
@@ -139,11 +140,18 @@ func (c *catalog) previewRequest(ctx context.Context, in requestInput) (requestP
 	if err != nil || !videoKind(w.Kind) || in.Season < -1 || in.Season > 1000 || (w.Kind == "films" && in.Season != -1) {
 		return p, cfg, obj, w, 0, errors.New("Œuvre ou saison invalide.")
 	}
-	cfgID := "radarr"
-	if w.Kind == "series" {
-		cfgID = "sonarr"
+	query := policy.PreviewQuery{Kind: w.Kind, Season: in.Season}
+	probe := arrClient{arrConfig{owner: c}}
+	ctx, done, err := probe.openSession(ctx)
+	if err != nil {
+		return p, cfg, obj, w, 0, err
 	}
-	cfg, err = c.arrConfig(ctx, cfgID)
+	defer done()
+	plan, err := probe.previewPlan(ctx, query)
+	if err != nil {
+		return p, cfg, obj, w, 0, err
+	}
+	cfg, err = c.arrConfig(ctx, plan.Connector)
 	if err != nil {
 		return p, cfg, obj, w, 0, err
 	}
@@ -162,52 +170,20 @@ func (c *catalog) previewRequest(ctx context.Context, in requestInput) (requestP
 	if err != nil {
 		return p, cfg, obj, w, 0, err
 	}
-	a := arrClient{cfg}
-	ctx, done, err := a.openSession(ctx)
-	if err != nil {
-		return p, cfg, obj, w, 0, err
-	}
-	defer done()
+	client := arrClient{cfg}
 	cfg.planChecksum = ctx.Value(acquisitionSessionKey{}).(*acquisitionSession).checksum
-	opt, err := a.options(ctx)
+	obj, opt, existing, err := client.previewResource(ctx, query, plan, external)
 	if err != nil {
 		return p, cfg, obj, w, 0, err
 	}
-	obj, err = a.find(ctx, external)
+	destination, err := plan.Project(query, existing, policy.Bindings{Root: cfg.Root, Profile: cfg.Profile}, obj, opt.Profiles)
 	if err != nil {
 		return p, cfg, obj, w, 0, err
 	}
-	existing := obj != nil
-	if !existing {
-		if !validChoices(cfg, opt) {
-			return p, cfg, obj, w, 0, errors.New("Le profil ou le dossier n’existe plus dans le service. Actualisez les réglages.")
-		}
-		obj, err = a.lookup(ctx, external)
-		if err != nil {
-			return p, cfg, obj, w, 0, err
-		}
-	}
-	p = requestPreview{Title: w.Metadata.Title, Connector: cfg.ID, Root: cfg.Root, Library: l.Name, Existing: existing, Seasons: []int{}}
-	profile := cfg.Profile
-	if existing {
-		p.Root = word(obj["path"])
-		profile = number(obj["qualityProfileId"])
-	}
-	p.Profile = "Profil #" + strconv.Itoa(profile)
-	for _, o := range opt.Profiles {
-		if o.ID == profile {
-			p.Profile = o.Name
-		}
-	}
-	if w.Kind == "series" {
-		p.Seasons = selectedSeasons(obj, in.Season)
-		if len(p.Seasons) == 0 {
-			return p, cfg, obj, w, 0, errors.New("Cette saison n’est pas référencée dans Sonarr.")
-		}
-	}
+	p = requestPreview{Title: w.Metadata.Title, Connector: cfg.ID, Root: destination.Root, Profile: destination.Profile, Library: l.Name, Existing: existing, Seasons: destination.Seasons}
 	// The confirmation describes the exact destination and scope. Re-read before
 	// submitting, rejecting a changed configuration instead of using stale UI data.
-	b, _ := json.Marshal([]any{cfg, cfg.planChecksum, in.WorkID, in.Season, external, number(obj["id"]), p})
+	b, _ := json.Marshal([]any{cfg, cfg.revision, cfg.planChecksum, in.WorkID, in.Season, external, number(obj["id"]), p})
 	sum := sha256.Sum256(b)
 	p.Confirmation = hex.EncodeToString(sum[:])
 	return p, cfg, obj, w, external, nil

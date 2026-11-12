@@ -1,3 +1,5 @@
+Version 0.0.67 — l’extension de demandes pilote aussi la préparation des aperçus avant confirmation. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
+
 Version 0.0.66 — les connecteurs utilisent le stockage commun des réglages d’extensions ; les formulaires périmés sont refusés. [Détails](extension-kit/acquisitionconfig/README.md).
 
 Version 0.0.65 — le composant partagé pilote aussi les lectures nécessaires au suivi Radarr/Sonarr et leurs limites. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
