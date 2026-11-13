@@ -124,6 +124,13 @@ func validateExtractionCode(ctx context.Context, p packageformat.Executable) err
 					}
 				}
 			}
+			if err == nil && packageformat.Compare(p.Manifest.MinCore, "0.0.69") >= 0 {
+				for _, kind := range []string{"films", "series"} {
+					if _, err = readAcquisitionAvailability(ctx, reader, a.AvailabilityQuery{Scope: a.PreviewQuery{Kind: kind, Season: -1}}); err != nil {
+						break
+					}
+				}
+			}
 			reader.engine.Close()
 		}
 		return err

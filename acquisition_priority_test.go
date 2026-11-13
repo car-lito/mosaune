@@ -72,6 +72,14 @@ func TestAcquisitionImportedFileBackgroundAvailability(t *testing.T) {
 			if r.Code != 200 || r.Body.String() != "readable media fixture" {
 				t.Fatal(r.Code, r.Body.String())
 			}
+			// Metadata alone is not proof: a file removed after identification must
+			// stop contributing even before the next library scan.
+			if e = os.Remove(filepath.Join(l.Path, "Arrival", "opaque.mp4")); e != nil {
+				t.Fatal(e)
+			}
+			if e = c.syncRequest(ctx, cfg, &v, allKinds); e != nil || v.Local != 0 || v.State == "available" {
+				t.Fatal("missing file still available", v, e)
+			}
 			if len(f.writes) != 1 {
 				t.Fatal("background tracking wrote to service", f.writes)
 			}

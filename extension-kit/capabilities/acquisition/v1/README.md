@@ -96,3 +96,11 @@ Le composant acquisition 0.9.0 ajoute deux opérations :
 Les chemins, adresses, identifiants distants, clés et objets réseau restent dans l’hôte. ProjectImportCandidates est une réduction de preuves exécutée côté hôte, pas dans le module. Les fichiers/épisodes sont plafonnés à 5000 ; les identifiants de fichiers ou d’épisodes ambigus et fichiers multi-épisodes sont exclus. Les chemins sont vérifiés dans la destination exacte, les doublons de chemins exclus. Aucune sortie ne peut créer un candidat, choisir une autre saison ou répéter un slot. La session d’extension est annulable, et le protocole est vérifié à l’import des paquets minCore >=0.0.68 et à l’exécution. Aucun repli natif.
 
 La famille conserve le même composant partagé, sans nouvelle carte visible. Les opérations physiques sur les fichiers et la vérification finale de leur disponibilité restent sous contrôle du serveur. Le contrat est encore limité aux objets canoniques films/séries ; il ne constitue pas un connecteur universel.
+
+## Disponibilité locale (cœur 0.0.69)
+
+Acquisition 0.10.0 expose `local-availability`. AvailabilityQuery contient scope(kind/season), film (preuve d’un film importé et lisible), imported (identités season/number) et files (plages season/first/last des fichiers lisibles). L’hôte conserve bibliothèque, identité fournisseur, chemin et ouverture réelle ; aucun de ces éléments privés ne traverse le module.
+
+AvailabilityResult v1 contient film et episodes. Un composant peut différer la disponibilité ou retourner un sous-ensemble, mais ne peut inventer une identité, compter un doublon ou dépasser la saison demandée. Le validateur vérifie chaque résultat contre les preuves. `Eligible` fusionne les plages puis les intersecte avec les imports : pas d’expansion 0..100000 par fichier, limites 5000 fichiers/imports. Le composant officiel utilise availability.json, mode verified/deferred.
+
+Le protocole est exigé à l’import minCore>=0.0.69 et sondé avant les lectures réseau du suivi, puis validé à chaque calcul réel. La session reste annulable et liée au programme sélectionné. L’installation, la désactivation et la migration49 conservent les choix explicites. L’hôte garde le scan physique et les contrôles d’accès ; les connecteurs restent limités aux objets canoniques films/séries de cette version.

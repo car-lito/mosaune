@@ -26,6 +26,14 @@ func (client arrClient) trackingReader(ctx context.Context) (*cataloguer, error)
 		r.engine.Close()
 		return nil, err
 	}
+	kind := "films"
+	if client.config.ID == "sonarr" {
+		kind = "series"
+	}
+	if _, err = readAcquisitionAvailability(ctx, r, a.AvailabilityQuery{Scope: a.PreviewQuery{Kind: kind, Season: -1}}); err != nil {
+		r.engine.Close()
+		return nil, err
+	}
 	return r, nil
 }
 

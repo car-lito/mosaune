@@ -302,6 +302,10 @@ func openCatalog(dir string) (*catalog, error) {
 		db.Close()
 		return nil, err
 	}
+	if err = migrateAcquisitionAvailability(db); err != nil {
+		db.Close()
+		return nil, err
+	}
 	reader, e := sql.Open("sqlite", filepath.Join(dir, "mosaune.db"))
 	if e != nil {
 		db.Close()

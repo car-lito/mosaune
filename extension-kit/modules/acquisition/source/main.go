@@ -72,6 +72,17 @@ func main() {
 		if r.Capability != a.Capability {
 			return fail()
 		}
+		if r.Operation == "local-availability" {
+			var q a.AvailabilityQuery
+			if protocol.DecodeOne(r.Payload, &q) != nil {
+				return fail()
+			}
+			p, err := localAvailability(q)
+			if err != nil {
+				return fail()
+			}
+			return p, nil
+		}
 		if r.Operation == "import-plan" {
 			var q a.PreviewQuery
 			if protocol.DecodeOne(r.Payload, &q) != nil {

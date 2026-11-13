@@ -1,3 +1,5 @@
+Version 0.0.69 — le composant de demandes calcule aussi la disponibilité locale, à partir des fichiers ouverts et vérifiés par Mosaune. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
+
 Version 0.0.68 — l’extension choisit aussi les fichiers importés à associer, à partir de candidats vérifiés et sans recevoir leurs chemins privés. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
 
 Version 0.0.67 — l’extension de demandes pilote aussi la préparation des aperçus avant confirmation. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).

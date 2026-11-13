@@ -1,3 +1,7 @@
+## 0.0.69 — disponibilité locale pilotée par l’extension
+
+Acquisition 0.10.0 fournit local-availability : elle rapproche les épisodes importés des plages d’épisodes présentes dans les fichiers lisibles. Le serveur conserve les contrôles de bibliothèque, identité et ouverture réelle, puis vérifie que le composant ne réclame aucune disponibilité sans preuve. Calcul borné sans expansion des plages, dédoublonnage et saison exacte. Migration49 conservatrice, familles17.x. Remplacement après redémarrage, désactivation, protocole absent et retrait d’un fichier déjà identifié testés. Les réglages au retrait et l’autonomie complète des connecteurs restent à achever.
+
 ## 0.0.68 — association des imports extensible
 
 Acquisition 0.9.0 expose un plan de lecture des fichiers importés et une sélection de candidats sans chemins privés. L’hôte vérifie les chemins, identités, doublons et saisons avant toute priorité de métadonnées. Les fichiers multi-épisodes restent confiés à la vérification habituelle. Migration conservatrice 48, familles 16.x ; remplacement, désactivation et absence de protocole testés. La vérification finale de disponibilité locale et l’autonomie complète des connecteurs restent à achever.

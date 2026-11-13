@@ -12,7 +12,6 @@ import (
 	policy "mosaune/extensionkit/capabilities/acquisition/v1"
 	"mosaune/extensionkit/configuration"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -511,12 +510,6 @@ func (c *catalog) syncRequest(ctx context.Context, cfg arrConfig, v *acquisition
 	if err = applyAcquisitionTracking(ctx, reader, observations, v); err != nil {
 		return err
 	}
-	importedEpisodes := map[string]bool{}
-	for _, ep := range observations.Episodes {
-		if ep.HasFile && (v.Season < 0 || ep.Season == v.Season) {
-			importedEpisodes[strconv.Itoa(ep.Season)+":"+strconv.Itoa(ep.Number)] = true
-		}
-	}
 	if v.Imported > 0 {
 		c.metadataMu.Lock()
 		defer c.metadataMu.Unlock()
@@ -540,45 +533,9 @@ func (c *catalog) syncRequest(ctx context.Context, cfg arrConfig, v *acquisition
 		if err := c.prioritizeImport(ctx, a, *v, obj, episodes); err != nil {
 			return err
 		}
-		items, e := c.items(ctx)
-		if e != nil {
-			return e
-		}
-		work, e := c.work(ctx, v.WorkID)
-		if e != nil {
-			return e
-		}
-		localEpisodes := map[string]bool{}
-		for _, m := range items {
-			md := m.Metadata
-			if m.LibraryID != v.Library || md == nil || md.Provider != work.Metadata.Provider || md.ProviderID != work.Metadata.ProviderID {
-				continue
-			}
-			f, _, openErr := c.openMedia(ctx, m.ID)
-			if openErr != nil {
-				continue
-			}
-			f.Close()
-			if v.Kind == "films" {
-				v.Local = 1
-				break
-			}
-			if v.Season >= 0 && md.Season != v.Season {
-				continue
-			}
-			end := md.EpisodeEnd
-			if end < md.Episode {
-				end = md.Episode
-			}
-			for n := md.Episode; n <= end; n++ {
-				key := strconv.Itoa(md.Season) + ":" + strconv.Itoa(n)
-				if importedEpisodes[key] {
-					localEpisodes[key] = true
-				}
-			}
-		}
-		if v.Kind == "series" {
-			v.Local = len(localEpisodes)
+		v.Local, err = c.acquisitionAvailability(ctx, reader, *v, observations)
+		if err != nil {
+			return err
 		}
 		observations.Local = v.Local
 		return applyAcquisitionTracking(ctx, reader, observations, v)
