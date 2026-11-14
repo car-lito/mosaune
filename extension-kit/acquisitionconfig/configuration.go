@@ -2,6 +2,7 @@ package acquisitionconfig
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"mosaune/extensionkit/configuration"
@@ -63,6 +64,9 @@ func (s ConfigurationStore) Load(ctx context.Context, id string) (Configuration,
 		return out, err
 	}
 	state, secret, err := b.ReadWithSecret(ctx, "key")
+	if err == sql.ErrNoRows {
+		return out, nil
+	}
 	if err != nil {
 		return out, err
 	}
@@ -84,6 +88,34 @@ func (s ConfigurationStore) Load(ctx context.Context, id string) (Configuration,
 	out.Key = secret
 	out.Configured = out.Key != ""
 	return out, err
+}
+
+// Reconcile runs in the installer's transaction. Disabled implementations still
+// retain these shared settings. A retirement keeps no address, key or library.
+func (s ConfigurationStore) Reconcile(ctx context.Context, retained bool) error {
+	for _, id := range []string{"radarr", "sonarr"} {
+		if retained {
+			if err := s.Register(ctx, id); err != nil {
+				return err
+			}
+			continue
+		}
+		b, err := s.Bound(id)
+		if err != nil {
+			return err
+		}
+		state, err := b.Read(ctx)
+		if err == sql.ErrNoRows {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		if err = b.Remove(ctx, state.Revision); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 func configurationPatch(v Configuration) (configuration.Patch, error) {
 	if _, err := ConfigurationOwner(v.ID); err != nil {

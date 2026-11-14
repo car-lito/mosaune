@@ -51,6 +51,9 @@ func installRecognition(ctx context.Context, tx *sql.Tx, kind string, revision i
 		return registry.Snapshot{}, err
 	}
 	_, err = tx.ExecContext(ctx, `INSERT INTO recognition_packages(kind,id,code) VALUES(?,?,?)`, kind, d.ID, code)
+	if err == nil && kind == "acquisition" {
+		err = reconcileAcquisitionConfiguration(ctx, tx)
+	}
 	return plan.After, err
 }
 
@@ -377,6 +380,11 @@ func changeRecognitionTx(ctx context.Context, tx *sql.Tx, id, operation string, 
 	}
 	if err != nil {
 		return kind, err
+	}
+	if kind == "acquisition" && operation == "remove" {
+		if err = reconcileAcquisitionConfiguration(ctx, tx); err != nil {
+			return kind, err
+		}
 	}
 	return kind, nil
 }

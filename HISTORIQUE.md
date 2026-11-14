@@ -1,3 +1,7 @@
+## 0.0.70 — cycle de vie des réglages partagés
+
+Les configurations Radarr/Sonarr suivent désormais l’installation réelle du composant de demandes : désactivation et remplacement conservent les réglages ; retrait du dernier composant les supprime dans la même transaction. La réinstallation repart sans clé ni destination, avec une révision supérieure pour empêcher la réutilisation des anciens formulaires. Le stockage commun conserve uniquement un compteur technique par propriétaire retiré, aucun secret. Migration50, branchements installation intégrée/import/archives groupées. Catalogues, médias et historique de demandes sont conservés ; aucun téléchargement distant n’est annulé. Protocole acquisition0.10.0 inchangé. Familles18.x publiées : la recompilation d’une dépendance commune change l’empreinte du composant Musique ; les archives précédentes restent immuables.
+
 ## 0.0.69 — disponibilité locale pilotée par l’extension
 
 Acquisition 0.10.0 fournit local-availability : elle rapproche les épisodes importés des plages d’épisodes présentes dans les fichiers lisibles. Le serveur conserve les contrôles de bibliothèque, identité et ouverture réelle, puis vérifie que le composant ne réclame aucune disponibilité sans preuve. Calcul borné sans expansion des plages, dédoublonnage et saison exacte. Migration49 conservatrice, familles17.x. Remplacement après redémarrage, désactivation, protocole absent et retrait d’un fichier déjà identifié testés. Les réglages au retrait et l’autonomie complète des connecteurs restent à achever.

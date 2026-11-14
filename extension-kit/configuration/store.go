@@ -40,7 +40,12 @@ func validOwner(id string) bool {
 	return (protocol.Descriptor{ID: id, Version: "1.0.0", Capabilities: []string{"configuration.owner.v1"}}).Validate() == nil
 }
 func (s SQLStore) Initialize(ctx context.Context) error {
-	_, err := s.DB.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS extension_configuration(owner TEXT PRIMARY KEY,revision INTEGER NOT NULL CHECK(revision>=0),schema_json TEXT NOT NULL,values_json TEXT NOT NULL,secrets_json TEXT NOT NULL)`)
+	_, err := s.DB.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS extension_configuration(owner TEXT PRIMARY KEY,revision INTEGER NOT NULL CHECK(revision>=0),schema_json TEXT NOT NULL,values_json TEXT NOT NULL,secrets_json TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS extension_configuration_epochs(owner TEXT PRIMARY KEY,next_revision INTEGER NOT NULL CHECK(next_revision>=0));
+CREATE TRIGGER IF NOT EXISTS extension_configuration_retirement AFTER DELETE ON extension_configuration BEGIN
+ INSERT INTO extension_configuration_epochs(owner,next_revision) VALUES(OLD.owner,OLD.revision+1)
+ ON CONFLICT(owner) DO UPDATE SET next_revision=MAX(next_revision,excluded.next_revision);
+END;`)
 	return err
 }
 func (s SQLStore) For(owner string) (Bound, error) {
@@ -104,7 +109,7 @@ func (s SQLStore) Register(ctx context.Context, owner string, schema Schema) err
 	}
 	old, err := b.load(ctx)
 	if err == sql.ErrNoRows {
-		r, e := s.DB.ExecContext(ctx, `INSERT INTO extension_configuration(owner,revision,schema_json,values_json,secrets_json) SELECT ?,0,?,'{}','{}' WHERE (SELECT COUNT(*) FROM extension_configuration)<128`, owner, string(next))
+		r, e := s.DB.ExecContext(ctx, `INSERT INTO extension_configuration(owner,revision,schema_json,values_json,secrets_json) SELECT ?,COALESCE((SELECT next_revision FROM extension_configuration_epochs WHERE owner=?),0),?,'{}','{}' WHERE (SELECT COUNT(*) FROM extension_configuration)<128 AND COALESCE((SELECT next_revision FROM extension_configuration_epochs WHERE owner=?),0)<9223372036854775806`, owner, owner, string(next), owner)
 		if e != nil {
 			return e
 		}
@@ -113,7 +118,7 @@ func (s SQLStore) Register(ctx context.Context, owner string, schema Schema) err
 			return e
 		}
 		if n != 1 {
-			return errors.New("configuration capacity reached")
+			return errors.New("configuration capacity or revision limit reached")
 		}
 		return nil
 	}

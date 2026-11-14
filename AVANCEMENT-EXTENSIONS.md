@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 13 novembre 2026 · étape 0.0.69.
+État du 14 novembre 2026 · étape 0.0.70.
 
-**Environ 89 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 90 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -93,7 +93,8 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [x] 0.0.67 — préparation des aperçus pilotée par le composant installé : lectures bornées, politique des ressources absentes, libellés, destinations et saisons vérifiées côté hôte.
 - [x] 0.0.68 — association des imports pilotée par le composant installé, candidats bornés sans chemins privés, refus des ambiguïtés et des choix hors saison.
 - [x] 0.0.69 — calcul de disponibilité locale par le composant installé, preuves de fichiers lisibles, dédoublonnage et validation de chaque résultat.
-- [ ] Achever le retrait définitif des réglages partagés et l’indépendance des connecteurs.
+- [x] 0.0.70 — réglages partagés des connecteurs conservés pour les implémentations installées, supprimés au retrait du dernier composant, réinstallation vide et formulaires anciens refusés.
+- [ ] Achever l’indépendance des connecteurs et la distribution complète des services par famille.
 
 - [x] **0.0.62 :** formulaires déclaratifs, guides, ordre des champs, limites de saisie et rejet des formulaires périmés. Même composant partagé, sans nouvelle extension visible.
 

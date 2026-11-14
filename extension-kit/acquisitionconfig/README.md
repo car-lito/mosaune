@@ -11,3 +11,9 @@ Ce paquet est exécuté par le serveur, jamais dans un programme Wasm. Il raccor
 La pause reste possible sans composant actif. Les configurations des deux connecteurs sont séparées et ne sont pas exposées par l’API générique de configuration des modules. Aucun accès supplémentaire n’est donné au Wasm ; acquisition 0.7.0 et familles 14.x restent inchangés. Les clés sont isolées des réponses publiques mais restent sans chiffrement au repos dans SQLite.
 
 Le retrait définitif du propriétaire lorsque tous ses consommateurs ont disparu reste à raccorder au cycle de désinstallation. Les prévisualisations, le rapprochement local et l’adaptation à de nouveaux types de connecteurs restent également à terminer. Ce raccordement n’est pas une revendication d’indépendance complète des connecteurs.
+
+## Cycle de vie (cœur 0.0.70)
+
+`ConfigurationStore.Reconcile(ctx, retained)` est appelé côté hôte dans la transaction du paquet : retained signifie qu’au moins une implémentation acquisition est installée, activation indifférente. Les deux propriétaires canoniques sont conservés ou supprimés ensemble. Installation intégrée, import et archives groupées enregistrent les schémas ; aucun propriétaire libre n’est accepté du module. Load retourne une configuration vide si le propriétaire est absent, sans le recréer. Save exige toujours un propriétaire enregistré.
+
+Le magasin commun garde un compteur de révision par propriétaire retiré dans extension_configuration_epochs. Un déclencheur SQL l’avance atomiquement lors de la suppression ; aucune adresse, clé ou destination n’y figure. La réinstallation reprend à une révision supérieure. Une suppression annulée n’avance pas le compteur. Les sauvegardes historiques ne sont pas purgées par cette opération.

@@ -192,6 +192,11 @@ func (c *catalog) commitRecognitionImport(ctx context.Context, p packageformat.E
 	if err != nil {
 		return err
 	}
+	if kind == "acquisition" {
+		if err = reconcileAcquisitionConfiguration(ctx, tx); err != nil {
+			return err
+		}
+	}
 	if err = tx.Commit(); err != nil {
 		return err
 	}
