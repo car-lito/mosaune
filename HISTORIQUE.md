@@ -1,3 +1,10 @@
+## 0.0.72 — configuration des fournisseurs par capacité
+
+- Les routes communes de réglages et de clés délèguent à des interfaces optionnelles d’adaptateurs hôte, sans branche spéciale selon le nom TMDB. Un second adaptateur avec un autre propriétaire et un autre champ secret est testé par les routes HTTP.
+- Schéma signé et valeurs publiques lus dans le même instantané. Écritures atomiques, contrôle du paquet courant et de la révision ; chaque remplacement, retrait et réinstallation invalide les anciens formulaires, même avec un schéma identique.
+- Aucun formulaire de remplacement si le paquet est absent ou corrompu. Après retour arrière, les valeurs propres à la version plus récente sont conservées pour une future mise à jour, mais ne sont ni affichées ni modifiables.
+- Aucun nouveau paquet média requis ; les programmes installés restent compatibles. L’adaptateur TMDB consomme encore sa clé partagée : cette étape ne supprime pas les derniers adaptateurs spécialisés ni ne termine le noyau seul.
+
 ## 0.0.71 — correspondances d’identifiants dans les fournisseurs
 
 - La recherche de l’identifiant TVDB d’une série dépend du manifeste signé du fournisseur : source, chemin et champ de réponse sont remplaçables sans modifier le serveur.

@@ -71,15 +71,8 @@ func migrateExtensionConfiguration(db *sql.DB) error {
 	return tx.Commit()
 }
 func (c *catalog) setProviderCredential(ctx context.Context, id, secret string) error {
-	if id == "tmdb" {
-		patch := configuration.Patch{}
-		if secret == "" {
-			patch.ClearSecrets = []string{"apiToken"}
-		} else {
-			raw, _ := json.Marshal(secret)
-			patch.Values = map[string]json.RawMessage{"apiToken": raw}
-		}
-		return tmdbConfiguration(c.db).Apply(ctx, patch)
+	if provider, ok := c.provider(id).(MetadataCredentialProvider); ok {
+		return provider.WriteCredential(ctx, secret)
 	}
 	if secret == "" {
 		_, err := c.db.ExecContext(ctx, `DELETE FROM provider_settings WHERE id=?`, id)

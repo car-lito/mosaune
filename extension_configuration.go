@@ -5,7 +5,6 @@ import (
 	"errors"
 	"mosaune/extensionkit/configuration"
 	"mosaune/extensionkit/protocol"
-	bundled "mosaune/extensionkit/providers/tmdb"
 	"mosaune/extensionkit/registry"
 	"net/http"
 )
@@ -13,55 +12,47 @@ import (
 // Schemas cannot select endpoints, tables, SQL or credentials. Trusted host
 // adapters bind a module ID to its own configuration and storage ownership.
 type configurationBinding struct {
-	schema     configuration.Schema
-	descriptor protocol.Descriptor
-	read       func(context.Context) (configuration.State, error)
-	write      func(context.Context, configuration.Patch) error
+	authorizationsManaged bool
+	schema                configuration.Schema
+	descriptor            protocol.Descriptor
+	read                  func(context.Context) (configuration.State, error)
+	write                 func(context.Context, configuration.Patch) error
 }
 
 func (c *catalog) configurationFor(id string) (configurationBinding, bool) {
+	return c.configurationForContext(context.Background(), id)
+}
+
+func (c *catalog) configurationForContext(ctx context.Context, id string) (configurationBinding, bool) {
 	// Connector settings belong to a shared capability. They must pass through
 	// its destination checks, never the generic module settings write endpoint.
 	if id == "mosaune.acquisition.radarr" || id == "mosaune.acquisition.sonarr" {
 		return configurationBinding{}, false
 	}
-	if id != bundled.Descriptor().ID {
-		// Only a host-registered installed module may expose its settings. A
-		// guessed owner ID or a row alone cannot create an accessible extension.
-		s, err := (registry.SQLStore{DB: c.db}).Load(context.Background())
-		if err != nil {
-			return configurationBinding{}, false
+	for _, provider := range c.providers {
+		if configurable, ok := provider.(MetadataConfigurationProvider); ok && configurable.ConfigurationOwner() == id {
+			binding, err := configurable.Configuration(ctx)
+			return binding, err == nil
 		}
-		entry, ok := registryEntryFor(s, id)
-		if !ok {
-			return configurationBinding{}, false
-		}
-		bound, err := (configuration.SQLStore{DB: c.db}).For(id)
-		if err != nil {
-			return configurationBinding{}, false
-		}
-		state, err := bound.Read(context.Background())
-		if err != nil {
-			return configurationBinding{}, false
-		}
-		return configurationBinding{schema: state.Schema, descriptor: entry.Descriptor, read: bound.Read, write: bound.Apply}, true
 	}
-	if c.provider("tmdb") == nil {
+	// Only a host-registered installed module may expose its settings.
+	s, err := (registry.SQLStore{DB: c.db}).Load(ctx)
+	if err != nil {
 		return configurationBinding{}, false
 	}
-	schema := bundled.Settings()
-	descriptor := bundled.Descriptor()
-	if p, ok := c.provider("tmdb").(*tmdbProvider); ok {
-		if installed, err := p.installedPackage(context.Background()); err == nil {
-			schema = installed.Manifest.Settings
-			descriptor = installed.Manifest.Descriptor
-		}
+	entry, ok := registryEntryFor(s, id)
+	if !ok {
+		return configurationBinding{}, false
 	}
-	bound := tmdbConfiguration(c.db)
-	return configurationBinding{schema: schema, descriptor: descriptor, read: func(ctx context.Context) (configuration.State, error) {
-		state, e := bound.Read(ctx)
-		return projectProviderSettings(state, schema), e
-	}, write: bound.Apply}, true
+	bound, err := (configuration.SQLStore{DB: c.db}).For(id)
+	if err != nil {
+		return configurationBinding{}, false
+	}
+	state, err := bound.Read(ctx)
+	if err != nil {
+		return configurationBinding{}, false
+	}
+	return configurationBinding{schema: state.Schema, descriptor: entry.Descriptor, read: bound.Read, write: bound.Apply}, true
 }
 
 // The host describes the effective named services, not arbitrary manifest prose.
@@ -84,7 +75,7 @@ func serviceViews(d protocol.Descriptor) []extensionServiceView {
 func (c *catalog) extensionConfigurationRoutes(mux *secureMux) {
 	c.extensionAuthorizationRoutes(mux)
 	read := func(w http.ResponseWriter, r *http.Request) {
-		binding, ok := c.configurationFor(r.PathValue("id"))
+		binding, ok := c.configurationForContext(r.Context(), r.PathValue("id"))
 		if !ok {
 			problem(w, 404, "Réglages d’extension introuvables.")
 			return
@@ -98,10 +89,10 @@ func (c *catalog) extensionConfigurationRoutes(mux *secureMux) {
 			configuration.State
 			Services              []extensionServiceView `json:"services"`
 			AuthorizationsManaged bool                   `json:"authorizationsManaged"`
-		}{state, serviceViews(binding.descriptor), r.PathValue("id") == tmdbConfigurationOwner})
+		}{state, serviceViews(binding.descriptor), binding.authorizationsManaged})
 	}
 	write := func(w http.ResponseWriter, r *http.Request) {
-		binding, ok := c.configurationFor(r.PathValue("id"))
+		binding, ok := c.configurationForContext(r.Context(), r.PathValue("id"))
 		if !ok {
 			problem(w, 404, "Réglages d’extension introuvables.")
 			return

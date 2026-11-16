@@ -137,8 +137,8 @@ func indexLocalMetadata(ctx context.Context, tx *sql.Tx, l library, rel string, 
 }
 
 func (c *catalog) credential(ctx context.Context, id string) string {
-	if id == "tmdb" {
-		secret, _ := tmdbConfiguration(c.db).Secret(ctx, "apiToken")
+	if provider, ok := c.provider(id).(MetadataCredentialProvider); ok {
+		secret, _ := provider.ReadCredential(ctx)
 		return secret
 	}
 	var secret string

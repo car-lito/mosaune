@@ -1,3 +1,5 @@
+Version 0.0.72 — les réglages et clés des fournisseurs passent par des contrats communs. Les formulaires ouverts avant un remplacement ou une réinstallation sont refusés ; les champs d’une autre version restent conservés sans être exposés. [Contrat contributeurs](extension-kit/configuration/README.md).
+
 Version 0.0.71 — les correspondances d’identifiants nécessaires aux demandes de séries sont déclarées par le paquet du fournisseur. TMDB 0.8.0 les fournit ; les anciens paquets demandent une mise à jour, sans repli intégré.
 
 Version 0.0.69 — le composant de demandes calcule aussi la disponibilité locale, à partir des fichiers ouverts et vérifiés par Mosaune. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).

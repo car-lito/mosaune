@@ -143,7 +143,12 @@ func registerProviderSettings(ctx context.Context, store configuration.SQLStore,
 			}
 		}
 	}
-	return store.Register(ctx, tmdbConfigurationOwner, schema)
+	if err := store.Register(ctx, tmdbConfigurationOwner, schema); err != nil {
+		return err
+	}
+	// Every package transition invalidates old forms, even with an identical
+	// schema, including removal followed by reinstalling the same archive.
+	return bound.Apply(ctx, configuration.Patch{})
 }
 func projectProviderSettings(state configuration.State, schema configuration.Schema) configuration.State {
 	state.Schema = schema

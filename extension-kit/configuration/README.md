@@ -38,6 +38,14 @@ Champ absent = conserver. Valeur inconnue, mauvais type, `null`, choix non décl
 
 Depuis 0.0.27, les routes sont `GET` et `PUT /api/v1/extensions/{id}/configuration`, réservées à l’administrateur ; l’ancien chemin avec `/bundled/` reste compatible. L’hôte choisit le propriétaire à partir de l’identité enregistrée ; un fichier ne peut pas choisir sa table ou accéder aux réglages d’une autre extension. TMDB utilise le [stockage commun des réglages](STORAGE.md), avec un propriétaire partagé entre fournisseur intégré et paquet. Désactiver le module conserve cette clé et les fiches ; il n’y a pas de base parallèle. Le formulaire envoie la révision lue pour éviter d’écraser une modification plus récente.
 
+## Adaptateurs de fournisseurs (0.0.72)
+
+Les routes communes utilisent deux capacités optionnelles du serveur : MetadataConfigurationProvider (propriétaire et liaison au formulaire) et MetadataCredentialProvider (lecture/écriture de la clé utilisée par l’ancien point d’accès métadonnées). Les noms du fournisseur, du propriétaire et du champ secret peuvent être différents. Ce sont des contrats internes d’adaptateurs approuvés, pas un accès SQL ou aux secrets accordé aux programmes invités.
+
+Pour les paquets signés, providerPackageConfiguration vérifie le propriétaire et lit schéma/valeurs dans un instantané SQL commun. Le navigateur transmet toujours la révision obtenue. Une écriture revérifie l’empreinte du paquet et la révision dans sa transaction ; un conflit renvoie HTTP409. Chaque transition de paquet avance la révision, y compris un retrait puis une réinstallation de la même archive. Les valeurs dormantes d’une version plus récente restent dans le stockage commun, mais seules les valeurs déclarées par le schéma signé actif sont lisibles et modifiables.
+
+Un paquet absent ou corrompu ne fournit aucun formulaire de secours (HTTP404). Une désactivation conserve le formulaire du paquet installé. Les permissions administrateur et l’absence de secrets dans les réponses sont inchangées. La clé TMDB reste conservée après retrait parce que son adaptateur hôte la consomme encore ; l’indépendance complète et la gestion des autorisations de tous les fournisseurs restent à terminer.
+
 ## Accès aux services
 
 Le descripteur du module annonce par exemple :
