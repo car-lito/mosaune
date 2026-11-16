@@ -161,11 +161,11 @@ func (c *catalog) previewRequest(ctx context.Context, in requestInput) (requestP
 	if err != nil {
 		return p, cfg, obj, w, 0, err
 	}
-	resolver, ok := c.provider(w.Metadata.Provider).(AcquisitionIdentifierProvider)
+	resolver, ok := c.provider(w.Metadata.Provider).(MetadataIdentifierProvider)
 	if !ok {
 		return p, cfg, obj, w, 0, errors.New("Ce fournisseur ne fournit pas encore les identifiants nécessaires aux demandes.")
 	}
-	external, err = resolver.AcquisitionID(ctx, c.credential(ctx, w.Metadata.Provider), w.Kind, w.Metadata.ProviderID)
+	external, err = acquisitionIdentifier(ctx, resolver, c.credential(ctx, w.Metadata.Provider), w.Kind, w.Metadata.ProviderID)
 	if err != nil {
 		return p, cfg, obj, w, 0, err
 	}

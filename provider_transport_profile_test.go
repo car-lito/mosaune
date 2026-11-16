@@ -15,7 +15,7 @@ func TestTransportPackageSettingsAcrossVersions(t *testing.T) {
 	c, dir := testCatalog(t)
 	ctx := context.Background()
 	p := c.provider("tmdb").(*tmdbProvider)
-	next, e := p.installedPackage(ctx)
+	next, e := packageformat.Parse(providerTransportExample, trustedProviderKey(), version)
 	if e != nil || next.Manifest.Transport == nil {
 		t.Fatal("missing signed profile", e)
 	}

@@ -37,12 +37,12 @@ func TestRepositoryExportCanBePublishedUnchanged(t *testing.T) {
 		}
 		files[f.Name] = data
 	}
-	if len(files) != 10+len(screenPackages()) || len(files["README.md"]) == 0 {
-		t.Fatal("incomplete export")
-	}
 	index, err := parseRepositoryIndex(files[repositoryIndexFile])
 	if err != nil {
 		t.Fatal(err)
+	}
+	if len(files) != len(index.Packages)+2 || len(files["README.md"]) == 0 {
+		t.Fatal("incomplete export")
 	}
 	c, _, _ := accountFixture(t)
 	c.repositoryTransport = tmdbFixtureTransport(func(r *http.Request) (*http.Response, error) {
@@ -113,6 +113,7 @@ func TestRepositoryCatalogDownloadAndPermissions(t *testing.T) {
 	indexRaw, _ := json.Marshal(index)
 	files := map[string][]byte{repositoryIndexFile: indexRaw, "packages/ambre.mosaune.zip": bundledThemeArchive(), "packages/salon.mosaune.zip": uiExampleArchive(), "packages/tmdb-0.4.0.mosaune.zip": providerExample, "packages/tmdb-0.4.1.mosaune.zip": providerUpdateExample, "packages/tmdb-0.5.0.mosaune.zip": providerCatalogueExample, "packages/tmdb-0.6.0.mosaune.zip": providerDiscoveryExample}
 	files["packages/tmdb-0.7.0.mosaune.zip"] = providerTransportExample
+	files["packages/tmdb-0.8.0.mosaune.zip"] = providerIdentifiersExample
 	for _, p := range append(screenPackages(), screenExamplePackage()) {
 		files[screenArchivePath(p)] = screenArchive(p)
 	}

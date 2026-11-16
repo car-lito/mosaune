@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	metadata "mosaune/extensionkit/capabilities/metadata/v1"
 	"mosaune/extensionkit/configuration"
 	discovery "mosaune/extensionkit/discovery/v1"
 	"mosaune/extensionkit/protocol"
@@ -25,17 +26,18 @@ const MaxCode = 8 << 20
 const HealthCapability = "system.health.v1"
 
 type Manifest struct {
-	Transport   *transport.Profile   `json:"transport,omitempty"`
-	Discovery   *discovery.Surface   `json:"discovery,omitempty"`
-	Schema      int                  `json:"schema"`
-	Name        string               `json:"name"`
-	Publisher   string               `json:"publisher"`
-	Description string               `json:"description"`
-	MinCore     string               `json:"minCore"`
-	Adapter     string               `json:"adapter"`
-	Descriptor  protocol.Descriptor  `json:"module"`
-	Settings    configuration.Schema `json:"settings"`
-	CodeSHA256  string               `json:"codeSha256"`
+	Identifiers []metadata.IdentifierRoute `json:"identifiers,omitempty"`
+	Transport   *transport.Profile         `json:"transport,omitempty"`
+	Discovery   *discovery.Surface         `json:"discovery,omitempty"`
+	Schema      int                        `json:"schema"`
+	Name        string                     `json:"name"`
+	Publisher   string                     `json:"publisher"`
+	Description string                     `json:"description"`
+	MinCore     string                     `json:"minCore"`
+	Adapter     string                     `json:"adapter"`
+	Descriptor  protocol.Descriptor        `json:"module"`
+	Settings    configuration.Schema       `json:"settings"`
+	CodeSHA256  string                     `json:"codeSha256"`
 }
 type Package struct {
 	Manifest Manifest `json:"manifest"`
@@ -80,6 +82,9 @@ func (m Manifest) Validate(core string) error {
 		return invalid
 	}
 	if len(d.Capabilities) == 4 && (!caps["metadata.video-catalog.v1"] || Compare(m.MinCore, "0.0.43") < 0) {
+		return invalid
+	}
+	if len(m.Identifiers) > 0 && (Compare(m.MinCore, "0.0.71") < 0 || metadata.ValidateIdentifierRoutes(m.Identifiers, m.Transport) != nil) {
 		return invalid
 	}
 	if m.Discovery != nil {

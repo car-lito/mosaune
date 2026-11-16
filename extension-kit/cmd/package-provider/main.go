@@ -29,6 +29,7 @@ func run() error {
 	v := flag.String("version", "0.5.0", "provider version")
 	surfacePath := flag.String("discovery", "", "optional discovery declaration JSON (requires core 0.0.52)")
 	withTransport := flag.Bool("transport", false, "include transport profile and catalogue settings (requires core 0.0.57)")
+	withIdentifiers := flag.Bool("identifiers", false, "include identifier mappings (requires transport and core 0.0.71)")
 	flag.Parse()
 	if *keyPath == "" || *public == "" {
 		return fmt.Errorf("key and public paths required")
@@ -96,6 +97,13 @@ func run() error {
 		m.Transport = &profile
 		m.Settings = tmdb.TransportSettings()
 		m.MinCore = "0.0.57"
+	}
+	if *withIdentifiers {
+		if !*withTransport {
+			return fmt.Errorf("identifier mappings require transport")
+		}
+		m.Identifiers = tmdb.Identifiers()
+		m.MinCore = "0.0.71"
 	}
 	data, err := packageformat.Create(m, code, key)
 	if err != nil {

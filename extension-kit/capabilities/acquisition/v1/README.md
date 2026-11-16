@@ -20,6 +20,8 @@ Le programme décide des états et messages, de la pertinence des entrées de fi
 
 Déclarez `minCore: "0.0.60"` pour un paquet qui fournit le suivi : ces opérations seront vérifiées à l’import. Les anciens paquets restent compatibles avec l’envoi, mais l’absence de `tracking-info` suspend le suivi avec une explication, sans repli sur une implémentation native. La mise à jour du module officiel ne modifie ni une sélection tierce, ni une désactivation, ni un retrait.
 
+Depuis le cœur 0.0.71, l’enveloppe de suivi omet les valeurs vides répétées : `hasFile: false` dans les épisodes et `episodeId: 0`, `size: 0`, `remaining: 0`, `status: ""` dans la file. Un décodeur doit leur appliquer ces valeurs par défaut, comme les types du kit Go. Une saison absente reste distincte d’une saison explicitement égale à zéro. Les limites, la validation des observations et les résultats attendus restent inchangés ; cette représentation réduit le coût de décodage des grandes séries dans l’interpréteur.
+
 ## Transport, depuis Mosaune 0.0.61
 
 Le module 0.3.0 ajoute `describe-transport`, qui reçoit `{"connector":"radarr"}` ou `sonarr` et retourne `Transport` (`transport.go`). Le fichier `modules/acquisition/source/transport.json` est un exemple complet. `minCore: "0.0.61"` exige deux profils valides à l’import. Un ancien programme sans cette opération ne provoque aucun appel réseau ni repli natif.

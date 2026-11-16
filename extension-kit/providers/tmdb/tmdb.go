@@ -53,6 +53,17 @@ func Settings() configuration.Schema {
 	return schema
 }
 
+//go:embed identifiers.json
+var identifiersJSON []byte
+
+func Identifiers() []metadata.IdentifierRoute {
+	var routes []metadata.IdentifierRoute
+	if json.Unmarshal(identifiersJSON, &routes) != nil {
+		panic("invalid identifier routes")
+	}
+	return routes
+}
+
 func Descriptor() protocol.Descriptor {
 	return protocol.Descriptor{ID: "mosaune.tmdb-search", Version: "0.5.0", Capabilities: []string{metadata.SearchCapability, video.DetailsCapability, catalog.Capability, packageformat.HealthCapability}, Services: []protocol.ServiceRequirement{{Name: "tmdb.api.v1", Operations: []string{"get"}}}}
 }

@@ -385,3 +385,9 @@ Pas de nouvelle carte d’extension ; aucun déploiement NAS.
 - [ ] Généraliser transport réseau, permissions de sources et configuration des fournisseurs.
 
 CI 0.0.54 confirmée réussie le 3 novembre 2026 (Windows/Linux, conteneurs amd64 et arm64, publication). Aucun déploiement NAS.
+
+### Étape 0.0.71 — identifiants des fournisseurs
+
+- [x] Déclarer les correspondances distantes dans le paquet signé et les consommer via un contrat commun.
+- [x] Conserver cache, permissions, annulation et identifiants locaux ; refuser les conversions non déclarées sans repli natif.
+- [ ] Terminer les autres adaptateurs de fournisseurs et les familles indépendantes.

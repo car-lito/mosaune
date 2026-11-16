@@ -1,0 +1,3 @@
+[
+  {"kind":"series","namespace":"tvdb","source":"api","path":"/tv/{id}/external_ids","field":"tvdb_id"}
+]

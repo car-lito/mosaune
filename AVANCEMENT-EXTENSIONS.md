@@ -1,6 +1,6 @@
 # Vers un Mosaune entièrement extensible
 
-État du 14 novembre 2026 · étape 0.0.70.
+État du 16 novembre 2026 · étape 0.0.71.
 
 **Environ 90 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
@@ -81,7 +81,8 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [x] Supprimer le moteur TMDB natif dupliqué : module obligatoire, pause et désinstallation persistantes sans substitution automatique.
 - [x] Distribuer le module TMDB fourni comme un paquet signé installé ; aucun retour implicite après retrait ni activation sans réinstallation.
 - [x] Lire les recherches et sélections depuis le manifeste signé TMDB installé, avec cache, retour arrière et retrait cohérents (0.0.52).
-- [ ] Achever l’indépendance de TMDB : adaptateur du transport, configuration, identifiants Sonarr et interface fournisseur générique.
+- [x] 0.0.71 — correspondances d’identifiants externes déclarées dans le paquet signé, interface de résolution commune et suppression du chemin/format TVDB intégré au connecteur.
+- [ ] Achever l’indépendance de TMDB : autres adaptateurs du transport, configuration et interface fournisseur complète.
 - [x] Extraire l’interprétation des réponses MusicBrainz (albums, éditions, pistes et artistes) dans un composant Wasm de Musique, remplaçable et désactivable.
 - [ ] Achever MusicBrainz : adaptateur du transport réseau, autorisation de nouvelles sources, configuration et distribution comme fournisseur indépendant.
 - [x] 0.0.59 — préparation des ajouts, saisons et recherches Radarr/Sonarr dans un composant partagé installable et remplaçable. Activation et retrait contrôlent les échanges, y compris le suivi.

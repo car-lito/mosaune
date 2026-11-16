@@ -1,3 +1,12 @@
+## 0.0.71 — correspondances d’identifiants dans les fournisseurs
+
+- La recherche de l’identifiant TVDB d’une série dépend du manifeste signé du fournisseur : source, chemin et champ de réponse sont remplaçables sans modifier le serveur.
+- Contrat commun par type de média et espace d’identifiants, validation des chemins et valeurs, accès réseau borné, cache et annulation conservés.
+- TMDB 0.8.0 distribué dans le catalogue ; installé sur une nouvelle instance. Une installation existante garde son paquet et peut le mettre à jour depuis Extensions.
+- Désactivation/retrait bloquent les résolutions distantes ; les identifiants propres déjà enregistrés restent utilisables hors ligne. Les anciens paquets sans correspondance ne déclenchent aucune recherche intégrée.
+- Messages de suivi allégés pour les grandes séries : valeurs vides omises à l’envoi puis restaurées au décodage, sans changer le protocole installé ni les limites de temps ou de mémoire.
+- L’interface fournisseur complète et le démarrage avec le seul noyau restent à terminer. Aucun changement des lecteurs ni déploiement NAS.
+
 ## 0.0.70 — cycle de vie des réglages partagés
 
 Les configurations Radarr/Sonarr suivent désormais l’installation réelle du composant de demandes : désactivation et remplacement conservent les réglages ; retrait du dernier composant les supprime dans la même transaction. La réinstallation repart sans clé ni destination, avec une révision supérieure pour empêcher la réutilisation des anciens formulaires. Le stockage commun conserve uniquement un compteur technique par propriétaire retiré, aucun secret. Migration50, branchements installation intégrée/import/archives groupées. Catalogues, médias et historique de demandes sont conservés ; aucun téléchargement distant n’est annulé. Protocole acquisition0.10.0 inchangé. Familles18.x publiées : la recompilation d’une dépendance commune change l’empreinte du composant Musique ; les archives précédentes restent immuables.

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	a "mosaune/extensionkit/capabilities/acquisition/v1"
 )
@@ -98,7 +99,7 @@ func applyAcquisitionTracking(ctx context.Context, r *cataloguer, q a.Tracking, 
 		return errors.New("Observations de suivi invalides ou trop volumineuses.")
 	}
 	var out a.TrackingResult
-	if err := r.call(ctx, "track", q, &out); err != nil {
+	if err := r.call(ctx, "track", acquisitionTrackingPayload(q), &out); err != nil {
 		return err
 	}
 	if err := out.Validate(q); err != nil {
@@ -108,4 +109,45 @@ func applyAcquisitionTracking(ctx context.Context, r *cataloguer, q a.Tracking, 
 	v.Total, v.Imported, v.Progress = out.Total, out.Imported, out.Progress
 	v.State, v.Message = out.State, out.Message
 	return nil
+}
+
+// Keep the installed protocol unchanged while avoiding thousands of redundant
+// false/empty values in large envelopes. Guest decoding restores these zero values.
+// All host and guest validation still runs on the complete typed observations.
+type acquisitionTrackingPayload a.Tracking
+
+func (q acquisitionTrackingPayload) MarshalJSON() ([]byte, error) {
+	type episode struct {
+		ID      int  `json:"id"`
+		Season  int  `json:"season"`
+		Number  int  `json:"number"`
+		HasFile bool `json:"hasFile,omitempty"`
+	}
+	type queueItem struct {
+		RemoteID  int     `json:"remoteId"`
+		EpisodeID int     `json:"episodeId,omitempty"`
+		Season    *int    `json:"season,omitempty"`
+		Size      float64 `json:"size,omitempty"`
+		Remaining float64 `json:"remaining,omitempty"`
+		Status    string  `json:"status,omitempty"`
+	}
+	var episodes []episode
+	if q.Episodes != nil {
+		episodes = make([]episode, len(q.Episodes))
+	}
+	for i, v := range q.Episodes {
+		episodes[i] = episode{v.ID, v.Season, v.Number, v.HasFile}
+	}
+	var queue []queueItem
+	if q.Queue != nil {
+		queue = make([]queueItem, len(q.Queue))
+	}
+	for i, v := range q.Queue {
+		queue[i] = queueItem{v.RemoteID, v.EpisodeID, v.Season, v.Size, v.Remaining, v.Status}
+	}
+	return json.Marshal(struct {
+		a.Tracking
+		Episodes []episode   `json:"episodes"`
+		Queue    []queueItem `json:"queue"`
+	}{a.Tracking(q), episodes, queue})
 }

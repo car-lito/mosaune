@@ -6,39 +6,29 @@ import (
 	"errors"
 	cfg "mosaune/extensionkit/acquisitionconfig"
 	a "mosaune/extensionkit/capabilities/acquisition/v1"
+	metadata "mosaune/extensionkit/capabilities/metadata/v1"
 	"strconv"
 	"strings"
 )
 
-// Each acquisition adapter owns its remote API. Metadata providers only resolve
-// stable identifiers; neither component needs to know about the other's storage.
-type AcquisitionIdentifierProvider interface {
-	AcquisitionID(context.Context, string, string, string) (int, error)
-}
-
-func (p *tmdbProvider) AcquisitionID(ctx context.Context, secret, kind, id string) (int, error) {
-	n, err := strconv.Atoi(id)
+// Acquisition consumes the generic provider identity contract. Remote routes and
+// response field names belong to the installed provider, never to this adapter.
+func acquisitionIdentifier(ctx context.Context, p MetadataIdentifierProvider, secret, kind, id string) (int, error) {
+	namespace := "tmdb"
+	if kind == "series" {
+		namespace = "tvdb"
+	} else if kind != "films" {
+		return 0, errors.New("Type de média invalide.")
+	}
+	value, err := p.ResolveIdentifier(ctx, secret, metadata.IdentifierQuery{Kind: kind, ID: id, Namespace: namespace})
+	if err != nil {
+		return 0, err
+	}
+	n, err := strconv.ParseInt(value, 10, 32)
 	if err != nil || n <= 0 {
-		return 0, errors.New("Identifiant TMDB invalide.")
+		return 0, errors.New("Identifiant incompatible avec ce service. Aucune demande envoyée.")
 	}
-	if kind == "films" {
-		return n, nil
-	}
-	return providerResult(ctx, p, func(ctx context.Context) (int, error) {
-		if e := p.moduleReady(); e != nil {
-			return 0, e
-		}
-		var out struct {
-			TVDB int `json:"tvdb_id"`
-		}
-		if err = p.get(ctx, secret, "/tv/"+id+"/external_ids", nil, &out); err != nil {
-			return 0, err
-		}
-		if out.TVDB <= 0 {
-			return 0, errors.New("TMDB ne fournit pas d’identifiant TVDB pour cette série. Aucune demande envoyée.")
-		}
-		return out.TVDB, nil
-	})
+	return int(n), nil
 }
 
 type arrConfig struct {

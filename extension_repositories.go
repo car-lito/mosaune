@@ -226,6 +226,7 @@ func bundledRepositoryArchive() ([]byte, error) {
 		{"packages/tmdb-0.5.0.mosaune.zip", providerCatalogueExample},
 		{"packages/tmdb-0.6.0.mosaune.zip", providerDiscoveryExample},
 		{"packages/tmdb-0.7.0.mosaune.zip", providerTransportExample},
+		{"packages/tmdb-0.8.0.mosaune.zip", providerIdentifiersExample},
 	}
 	for _, p := range append(screenPackages(), screenExamplePackage()) {
 		files = append(files, struct {
@@ -260,7 +261,7 @@ func bundledRepository() extensionRepository {
 		m := p.Manifest
 		entries = append(entries, repositoryEntry{ID: m.ID, Name: m.Name, Publisher: m.Publisher, Description: m.Description, Version: m.Version, Kind: "pages", MinCore: m.MinCore, Path: screenArchivePath(p), SHA256: packageformat.Hash(screenArchive(p))})
 	}
-	for _, raw := range [][]byte{providerExample, providerUpdateExample, providerCatalogueExample, providerDiscoveryExample, providerTransportExample} {
+	for _, raw := range [][]byte{providerExample, providerUpdateExample, providerCatalogueExample, providerDiscoveryExample, providerTransportExample, providerIdentifiersExample} {
 		p, err := packageformat.Parse(raw, trustedProviderKey(), version)
 		if err != nil {
 			continue
@@ -321,6 +322,8 @@ func (c *catalog) repositoryPackage(ctx context.Context, repo extensionRepositor
 			raw = providerExample
 		case "packages/tmdb-0.6.0.mosaune.zip":
 			raw = providerDiscoveryExample
+		case "packages/tmdb-0.8.0.mosaune.zip":
+			raw = providerIdentifiersExample
 		case "packages/tmdb-0.7.0.mosaune.zip":
 			raw = providerTransportExample
 		case "packages/tmdb-0.5.0.mosaune.zip":

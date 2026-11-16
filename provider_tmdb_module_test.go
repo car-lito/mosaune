@@ -69,7 +69,7 @@ func TestTMDBModulePauseAndRemovalSurviveRestart(t *testing.T) {
 		},
 		func() error { _, e := p.Artwork(ctx, "fixture", "/poster.jpg"); return e },
 		func() error { _, e := p.Artwork(ctx, "fixture", "yt:abcdefghijk"); return e },
-		func() error { _, e := p.AcquisitionID(ctx, "fixture", "series", "42"); return e },
+		func() error { _, e := acquisitionIdentifier(ctx, p, "fixture", "series", "42"); return e },
 	}
 	for _, check := range checks {
 		if e := check(); !errors.Is(e, errProviderModuleUnavailable) {

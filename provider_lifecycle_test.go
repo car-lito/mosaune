@@ -53,10 +53,10 @@ func TestTMDBDisableAllCapabilitiesAndEngines(t *testing.T) {
 					t.Fatalf("operation %d: %v", i, e)
 				}
 			}
-			if _, e := p.AcquisitionID(ctx, "fixture", "series", "42"); !errors.Is(e, errProviderDisabled) {
+			if _, e := acquisitionIdentifier(ctx, p, "fixture", "series", "42"); !errors.Is(e, errProviderDisabled) {
 				t.Fatal("series ID lookup bypass", e)
 			}
-			if id, e := p.AcquisitionID(ctx, "fixture", "films", "42"); e != nil || id != 42 {
+			if id, e := acquisitionIdentifier(ctx, p, "fixture", "films", "42"); e != nil || id != 42 {
 				t.Fatal("local film ID unavailable", e)
 			}
 			if calls.Load() != before {
@@ -154,6 +154,12 @@ func TestTMDBDisableCancelsLateResultsAndPersistence(t *testing.T) {
 	c, _ := testCatalog(t)
 	p := c.provider("tmdb").(*tmdbProvider)
 	ctx := testContext(context.Background())
+	// Measure cancellation of an in-flight request, not cold Wasm compilation.
+	_, releaseEngine, engineErr := p.extensionEngine(ctx)
+	if engineErr != nil {
+		t.Fatal(engineErr)
+	}
+	releaseEngine()
 	entered := make(chan context.Context, 1)
 	release := make(chan struct{})
 	defer close(release)
