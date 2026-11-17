@@ -24,6 +24,11 @@ type providerLifecycle struct {
 	calls             map[uint64]context.CancelCauseFunc
 }
 type lifecycleProvider interface{ lifecycle() *providerLifecycle }
+type providerStateManager interface {
+	MetadataProvider
+	lifecycleProvider
+	setProviderEnabled(context.Context, bool) error
+}
 type providerLease struct{ owner *providerLifecycle }
 type providerLeaseKey struct{}
 
@@ -159,7 +164,7 @@ func migrateProviderStates(db *sql.DB) error {
 }
 func providerStateRoutes(mux *secureMux, c *catalog) {
 	mux.HandleFunc("PUT /api/v1/metadata/providers/{provider}/state", func(w http.ResponseWriter, r *http.Request) {
-		p, ok := c.provider(r.PathValue("provider")).(*tmdbProvider)
+		p, ok := c.provider(r.PathValue("provider")).(providerStateManager)
 		if !ok {
 			problem(w, 404, "Ce fournisseur ne propose pas encore ce réglage.")
 			return

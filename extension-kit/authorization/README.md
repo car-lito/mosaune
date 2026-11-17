@@ -35,8 +35,8 @@ jamais réinitialisées avec des droits permissifs. Maximum : 128 propriétaires
 
 TMDB possède un adaptateur effectif : `mosaune.tmdb-search`, service
 `tmdb.api.v1`, opération `get`. Son accord couvre les consultations en ligne du
-fournisseur, y compris ses images gérées par l'hôte. Les deux moteurs, natif et
-Wasm, partagent le même accord. Les sous-requêtes Wasm restent limitées à l'œuvre,
+fournisseur, y compris ses images gérées par l'hôte. Le programme Wasm et les transports
+hôte partagent le même accord. Les sous-requêtes Wasm restent limitées à l'œuvre,
 la langue et les chemins attendus ; elles ne reçoivent pas la clé.
 
 Le catalogue passe au schéma 17, avec la sauvegarde préalable habituelle. Pour le
@@ -46,7 +46,7 @@ réactive ni un fournisseur désactivé ni une autorisation déjà enregistrée 
 retirée. Ce choix de l'hôte n'est **pas** le comportement générique de `Register`.
 
 Les routes administrateur `GET/PUT /api/v1/extensions/{id}/authorizations` ne sont
-exposées que pour cet adaptateur complet. La révocation utilise le cycle de vie
+exposées que pour les adaptateurs complets inscrits auprès de l’hôte. La révocation utilise le cycle de vie
 commun des opérations et leurs verrous d'enregistrement. Elle suspend les
 identifications sans compter d'échec, garde les métadonnées et images conservées,
 et persiste au redémarrage. Changer de moteur, retirer son paquet optionnel ou
@@ -55,3 +55,11 @@ passer en mode de secours ne contourne pas le refus.
 Les autres familles doivent encore raccorder leur adaptateur et leur cycle de
 révocation avant d'exposer ces routes. Ce stockage ne constitue pas un système
 universel de permissions de fichiers, de réseau arbitraire ou de tâches.
+
+## Adaptateur commun depuis 0.0.73
+
+MetadataAuthorizationProvider fournit une liaison providerServiceAccess : propriétaire approuvé, stockage, cycle de vie et descriptions des services/opérations pris en charge. Les routes ne connaissent ni le nom TMDB ni ses opérations. Le composant de configuration et l’aperçu de paquet utilisent ces descriptions, filtrées par les demandes du descripteur. Les réponses des accès masquent les opérations sans prise en charge, sans modifier la révision persistante ; une tentative directe de les accorder reste refusée.
+
+La liaison commune applique le verrou des modifications puis celui des résultats avant la transaction SQL. Un échec ne modifie ni les appels ni l’état effectif. Après validation et commit, le retrait d’un accès nécessaire bloque le fournisseur et annule ses appels ; un accord ultérieur ne rend jamais leurs résultats valides. Le contrat actuel porte sur les services nécessaires au fournisseur dans son ensemble, pas sur une permission indépendante pour chaque méthode. load s’utilise au démarrage avant exposition aux requêtes.
+
+La commande d’activation utilise aussi une interface optionnelle exigeant le cycle de vie. Les migrations historiques et les services précis restent dans l’adaptateur TMDB. Un deuxième adaptateur de test couvre un autre propriétaire/service, les rôles, les conflits, le rechargement, les échecs de stockage et les résultats tardifs. Cela ne rend pas encore installable un fournisseur arbitraire : les adaptateurs doivent être approuvés et raccordés côté hôte.

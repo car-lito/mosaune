@@ -58,7 +58,7 @@
    {#if config.authorizationsManaged}
     {#if access}<form onsubmit={e=>{e.preventDefault();void saveAccess();}}>
      {#each access.requested as service}{#each service.operations as op}
-      <label class="extension-config-check"><input type="checkbox" checked={accessChoices[service.name+'/'+op]??false} onchange={e=>accessChoices[service.name+'/'+op]=e.currentTarget.checked} disabled={busy}/>{service.name==='tmdb.api.v1'&&op==='get'?'Autoriser les consultations en ligne de TMDB':service.name+' · '+op}</label>
+      <label class="extension-config-check"><input type="checkbox" checked={accessChoices[service.name+'/'+op]??false} onchange={e=>accessChoices[service.name+'/'+op]=e.currentTarget.checked} disabled={busy}/>Autoriser : {config.services.find(s=>s.name===service.name)?.label??service.name}{service.operations.length>1?' · '+op:''}</label>
      {/each}{/each}
      <p>Une mise à jour ne peut pas s’accorder de nouveaux accès. Ce choix s’applique à tous les comptes sur ce serveur.</p>
      <button class="secondary" disabled={busy}>Enregistrer les accès</button>

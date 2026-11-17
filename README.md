@@ -1,3 +1,5 @@
+Version 0.0.73 — autorisations, révocation des appels et descriptions des services passent par un adaptateur fournisseur commun. [Contrat contributeurs](extension-kit/authorization/README.md).
+
 Version 0.0.72 — les réglages et clés des fournisseurs passent par des contrats communs. Les formulaires ouverts avant un remplacement ou une réinstallation sont refusés ; les champs d’une autre version restent conservés sans être exposés. [Contrat contributeurs](extension-kit/configuration/README.md).
 
 Version 0.0.71 — les correspondances d’identifiants nécessaires aux demandes de séries sont déclarées par le paquet du fournisseur. TMDB 0.8.0 les fournit ; les anciens paquets demandent une mise à jour, sans repli intégré.

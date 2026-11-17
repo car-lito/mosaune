@@ -97,7 +97,7 @@ func (c *catalog) providerPackageRoutes(mux *secureMux) {
 			problem(w, 409, "Une mise à jour doit avoir une version supérieure. Pour revenir en arrière, utilisez Restaurer la version précédente.")
 			return
 		}
-		sendJSON(w, 200, map[string]any{"package": pack, "previousChecksum": old.Checksum, "previousVersion": old.Manifest.Descriptor.Version, "signer": "Clé de développement Mosaune", "services": serviceViews(pack.Manifest.Descriptor)})
+		sendJSON(w, 200, map[string]any{"package": pack, "previousChecksum": old.Checksum, "previousVersion": old.Manifest.Descriptor.Version, "signer": "Clé de développement Mosaune", "services": c.serviceViews(pack.Manifest.Descriptor)})
 	})
 	mux.HandleFunc("POST /api/v1/provider-packages/install", func(w http.ResponseWriter, r *http.Request) {
 		pack, ok := upload(w, r)

@@ -32,6 +32,9 @@ func (c *catalog) configurationForContext(ctx context.Context, id string) (confi
 	for _, provider := range c.providers {
 		if configurable, ok := provider.(MetadataConfigurationProvider); ok && configurable.ConfigurationOwner() == id {
 			binding, err := configurable.Configuration(ctx)
+			if err == nil {
+				_, binding.authorizationsManaged = c.authorizationFor(id)
+			}
 			return binding, err == nil
 		}
 	}
@@ -63,15 +66,6 @@ type extensionServiceView struct {
 	Operations  []string `json:"operations"`
 }
 
-func serviceViews(d protocol.Descriptor) []extensionServiceView {
-	views := []extensionServiceView{}
-	for _, s := range d.Services {
-		if s.Name == "tmdb.api.v1" {
-			views = append(views, extensionServiceView{Name: s.Name, Label: "Consulter TMDB", Description: "Recherches, fiches et images en ligne de TMDB, pour le fournisseur intégré et son extension. La clé reste gérée par Mosaune. Retirer cet accès arrête aussi les recherches en cours ; les fiches et images déjà conservées restent disponibles.", Operations: s.Operations})
-		}
-	}
-	return views
-}
 func (c *catalog) extensionConfigurationRoutes(mux *secureMux) {
 	c.extensionAuthorizationRoutes(mux)
 	read := func(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +83,7 @@ func (c *catalog) extensionConfigurationRoutes(mux *secureMux) {
 			configuration.State
 			Services              []extensionServiceView `json:"services"`
 			AuthorizationsManaged bool                   `json:"authorizationsManaged"`
-		}{state, serviceViews(binding.descriptor), binding.authorizationsManaged})
+		}{state, c.serviceViews(binding.descriptor), binding.authorizationsManaged})
 	}
 	write := func(w http.ResponseWriter, r *http.Request) {
 		binding, ok := c.configurationForContext(r.Context(), r.PathValue("id"))

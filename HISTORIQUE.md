@@ -1,3 +1,11 @@
+## 0.0.73 — autorisations communes aux fournisseurs
+
+- Les routes des accès, l’affichage de leurs descriptions et la commande d’activation ne sélectionnent plus TMDB en dur. Des capacités optionnelles relient chaque adaptateur à son propriétaire et au cycle de vie de ses appels.
+- Révocation partagée : enregistrement atomique avant annulation, sérialisation avec les résultats en cours, refus des formulaires périmés et des opérations non exécutables par l’hôte. Une réautorisation ne réactive pas les anciennes requêtes.
+- Les contrôles de l’interface reprennent les libellés de l’adaptateur ; seuls les services demandés et pris en charge sont proposés. Une ligne de registre seule ne crée pas d’autorisation modifiable.
+- Vérification conteneur corrigée : la version attendue du paquet TMDB fourni est 0.8.0. L’ancien contrôle attendait encore 0.7.0 et faisait échouer la CI de 0.0.72.
+- Pas de nouveau paquet média. Les destinations et adaptateurs spécialisés, les dépendances complètes et la validation du noyau seul restent à terminer.
+
 ## 0.0.72 — configuration des fournisseurs par capacité
 
 - Les routes communes de réglages et de clés délèguent à des interfaces optionnelles d’adaptateurs hôte, sans branche spéciale selon le nom TMDB. Un second adaptateur avec un autre propriétaire et un autre champ secret est testé par les routes HTTP.

@@ -63,8 +63,7 @@ func providerPackageConfiguration(ctx context.Context, db *sql.DB, providerID, o
 	}
 	return configurationBinding{
 		schema: pack.Manifest.Settings, descriptor: pack.Manifest.Descriptor,
-		authorizationsManaged: true,
-		read:                  func(context.Context) (configuration.State, error) { return state, nil },
+		read: func(context.Context) (configuration.State, error) { return state, nil },
 		write: func(ctx context.Context, patch configuration.Patch) error {
 			tx, err := db.BeginTx(ctx, nil)
 			if err != nil {

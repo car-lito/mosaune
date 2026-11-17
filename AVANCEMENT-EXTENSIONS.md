@@ -1,6 +1,6 @@
 # Vers un Mosaune entièrement extensible
 
-État du 16 novembre 2026 · étape 0.0.72.
+État du 17 novembre 2026 · étape 0.0.73.
 
 **Environ 91 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
@@ -83,6 +83,7 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [x] Lire les recherches et sélections depuis le manifeste signé TMDB installé, avec cache, retour arrière et retrait cohérents (0.0.52).
 - [x] 0.0.71 — correspondances d’identifiants externes déclarées dans le paquet signé, interface de résolution commune et suppression du chemin/format TVDB intégré au connecteur.
 - [x] 0.0.72 — contrats communs de configuration et de clés pour les adaptateurs fournisseurs ; instantanés, écritures atomiques et formulaires invalidés lors des transitions de paquets. Pas de formulaire de secours après retrait.
+- [x] 0.0.73 — raccordement commun des autorisations, révocation, descriptions de services et commande d’activation ; deuxième adaptateur testé sans branche TMDB dans les routes.
 - [ ] Achever l’indépendance de TMDB : autres adaptateurs du transport, configuration et interface fournisseur complète.
 - [x] Extraire l’interprétation des réponses MusicBrainz (albums, éditions, pistes et artistes) dans un composant Wasm de Musique, remplaçable et désactivable.
 - [ ] Achever MusicBrainz : adaptateur du transport réseau, autorisation de nouvelles sources, configuration et distribution comme fournisseur indépendant.
