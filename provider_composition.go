@@ -4,7 +4,7 @@ package main
 // list of trusted host adapters, not permission to load arbitrary Go code.
 func suppliedMetadataProviders() []metadataProviderFactory {
 	return []metadataProviderFactory{
-		{ID: "tmdb", Create: func(c *catalog) (metadataProviderRuntime, error) {
+		{ID: "tmdb", InstallDefault: installInitialTMDB, Create: func(c *catalog) (metadataProviderRuntime, error) {
 			p := newTMDBProvider(c.db)
 			p.extension.blocked = func() bool { return c.extensionSafeMode }
 			return p, nil

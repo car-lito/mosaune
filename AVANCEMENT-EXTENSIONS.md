@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 22 novembre 2026 · étape 0.0.74.
+État du 22 novembre 2026 · étape 0.0.75.
 
-**Environ 92 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 93 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -23,6 +23,7 @@ La cible est désormais **quelques grandes extensions visibles, composées de so
 - [x] Contrats de réglages et d’autorisations par propriétaire ; première intégration TMDB.
 - [x] Dépôt officiel, ajout de dépôts GitHub et import de paquets compatibles.
 - [x] Installation, activation, sélection, mise à jour, restauration et retrait des familles exécutables déjà prises en charge.
+- [x] Installation initiale des fournisseurs séparée des migrations historiques, sélection durable et reprise transactionnelle (0.0.75).
 - [ ] Généraliser réglages, migrations privées, permissions de services et gestion des secrets à toutes les familles.
 - [ ] Terminer les règles de confiance des éditeurs et les budgets globaux pour ouvrir plus largement les extensions exécutables.
 

@@ -1,3 +1,13 @@
+## Installation initiale des adaptateurs — 0.0.75
+
+La fabrique peut déclarer InstallDefault(context.Context, *sql.Tx) error. Ce contrat appartient au code hôte approuvé ; aucun programme invité ne reçoit la connexion SQL. La composition officielle attribue cette fonction à TMDB ; MusicBrainz n’a pas de paquet initial à installer par ce mécanisme.
+
+Sur une base neuve, provider_bootstrap enregistre les identifiants avant les migrations. Les anciennes étapes créent leurs tables mais reportent le provisionnement TMDB. Après les migrations, tous les installateurs sélectionnés et le marqueur completed sont validés dans une seule transaction (schéma 51). Un installateur doit utiliser la transaction reçue et éviter les effets externes irréversibles. Échec ou interruption conservent la sélection pour la reprise ; une fabrique manquante, un doublon ou un enregistrement illisible échoue sans installation partielle. Une nouvelle valeur par défaut n’est pas ajoutée à une reprise.
+
+Une composition initiale vide reste vide après réouverture avec les fabriques officielles. Les bases existantes gardent leur parcours historique et leurs choix, sans rejouer les installateurs. Les paquets retirés ne réapparaissent pas. L’installation manuelle d’un fournisseur absent ne reçoit pas automatiquement les accès accordés à la composition officielle initiale.
+
+Cette étape ne fournit pas encore de sélecteur utilisateur au premier démarrage. Les familles médias et leurs migrations ne suivent pas encore toutes ce contrat ; un catalogue sans fournisseur n’est donc pas un noyau entièrement vide.
+
 ## Composition des adaptateurs hôte — 0.0.74
 
 Le catalogue reçoit une liste de fabriques identifiées (metadataProviderFactory). La liste officielle se trouve dans provider_composition.go ; les réglages privés de démarrage sont dans les adaptateurs. Le contrat metadataProviderRuntime complète MetadataProvider avec StartMetadataProvider(context.Context) et CloseMetadataProvider() error. Ces fonctions appartiennent au code hôte approuvé, pas à un programme invité pouvant accéder au catalogue ou à sa base.
@@ -6,7 +16,7 @@ Avant toute création, la composition vérifie les identifiants, les doublons et
 
 La fermeture du catalogue annule d’abord les appels des composants partagés, puis ferme les adaptateurs en ordre inverse avant la base. TMDB annule également ses contextes fournisseurs et interdit définitivement de nouvelles opérations sur cette instance ; aucune préférence persistante n’est changée. Les appels MusicBrainz relèvent du moteur partagé de reconnaissance, annulé avant fermeture ; son adaptateur libère les connexions HTTP inactives.
 
-openCatalogWithProviders permet de tester une composition vide ou de remplacement. L’ouverture habituelle conserve TMDB et MusicBrainz. Les migrations et l’installation initiale des paquets restent inchangées : ce point d’entrée interne ne signifie ni noyau seul achevé, ni chargement de fournisseurs arbitraires depuis GitHub, ni nouvelle option utilisateur.
+openCatalogWithProviders permet de tester une composition vide ou de remplacement. L’ouverture habituelle conserve TMDB et MusicBrainz. Depuis 0.0.75, l’installation initiale suit le contrat décrit plus haut. Ce point d’entrée interne ne signifie ni noyau seul achevé, ni chargement de fournisseurs arbitraires depuis GitHub, ni nouvelle option utilisateur.
 
 ## Présentation dans la recherche — 0.0.25
 

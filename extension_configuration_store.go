@@ -34,6 +34,11 @@ func migrateExtensionConfiguration(db *sql.DB) error {
 	if err = store.Initialize(ctx); err != nil {
 		return err
 	}
+	if skip, e := deferProviderSeed(ctx, tx, 16); e != nil {
+		return e
+	} else if skip {
+		return tx.Commit()
+	}
 	schema := bundled.Settings()
 	var archive []byte
 	if err = tx.QueryRow(`SELECT archive FROM provider_packages WHERE id='tmdb'`).Scan(&archive); err != nil && err != sql.ErrNoRows {

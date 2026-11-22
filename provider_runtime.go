@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"reflect"
@@ -17,8 +18,9 @@ type metadataProviderRuntime interface {
 }
 
 type metadataProviderFactory struct {
-	ID     string
-	Create func(*catalog) (metadataProviderRuntime, error)
+	InstallDefault func(context.Context, *sql.Tx) error
+	ID             string
+	Create         func(*catalog) (metadataProviderRuntime, error)
 }
 
 var providerRegistrationID = regexp.MustCompile(`^[a-z][a-z0-9-]{0,63}$`)
@@ -39,13 +41,8 @@ func (c *catalog) startMetadataProviders(ctx context.Context, factories []metada
 	if len(c.providers) != 0 {
 		return errors.New("Les fournisseurs sont déjà démarrés.")
 	}
-	seen := map[string]bool{}
-	// Validate composition before any constructor can allocate resources.
-	for _, f := range factories {
-		if !providerRegistrationID.MatchString(f.ID) || f.Create == nil || seen[f.ID] {
-			return errors.New("Composition des fournisseurs invalide.")
-		}
-		seen[f.ID] = true
+	if err := validateProviderFactories(factories); err != nil {
+		return err
 	}
 	started := []MetadataProvider{}
 	fail := func(err error) error { return errors.Join(err, closeMetadataProviders(started)) }
@@ -83,4 +80,19 @@ func closeMetadataProviders(providers []MetadataProvider) error {
 		}
 	}
 	return errors.Join(errs...)
+}
+
+func validateProviderFactories(factories []metadataProviderFactory) error {
+	if len(factories) > 128 {
+		return errors.New("Trop de fournisseurs.")
+	}
+	seen := map[string]bool{}
+	// Validate composition before any constructor can allocate resources.
+	for _, f := range factories {
+		if !providerRegistrationID.MatchString(f.ID) || f.Create == nil || seen[f.ID] {
+			return errors.New("Composition des fournisseurs invalide.")
+		}
+		seen[f.ID] = true
+	}
+	return nil
 }

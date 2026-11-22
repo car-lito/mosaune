@@ -1,3 +1,11 @@
+## 0.0.75 — installation initiale des fournisseurs
+
+- La première composition est enregistrée avant les migrations. Les fonctions d’installation des fournisseurs sélectionnés et leur validation finale sont exécutées dans une même transaction ; un échec ne laisse pas de paquet partiellement installé.
+- Une reprise conserve la sélection initiale, même si les valeurs par défaut du programme changent. Un fournisseur requis manquant ou une sélection illisible bloque explicitement la reprise.
+- Une nouvelle composition vide ne crée aucun paquet, réglage, autorisation ni entrée de registre TMDB. Revenir ensuite au programme habituel ne l’installe pas silencieusement ; une installation manuelle requiert ses autorisations explicites.
+- Les installations existantes conservent leurs paquets, retraits, pauses, clés et refus d’accès. La composition classique continue de fournir TMDB. Schéma 51 ; aucune nouvelle archive média nécessaire.
+- Ce choix reste un point d’entrée interne testé, pas encore un assistant d’installation ni un noyau entièrement vide. Les autres familles et leurs migrations restent à découpler.
+
 ## 0.0.74 — composition et démarrage des fournisseurs
 
 - Le catalogue ne construit plus TMDB/MusicBrainz et ne lit plus leurs paramètres privés au démarrage. La composition officielle est séparée ; chaque adaptateur initialise et ferme ses ressources par le même contrat.

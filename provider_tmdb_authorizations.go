@@ -36,6 +36,11 @@ func migrateExtensionAuthorizations(db *sql.DB) error {
 	if err = s.Initialize(ctx); err != nil {
 		return err
 	}
+	if skip, e := deferProviderSeed(ctx, tx, 17); e != nil {
+		return e
+	} else if skip {
+		return tx.Commit()
+	}
 	_, err = s.Read(ctx, tmdbConfigurationOwner)
 	newOwner := errors.Is(err, sql.ErrNoRows)
 	if err != nil && !newOwner {

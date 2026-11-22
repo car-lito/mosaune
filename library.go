@@ -117,6 +117,10 @@ func openCatalogWithProviders(dir string, factories []metadataProviderFactory) (
 			return nil, fmt.Errorf("sauvegarde avant migration : %w", e)
 		}
 	}
+	if err = prepareProviderBootstrap(context.Background(), db, oldVersion, factories); err != nil {
+		db.Close()
+		return nil, err
+	}
 	if err = migrateMetadata(db); err != nil {
 		db.Close()
 		return nil, err
@@ -310,6 +314,10 @@ func openCatalogWithProviders(dir string, factories []metadataProviderFactory) (
 		return nil, err
 	}
 	if err = migrateAcquisitionRetirement(db); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if err = finishProviderBootstrap(context.Background(), db, factories); err != nil {
 		db.Close()
 		return nil, err
 	}

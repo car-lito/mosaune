@@ -12,7 +12,10 @@ func (p *tmdbProvider) StartMetadataProvider(ctx context.Context) error {
 	}
 	p.state.disabled = !active
 	if err := p.loadServiceAuthorization(ctx); err != nil {
-		return err
+		if err != sql.ErrNoRows || p.extension.installed {
+			return err
+		}
+		p.state.accessDenied = true
 	}
 	// A missing historical row keeps the constructor's default. Invalid stored
 	// state is an error, never a reason to silently reactivate a provider.

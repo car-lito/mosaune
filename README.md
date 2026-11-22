@@ -1,3 +1,5 @@
+Version 0.0.75 — l’installation initiale des fournisseurs suit la composition choisie, mémorisée et reprise après interruption. Un fournisseur retiré n’est pas réinstallé au démarrage. [Contrat contributeurs](EXTENSIONS-METADONNEES.md).
+
 Version 0.0.74 — démarrage et fermeture des fournisseurs passent par une composition et un contrat communs, séparés du catalogue. [Contrat contributeurs](EXTENSIONS-METADONNEES.md).
 
 Version 0.0.73 — autorisations, révocation des appels et descriptions des services passent par un adaptateur fournisseur commun. [Contrat contributeurs](extension-kit/authorization/README.md).
