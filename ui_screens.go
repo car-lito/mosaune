@@ -72,6 +72,11 @@ func migrateUIScreens(db *sql.DB) error {
 		return e
 	}
 	defer tx.Rollback()
+	if deferred, err := deferMediaSeed(context.Background(), tx, 27); err != nil {
+		return err
+	} else if deferred {
+		return tx.Commit()
+	}
 	for _, p := range screenPackages() {
 		raw, _ := json.Marshal(p.Manifest)
 		if _, e = tx.Exec("INSERT OR IGNORE INTO extensions(id,manifest,checksum,enabled) VALUES(?,?,?,1)", p.Manifest.ID, string(raw), p.Checksum); e != nil {

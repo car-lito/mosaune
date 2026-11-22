@@ -37,6 +37,11 @@ CREATE TABLE recognition_selection(kind TEXT PRIMARY KEY,id TEXT NOT NULL);`)
 	if err != nil {
 		return err
 	}
+	if deferred, err := deferMediaSeed(context.Background(), tx, 19); err != nil {
+		return err
+	} else if deferred {
+		return tx.Commit()
+	}
 	// Remember the existing choice, including an absent factory package. Never
 	// substitute a different installed module when the selected one disappears.
 	for _, kind := range recognitionKinds {

@@ -74,6 +74,11 @@ func migrateRecognitionPackages(db *sql.DB) error {
 	if _, err = tx.ExecContext(ctx, `CREATE TABLE recognition_packages(kind TEXT PRIMARY KEY,id TEXT NOT NULL UNIQUE,code BLOB NOT NULL);`); err != nil {
 		return err
 	}
+	if deferred, err := deferMediaSeed(context.Background(), tx, 18); err != nil {
+		return err
+	} else if deferred {
+		return tx.Commit()
+	}
 	store := registry.SQLStore{DB: tx}
 	for _, kind := range recognitionKinds {
 		s, e := store.Load(ctx)

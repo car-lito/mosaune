@@ -1,3 +1,12 @@
+## 0.0.76 — composition initiale des familles médias
+
+- Les migrations créent les tables sans installer les composants médias d’office sur un nouveau catalogue. La composition initiale est mémorisée séparément des choix de fournisseurs.
+- Films, Séries et Musique sont installables seuls, ensemble ou absents dès le départ. Le planificateur et l’application transactionnelle des familles sont partagés avec les opérations d’administration ; aucun second catalogue de composants à maintenir. Les composants communs ne sont installés qu’une fois.
+- Toutes les familles initiales, leurs écrans, choix de composants et marqueur de réussite sont validés ensemble. Un échec sur la deuxième famille annule aussi la première ; une reprise conserve la sélection d’origine. Les installations existantes, pauses et retraits ne sont pas modifiés.
+- Le choix de l’écran d’une famille est désormais enregistré par son installation, sans dépendre d’une ancienne migration.
+- Options de premier lancement : -initial-media films,series,music (ou none), variable MOSAUNE_INITIAL_MEDIA, -initial-home=false pour omettre l’accueil. Aucun effet de réinstallation sur un catalogue existant. Schéma 52, composants et archives médias inchangés.
+- Les fournisseurs restent choisis séparément ; les adaptateurs hôte, tables communes et programmes fournis restent dans le binaire. Cette étape ne prétend pas terminer le noyau minimal ni les lecteurs.
+
 ## 0.0.75 — installation initiale des fournisseurs
 
 - La première composition est enregistrée avant les migrations. Les fonctions d’installation des fournisseurs sélectionnés et leur validation finale sont exécutées dans une même transaction ; un échec ne laisse pas de paquet partiellement installé.

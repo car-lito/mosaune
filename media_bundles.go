@@ -137,6 +137,11 @@ func migrateMediaBundles(db *sql.DB) error {
 	if _, e = tx.Exec(`CREATE TABLE IF NOT EXISTS media_bundles(id TEXT PRIMARY KEY,manifest TEXT NOT NULL);CREATE TABLE IF NOT EXISTS media_bundle_screens(kind TEXT PRIMARY KEY,id TEXT NOT NULL);`); e != nil {
 		return e
 	}
+	if deferred, err := deferMediaSeed(context.Background(), tx, 30); err != nil {
+		return err
+	} else if deferred {
+		return tx.Commit()
+	}
 	ms, e := mediaBundleDefinitions()
 	if e != nil {
 		return e
@@ -456,40 +461,7 @@ func (c *catalog) mediaBundlePlans(ctx context.Context, id, op string, revision 
 	if len(p.Blockers) > 0 {
 		return nil, errors.New("Résolvez les conflits avant de continuer.")
 	}
-	if op == "restore" {
-		if e = applyBundleUndo(ctx, tx, p); e != nil {
-			return nil, e
-		}
-	} else {
-		for _, step := range p.Steps {
-			if step.Slot == "screen" {
-				e = applyBundleScreen(ctx, tx, p.Manifest, step)
-			} else {
-				_, e = changeRecognitionTx(ctx, tx, step.ID, step.Operation, rev)
-				if e == nil {
-					var s registry.Snapshot
-					s, e = (registry.SQLStore{DB: tx}).Load(ctx)
-					rev = s.Revision
-				}
-			}
-			if e != nil {
-				return nil, e
-			}
-		}
-	}
-	if op == "prepare" {
-		raw, _ := json.Marshal(p.Manifest)
-		_, e = tx.ExecContext(ctx, "INSERT INTO media_bundles VALUES(?,?) ON CONFLICT(id) DO UPDATE SET manifest=excluded.manifest", p.Manifest.ID, string(raw))
-	} else if op == "remove" {
-		_, e = tx.ExecContext(ctx, "DELETE FROM media_bundles WHERE id=?", p.Manifest.ID)
-		if e == nil {
-			_, e = tx.ExecContext(ctx, "DELETE FROM media_bundle_archives WHERE kind=?", p.Manifest.Kind)
-		}
-		if e == nil {
-			_, e = tx.ExecContext(ctx, "DELETE FROM media_bundle_undo WHERE kind=?", p.Manifest.Kind)
-		}
-	}
-	if e != nil {
+	if e = applyMediaBundlePlanTx(ctx, tx, p, op, rev); e != nil {
 		return nil, e
 	}
 	if e = tx.Commit(); e != nil {
@@ -544,4 +516,50 @@ func (c *catalog) mediaBundleRoutes(mux *secureMux) {
 			sendJSON(w, 200, p[0])
 		})
 	}
+}
+
+// Apply an already validated plan within the caller's transaction.
+func applyMediaBundlePlanTx(ctx context.Context, tx *sql.Tx, p mediaBundlePlan, op string, rev int64) error {
+	var e error
+	if op == "restore" {
+		if e = applyBundleUndo(ctx, tx, p); e != nil {
+			return e
+		}
+	} else {
+		for _, step := range p.Steps {
+			if step.Slot == "screen" {
+				e = applyBundleScreen(ctx, tx, p.Manifest, step)
+			} else {
+				_, e = changeRecognitionTx(ctx, tx, step.ID, step.Operation, rev)
+				if e == nil {
+					var s registry.Snapshot
+					s, e = (registry.SQLStore{DB: tx}).Load(ctx)
+					rev = s.Revision
+				}
+			}
+			if e != nil {
+				return e
+			}
+		}
+	}
+	if op == "prepare" {
+		raw, _ := json.Marshal(p.Manifest)
+		_, e = tx.ExecContext(ctx, "INSERT INTO media_bundles VALUES(?,?) ON CONFLICT(id) DO UPDATE SET manifest=excluded.manifest", p.Manifest.ID, string(raw))
+		if e == nil {
+			_, e = tx.ExecContext(ctx, "INSERT INTO media_bundle_screens(kind,id) VALUES(?,?) ON CONFLICT(kind) DO UPDATE SET id=excluded.id", p.Manifest.Kind, p.ScreenID)
+		}
+	} else if op == "remove" {
+		_, e = tx.ExecContext(ctx, "DELETE FROM media_bundles WHERE id=?", p.Manifest.ID)
+		if e == nil {
+			_, e = tx.ExecContext(ctx, "DELETE FROM media_bundle_archives WHERE kind=?", p.Manifest.Kind)
+		}
+		if e == nil {
+			_, e = tx.ExecContext(ctx, "DELETE FROM media_bundle_undo WHERE kind=?", p.Manifest.Kind)
+		}
+	}
+	if e != nil {
+		return e
+	}
+
+	return nil
 }

@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 22 novembre 2026 · étape 0.0.75.
+État du 22 novembre 2026 · étape 0.0.76.
 
-**Environ 93 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 94 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -39,6 +39,7 @@ La cible est désormais **quelques grandes extensions visibles, composées de so
 - [x] Commandes, artistes, listes de pistes/fichiers, rapprochement des pistes, format des pochettes et présentation des suggestions.
 - [x] Exemples de remplaçants externes réellement installés et exécutés.
 - [ ] Extraire les comportements encore intégrés : profils, services de recherche/découverte, association des métadonnées, playlists et adaptateurs des commandes.
+- [x] 0.0.76 : installation initiale indépendante des familles, composants partagés et écrans via le même planificateur, transaction et sélection durable ; options de démarrage dédiées.
 - [ ] Livrer trois familles médias complètes, dont l’installation et le retrait commandent aussi leurs écrans et services.
 
 ### Gestion commune et dépendances

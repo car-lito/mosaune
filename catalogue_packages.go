@@ -34,6 +34,11 @@ func migrateCataloguePackages(db *sql.DB) error {
 		return err
 	}
 	defer tx.Rollback()
+	if deferred, err := deferMediaSeed(context.Background(), tx, 22); err != nil {
+		return err
+	} else if deferred {
+		return tx.Commit()
+	}
 	ctx := context.Background()
 	store := registry.SQLStore{DB: tx}
 	for _, kind := range catalogueKinds {

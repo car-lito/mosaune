@@ -25,6 +25,14 @@ func migrateExtractionPackages(db *sql.DB) error {
 		return err
 	}
 	defer tx.Rollback()
+	if pending, e := pendingMediaBootstrap(context.Background(), tx); e != nil {
+		return e
+	} else if pending {
+		if _, e = tx.Exec("DROP TABLE local_metadata_packages; PRAGMA user_version=21"); e != nil {
+			return e
+		}
+		return tx.Commit()
+	}
 	if _, err = tx.Exec(`INSERT INTO recognition_packages(id,kind,code) SELECT id,'audiotags',code FROM local_metadata_packages;
  INSERT INTO recognition_selection(kind,id) VALUES('audiotags','mosaune.music.tags') ON CONFLICT(kind) DO NOTHING;
  DROP TABLE local_metadata_packages;

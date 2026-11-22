@@ -1,3 +1,5 @@
+Version 0.0.76 — une installation neuve peut choisir Films, Séries ou Musique indépendamment. Les familles utilisent le même installateur que leurs ajouts ultérieurs ; composants partagés, écrans et reprise après interruption sont conservés. [Options et contrat](extensions/MEDIA-BUNDLES.md#installation-initiale--0076).
+
 Version 0.0.75 — l’installation initiale des fournisseurs suit la composition choisie, mémorisée et reprise après interruption. Un fournisseur retiré n’est pas réinstallé au démarrage. [Contrat contributeurs](EXTENSIONS-METADONNEES.md).
 
 Version 0.0.74 — démarrage et fermeture des fournisseurs passent par une composition et un contrat communs, séparés du catalogue. [Contrat contributeurs](EXTENSIONS-METADONNEES.md).

@@ -26,6 +26,11 @@ func migrateDetailSections(db *sql.DB) error {
 		return e
 	}
 	defer tx.Rollback()
+	if deferred, err := deferMediaSeed(context.Background(), tx, 24); err != nil {
+		return err
+	} else if deferred {
+		return tx.Commit()
+	}
 	ctx := context.Background()
 	store := registry.SQLStore{DB: tx}
 	s, e := store.Load(ctx)

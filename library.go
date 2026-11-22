@@ -78,6 +78,9 @@ func openCatalog(dir string) (*catalog, error) {
 	return openCatalogWithProviders(dir, suppliedMetadataProviders())
 }
 func openCatalogWithProviders(dir string, factories []metadataProviderFactory) (*catalog, error) {
+	return openCatalogWithComposition(dir, factories, suppliedMediaSelection())
+}
+func openCatalogWithComposition(dir string, factories []metadataProviderFactory, media mediaBootstrapSelection) (*catalog, error) {
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return nil, err
 	}
@@ -116,6 +119,10 @@ func openCatalogWithProviders(dir string, factories []metadataProviderFactory) (
 			db.Close()
 			return nil, fmt.Errorf("sauvegarde avant migration : %w", e)
 		}
+	}
+	if err = prepareMediaBootstrap(context.Background(), db, oldVersion, media); err != nil {
+		db.Close()
+		return nil, err
 	}
 	if err = prepareProviderBootstrap(context.Background(), db, oldVersion, factories); err != nil {
 		db.Close()
@@ -318,6 +325,10 @@ func openCatalogWithProviders(dir string, factories []metadataProviderFactory) (
 		return nil, err
 	}
 	if err = finishProviderBootstrap(context.Background(), db, factories); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if err = finishMediaBootstrap(context.Background(), db); err != nil {
 		db.Close()
 		return nil, err
 	}

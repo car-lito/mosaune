@@ -25,6 +25,11 @@ func migrateDetailLists(db *sql.DB) error {
 		return e
 	}
 	defer tx.Rollback()
+	if deferred, err := deferMediaSeed(context.Background(), tx, 23); err != nil {
+		return err
+	} else if deferred {
+		return tx.Commit()
+	}
 	ctx := context.Background()
 	store := registry.SQLStore{DB: tx}
 	s, e := store.Load(ctx)

@@ -41,6 +41,11 @@ func migrateAudioTags(db *sql.DB) error {
 	if _, err = tx.ExecContext(ctx, "CREATE TABLE local_metadata_packages(id TEXT PRIMARY KEY,code BLOB NOT NULL)"); err != nil {
 		return err
 	}
+	if deferred, err := deferMediaSeed(context.Background(), tx, 20); err != nil {
+		return err
+	} else if deferred {
+		return tx.Commit()
+	}
 	store := registry.SQLStore{DB: tx}
 	s, err := store.Load(ctx)
 	if err != nil {

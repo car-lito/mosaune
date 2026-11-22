@@ -20,6 +20,11 @@ func migrateAcquisitionExtension(db *sql.DB) error {
 		return err
 	}
 	defer tx.Rollback()
+	if deferred, err := deferMediaSeed(context.Background(), tx, 39); err != nil {
+		return err
+	} else if deferred {
+		return tx.Commit()
+	}
 	ctx := context.Background()
 	store := registry.SQLStore{DB: tx}
 	state, err := store.Load(ctx)
