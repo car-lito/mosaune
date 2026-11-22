@@ -10,6 +10,8 @@ import (
 
 var errProviderModuleUnavailable = errors.New("Module fournisseur indisponible. Activez ou réinstallez son paquet dans Extensions ; aucun moteur de remplacement n’est utilisé.")
 
+var errProviderStopped = errors.New("Fournisseur arrêté.")
+
 var errProviderDisabled = errors.New("Fournisseur désactivé. Les informations déjà enregistrées restent disponibles.")
 
 // Optional host-owned lifecycle, independent of the provider's execution engine.
@@ -17,6 +19,7 @@ var errProviderDisabled = errors.New("Fournisseur désactivé. Les informations 
 type providerLifecycle struct {
 	changes           sync.Mutex
 	mu                sync.Mutex
+	closed            bool
 	disabled          bool
 	accessDenied      bool
 	moduleUnavailable bool
@@ -37,7 +40,7 @@ func providerAvailable(p MetadataProvider) bool {
 		s := managed.lifecycle()
 		s.mu.Lock()
 		defer s.mu.Unlock()
-		return !s.disabled && !s.accessDenied && !s.moduleUnavailable
+		return !s.closed && !s.disabled && !s.accessDenied && !s.moduleUnavailable
 	}
 	return true
 }
@@ -62,6 +65,9 @@ func beginProvider(ctx context.Context, p MetadataProvider) (context.Context, fu
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.closed {
+		return ctx, func() {}, errProviderStopped
+	}
 	if s.disabled {
 		return ctx, func() {}, errProviderDisabled
 	}
@@ -92,6 +98,10 @@ func providerCommit(ctx context.Context) (func(), error) {
 		if err := context.Cause(ctx); err != nil {
 			lease.owner.mu.Unlock()
 			return func() {}, err
+		}
+		if lease.owner.closed {
+			lease.owner.mu.Unlock()
+			return func() {}, errProviderStopped
 		}
 		if lease.owner.disabled {
 			lease.owner.mu.Unlock()
@@ -185,4 +195,14 @@ func providerStateRoutes(mux *secureMux, c *catalog) {
 		}
 		sendJSON(w, 200, map[string]bool{"enabled": providerEnabled(p)})
 	})
+}
+
+// Stop is terminal for this in-memory instance, without changing persisted preferences.
+func (s *providerLifecycle) stop() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.closed = true
+	for _, cancel := range s.calls {
+		cancel(errProviderStopped)
+	}
 }

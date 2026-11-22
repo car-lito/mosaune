@@ -1,3 +1,5 @@
+Version 0.0.74 — démarrage et fermeture des fournisseurs passent par une composition et un contrat communs, séparés du catalogue. [Contrat contributeurs](EXTENSIONS-METADONNEES.md).
+
 Version 0.0.73 — autorisations, révocation des appels et descriptions des services passent par un adaptateur fournisseur commun. [Contrat contributeurs](extension-kit/authorization/README.md).
 
 Version 0.0.72 — les réglages et clés des fournisseurs passent par des contrats communs. Les formulaires ouverts avant un remplacement ou une réinstallation sont refusés ; les champs d’une autre version restent conservés sans être exposés. [Contrat contributeurs](extension-kit/configuration/README.md).

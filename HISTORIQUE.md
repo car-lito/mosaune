@@ -1,3 +1,11 @@
+## 0.0.74 — composition et démarrage des fournisseurs
+
+- Le catalogue ne construit plus TMDB/MusicBrainz et ne lit plus leurs paramètres privés au démarrage. La composition officielle est séparée ; chaque adaptateur initialise et ferme ses ressources par le même contrat.
+- Validation préalable des identifiants, refus des doublons et publication de la liste uniquement après réussite complète. Erreur, annulation ou identité incohérente ferment les instances créées dans l’ordre inverse, y compris celle qui échoue ; les erreurs de fermeture sont conservées.
+- Une instance TMDB arrêtée annule ses requêtes et refuse les résultats tardifs sans modifier ses préférences persistantes. L’état enregistré illisible provoque un échec explicite, sans réactivation silencieuse.
+- Tests d’un catalogue avec un autre fournisseur ou sans fournisseur. Cela ne constitue pas encore le noyau seul : migrations, installation des composants et distribution indépendante restent à découpler.
+- Pas de nouveau paquet média ni de changement de lecteur.
+
 ## 0.0.73 — autorisations communes aux fournisseurs
 
 - Les routes des accès, l’affichage de leurs descriptions et la commande d’activation ne sélectionnent plus TMDB en dur. Des capacités optionnelles relient chaque adaptateur à son propriétaire et au cycle de vie de ses appels.

@@ -1,3 +1,13 @@
+## Composition des adaptateurs hôte — 0.0.74
+
+Le catalogue reçoit une liste de fabriques identifiées (metadataProviderFactory). La liste officielle se trouve dans provider_composition.go ; les réglages privés de démarrage sont dans les adaptateurs. Le contrat metadataProviderRuntime complète MetadataProvider avec StartMetadataProvider(context.Context) et CloseMetadataProvider() error. Ces fonctions appartiennent au code hôte approuvé, pas à un programme invité pouvant accéder au catalogue ou à sa base.
+
+Avant toute création, la composition vérifie les identifiants, les doublons et les constructeurs. Un constructeur retournant une instance partielle avec une erreur doit la rendre refermable. Une erreur de démarrage, une annulation ou une identité différente entraîne la fermeture de toutes les instances créées, en ordre inverse. Les erreurs initiales et de fermeture sont conservées. La liste n’est exposée aux requêtes qu’une fois tous les adaptateurs démarrés ; les adaptateurs ne doivent pas consulter une composition partiellement publiée. Un constructeur reste responsable des ressources qu’il ne retourne pas.
+
+La fermeture du catalogue annule d’abord les appels des composants partagés, puis ferme les adaptateurs en ordre inverse avant la base. TMDB annule également ses contextes fournisseurs et interdit définitivement de nouvelles opérations sur cette instance ; aucune préférence persistante n’est changée. Les appels MusicBrainz relèvent du moteur partagé de reconnaissance, annulé avant fermeture ; son adaptateur libère les connexions HTTP inactives.
+
+openCatalogWithProviders permet de tester une composition vide ou de remplacement. L’ouverture habituelle conserve TMDB et MusicBrainz. Les migrations et l’installation initiale des paquets restent inchangées : ce point d’entrée interne ne signifie ni noyau seul achevé, ni chargement de fournisseurs arbitraires depuis GitHub, ni nouvelle option utilisateur.
+
 ## Présentation dans la recherche — 0.0.25
 
 Le champ facultatif `presentation` traverse les fiches normalisées et les contrats du moteur. Le type affiché, les mots-clés et les proportions ne sont pas codés en dur dans le renderer. Voir le [contrat et l’exemple Jeu/Console](extension-kit/presentation/v1/README.md).

@@ -75,6 +75,9 @@ type catalog struct {
 }
 
 func openCatalog(dir string) (*catalog, error) {
+	return openCatalogWithProviders(dir, suppliedMetadataProviders())
+}
+func openCatalogWithProviders(dir string, factories []metadataProviderFactory) (*catalog, error) {
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return nil, err
 	}
@@ -325,25 +328,9 @@ func openCatalog(dir string) (*catalog, error) {
 	if c.accountCount() == 0 {
 		c.auth.code = rand.Text()
 	}
-	c.providers = []MetadataProvider{newTMDBProvider(db), newMusicBrainzProvider(db)}
-	c.providers[1].(*musicBrainzProvider).owner = c
-	p := c.providers[0].(*tmdbProvider)
-	var active = true
-	if e := db.QueryRow("SELECT enabled FROM provider_states WHERE id='tmdb'").Scan(&active); e != nil && e != sql.ErrNoRows {
-		reader.Close()
-		db.Close()
-		return nil, e
+	if err = c.startMetadataProviders(context.Background(), factories); err != nil {
+		return nil, errors.Join(err, c.close())
 	}
-	p.state.disabled = !active
-	if e = p.loadServiceAuthorization(context.Background()); e != nil {
-		reader.Close()
-		db.Close()
-		return nil, e
-	}
-	p.extension.blocked = func() bool { return c.extensionSafeMode }
-	_ = db.QueryRow(`SELECT enabled FROM provider_runtime WHERE id='tmdb'`).Scan(&p.extension.enabled)
-	p.extension.enabled = p.extension.enabled && p.extension.installed
-	p.setModuleAvailable(p.extension.enabled)
 	return c, nil
 }
 
@@ -654,13 +641,9 @@ func (c *catalog) close() error {
 		call.cancel(context.Canceled)
 	}
 	c.recognition.mu.Unlock()
-	for _, provider := range c.providers {
-		if p, ok := provider.(*tmdbProvider); ok {
-			p.closeExtension()
-		}
-	}
+	providerErr := closeMetadataProviders(c.providers)
 	if c.authRead != nil {
 		_ = c.authRead.Close()
 	}
-	return c.db.Close()
+	return errors.Join(providerErr, c.db.Close())
 }

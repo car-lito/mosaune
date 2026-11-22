@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 17 novembre 2026 · étape 0.0.73.
+État du 22 novembre 2026 · étape 0.0.74.
 
-**Environ 91 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 92 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -84,6 +84,7 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [x] 0.0.71 — correspondances d’identifiants externes déclarées dans le paquet signé, interface de résolution commune et suppression du chemin/format TVDB intégré au connecteur.
 - [x] 0.0.72 — contrats communs de configuration et de clés pour les adaptateurs fournisseurs ; instantanés, écritures atomiques et formulaires invalidés lors des transitions de paquets. Pas de formulaire de secours après retrait.
 - [x] 0.0.73 — raccordement commun des autorisations, révocation, descriptions de services et commande d’activation ; deuxième adaptateur testé sans branche TMDB dans les routes.
+- [x] 0.0.74 — composition officielle et initialisation/fermeture des adaptateurs séparées du catalogue ; nettoyage après échec, autre fournisseur et composition vide testés. Les migrations restent intégrées.
 - [ ] Achever l’indépendance de TMDB : autres adaptateurs du transport, configuration et interface fournisseur complète.
 - [x] Extraire l’interprétation des réponses MusicBrainz (albums, éditions, pistes et artistes) dans un composant Wasm de Musique, remplaçable et désactivable.
 - [ ] Achever MusicBrainz : adaptateur du transport réseau, autorisation de nouvelles sources, configuration et distribution comme fournisseur indépendant.

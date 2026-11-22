@@ -83,14 +83,18 @@ func (p *tmdbProvider) setExtension(ctx context.Context, enabled bool) error {
 	}
 	return nil
 }
-func (p *tmdbProvider) closeExtension() {
+func (p *tmdbProvider) closeExtension() { _ = p.closeExtensionWithError() }
+
+func (p *tmdbProvider) closeExtensionWithError() error {
 	p.extension.mu.Lock()
 	defer p.extension.mu.Unlock()
 	p.extension.enabled = false
 	if p.extension.engine != nil {
-		_ = p.extension.engine.Close()
+		err := p.extension.engine.Close()
 		p.extension.engine = nil
+		return err
 	}
+	return nil
 }
 func (p *tmdbProvider) activeSearch(ctx context.Context, secret string, q MetadataQuery) ([]MetadataCandidate, error) {
 	profile, profileErr := p.configuredProfile(ctx)
