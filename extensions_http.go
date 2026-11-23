@@ -34,6 +34,7 @@ func (c *catalog) extensionRoutes(mux *secureMux) {
 	c.extensionRepositoryRoutes(mux)
 	c.extensionConfigurationRoutes(mux)
 	c.providerPackageRoutes(mux)
+	c.tmdbPackageCompatibilityRoutes(mux)
 	mux.HandleFunc("GET /api/v1/extensions/theme-template", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Content-Disposition", `attachment; filename="extension.json"`)

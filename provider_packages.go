@@ -40,22 +40,6 @@ func migrateProviderPackages(db *sql.DB) error {
 	return err
 }
 
-type providerPackageState struct {
-	Registration        *providerRegistration  `json:"registration,omitempty"`
-	RegistrationWarning string                 `json:"registrationWarning,omitempty"`
-	Package             *packageformat.Package `json:"package"`
-	PreviousVersion     string                 `json:"previousVersion"`
-	PreviousChecksum    string                 `json:"previousChecksum"`
-	Runtime             map[string]bool        `json:"runtime"`
-}
-
-type providerRegistration struct {
-	Revision     int64             `json:"revision"`
-	Wanted       bool              `json:"wanted"`
-	Dependencies []string          `json:"dependencies"`
-	Choices      map[string]string `json:"choices"`
-}
-
 func (p *tmdbProvider) packageKey() ed25519.PublicKey {
 	if p.extension.key != nil {
 		return p.extension.key

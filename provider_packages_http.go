@@ -2,39 +2,36 @@ package main
 
 import (
 	"database/sql"
-	_ "embed"
+	"errors"
 	"io"
 	"mosaune/extensionkit/packageformat"
 	"net/http"
 )
 
-// These signed archives are standalone deliverables. Version 0.8.0 is provisioned
-// once for a fresh installation; runtime execution only reads the installed archive.
-//
-//go:embed packages/tmdb-0.4.0.mosaune.zip
-var providerExample []byte
-
-//go:embed packages/tmdb-0.4.1.mosaune.zip
-var providerUpdateExample []byte
-
-//go:embed packages/tmdb-0.5.0.mosaune.zip
-var providerCatalogueExample []byte
-
-//go:embed packages/tmdb-0.6.0.mosaune.zip
-var providerDiscoveryExample []byte
-
-//go:embed packages/tmdb-0.7.0.mosaune.zip
-var providerTransportExample []byte
-
-//go:embed packages/tmdb-0.8.0.mosaune.zip
-var providerIdentifiersExample []byte
+func (c *catalog) packageProvider(w http.ResponseWriter, r *http.Request) metadataPackageProvider {
+	p, ok := c.provider(r.PathValue("provider")).(metadataPackageProvider)
+	if !ok {
+		problem(w, 404, "Ce fournisseur ne propose pas de gestion de paquets.")
+		return nil
+	}
+	return p
+}
 
 func (c *catalog) providerPackageRoutes(mux *secureMux) {
-	provider := func() *tmdbProvider { p, _ := c.provider("tmdb").(*tmdbProvider); return p }
-	mux.HandleFunc("GET /api/v1/provider-packages/tmdb", func(w http.ResponseWriter, r *http.Request) {
-		p := provider()
+	mux.HandleFunc("GET /api/v1/provider-packages", func(w http.ResponseWriter, r *http.Request) {
+		// Discovery is based on implemented contracts, never a manifest claim.
+		managers := []map[string]string{}
+		for _, p := range c.providers {
+			if _, ok := p.(metadataPackageProvider); ok {
+				info := p.Info()
+				managers = append(managers, map[string]string{"id": info.ID, "name": info.Name})
+			}
+		}
+		sendJSON(w, 200, managers)
+	})
+	mux.HandleFunc("GET /api/v1/provider-packages/{provider}", func(w http.ResponseWriter, r *http.Request) {
+		p := c.packageProvider(w, r)
 		if p == nil {
-			problem(w, 404, "Fournisseur absent.")
 			return
 		}
 		state, err := p.packageState(r.Context())
@@ -44,79 +41,16 @@ func (c *catalog) providerPackageRoutes(mux *secureMux) {
 		}
 		sendJSON(w, 200, state)
 	})
-	mux.HandleFunc("GET /api/v1/provider-packages/example", func(w http.ResponseWriter, r *http.Request) {
-		raw, name := providerExample, "tmdb-0.4.0.mosaune.zip"
-		if r.URL.Query().Get("update") == "1" {
-			raw, name = providerUpdateExample, "tmdb-0.4.1.mosaune.zip"
-		}
-		if r.URL.Query().Get("catalogue") == "1" {
-			raw, name = providerCatalogueExample, "tmdb-0.5.0.mosaune.zip"
-		}
-		if r.URL.Query().Get("discovery") == "1" {
-			raw, name = providerDiscoveryExample, "tmdb-0.6.0.mosaune.zip"
-		}
-		if r.URL.Query().Get("transport") == "1" {
-			raw, name = providerTransportExample, "tmdb-0.7.0.mosaune.zip"
-		}
-		if r.URL.Query().Get("identifiers") == "1" {
-			raw, name = providerIdentifiersExample, "tmdb-0.8.0.mosaune.zip"
-		}
-		w.Header().Set("Content-Type", "application/zip")
-		w.Header().Set("Content-Disposition", `attachment; filename="`+name+`"`)
-		_, _ = w.Write(raw)
-	})
-	upload := func(w http.ResponseWriter, r *http.Request) (packageformat.Package, bool) {
-		p := provider()
-		if p == nil {
-			problem(w, 404, "Fournisseur absent.")
-			return packageformat.Package{}, false
-		}
-		raw, err := io.ReadAll(http.MaxBytesReader(w, r.Body, packageformat.MaxArchive))
-		if err != nil {
-			problem(w, 400, "Paquet illisible ou trop volumineux (9 Mio maximum).")
-			return packageformat.Package{}, false
-		}
-		pack, err := packageformat.Parse(raw, p.packageKey(), version)
-		if err != nil {
-			problem(w, 400, err.Error())
-			return pack, false
-		}
-		return pack, true
+	for _, action := range []string{"preview", "install"} {
+		mux.HandleFunc("POST /api/v1/provider-packages/{provider}/"+action, func(w http.ResponseWriter, r *http.Request) {
+			c.providerPackageUpload(w, r, action == "install")
+		})
 	}
-	mux.HandleFunc("POST /api/v1/provider-packages/preview", func(w http.ResponseWriter, r *http.Request) {
-		pack, ok := upload(w, r)
-		if !ok {
+	mux.HandleFunc("POST /api/v1/provider-packages/{provider}/rollback", func(w http.ResponseWriter, r *http.Request) {
+		p := c.packageProvider(w, r)
+		if p == nil {
 			return
 		}
-		old, err := provider().installedPackage(r.Context())
-		if err != nil && err != sql.ErrNoRows {
-			problem(w, 500, "Installation actuelle illisible.")
-			return
-		}
-		if err == nil && packageformat.Compare(pack.Manifest.Descriptor.Version, old.Manifest.Descriptor.Version) <= 0 {
-			problem(w, 409, "Une mise à jour doit avoir une version supérieure. Pour revenir en arrière, utilisez Restaurer la version précédente.")
-			return
-		}
-		sendJSON(w, 200, map[string]any{"package": pack, "previousChecksum": old.Checksum, "previousVersion": old.Manifest.Descriptor.Version, "signer": "Clé de développement Mosaune", "services": c.serviceViews(pack.Manifest.Descriptor)})
-	})
-	mux.HandleFunc("POST /api/v1/provider-packages/install", func(w http.ResponseWriter, r *http.Request) {
-		pack, ok := upload(w, r)
-		if !ok {
-			return
-		}
-		if r.Header.Get("X-Mosaune-Package-Checksum") != pack.Checksum {
-			problem(w, 409, "Le paquet a changé. Vérifiez-le de nouveau.")
-			return
-		}
-		c.extensionMu.Lock()
-		defer c.extensionMu.Unlock()
-		if err := provider().installPackage(r.Context(), pack, r.Header.Get("X-Mosaune-Previous-Checksum"), false); err != nil {
-			problem(w, 409, err.Error())
-			return
-		}
-		sendJSON(w, 201, pack)
-	})
-	mux.HandleFunc("POST /api/v1/provider-packages/tmdb/rollback", func(w http.ResponseWriter, r *http.Request) {
 		var input struct {
 			Checksum         string `json:"checksum"`
 			PreviousChecksum string `json:"previousChecksum"`
@@ -124,40 +58,27 @@ func (c *catalog) providerPackageRoutes(mux *secureMux) {
 		if !readJSON(w, r, &input) {
 			return
 		}
-		p := provider()
-		if p == nil {
-			problem(w, 404, "Fournisseur absent.")
-			return
-		}
 		c.extensionMu.Lock()
 		defer c.extensionMu.Unlock()
-		var raw []byte
-		var checksum string
-		if err := c.db.QueryRowContext(r.Context(), `SELECT previous,previous_checksum FROM provider_packages WHERE id='tmdb'`).Scan(&raw, &checksum); err != nil || len(raw) == 0 || checksum != input.PreviousChecksum {
-			problem(w, 409, "Version précédente absente ou modifiée.")
-			return
-		}
-		pack, err := packageformat.Parse(raw, p.packageKey(), version)
-		if err != nil {
-			problem(w, 400, "Version précédente altérée.")
-			return
-		}
-		if err = p.installPackage(r.Context(), pack, input.Checksum, true); err != nil {
-			problem(w, 409, err.Error())
+		if err := p.rollbackPackage(r.Context(), input.Checksum, input.PreviousChecksum); err != nil {
+			status := 409
+			if errors.Is(err, errProviderRollbackCorrupt) {
+				status = 400
+			}
+			problem(w, status, err.Error())
 			return
 		}
 		w.WriteHeader(204)
 	})
-	mux.HandleFunc("DELETE /api/v1/provider-packages/tmdb", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("DELETE /api/v1/provider-packages/{provider}", func(w http.ResponseWriter, r *http.Request) {
+		p := c.packageProvider(w, r)
+		if p == nil {
+			return
+		}
 		var input struct {
 			Checksum string `json:"checksum"`
 		}
 		if !readJSON(w, r, &input) {
-			return
-		}
-		p := provider()
-		if p == nil {
-			problem(w, 404, "Fournisseur absent.")
 			return
 		}
 		c.extensionMu.Lock()
@@ -168,4 +89,45 @@ func (c *catalog) providerPackageRoutes(mux *secureMux) {
 		}
 		w.WriteHeader(204)
 	})
+}
+
+func (c *catalog) providerPackageUpload(w http.ResponseWriter, r *http.Request, install bool) {
+	p := c.packageProvider(w, r)
+	if p == nil {
+		return
+	}
+	raw, err := io.ReadAll(http.MaxBytesReader(w, r.Body, packageformat.MaxArchive))
+	if err != nil {
+		problem(w, 400, "Paquet illisible ou trop volumineux (9 Mio maximum).")
+		return
+	}
+	pack, err := p.parseProviderPackage(raw)
+	if err != nil {
+		problem(w, 400, err.Error())
+		return
+	}
+	if !install {
+		old, err := p.installedPackage(r.Context())
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			problem(w, 500, "Installation actuelle illisible.")
+			return
+		}
+		if err == nil && packageformat.Compare(pack.Manifest.Descriptor.Version, old.Manifest.Descriptor.Version) <= 0 {
+			problem(w, 409, "Une mise à jour doit avoir une version supérieure. Pour revenir en arrière, utilisez Restaurer la version précédente.")
+			return
+		}
+		sendJSON(w, 200, map[string]any{"package": pack, "previousChecksum": old.Checksum, "previousVersion": old.Manifest.Descriptor.Version, "signer": p.packageSigner(), "services": c.serviceViews(pack.Manifest.Descriptor)})
+		return
+	}
+	if r.Header.Get("X-Mosaune-Package-Checksum") != pack.Checksum {
+		problem(w, 409, "Le paquet a changé. Vérifiez-le de nouveau.")
+		return
+	}
+	c.extensionMu.Lock()
+	defer c.extensionMu.Unlock()
+	if err := p.installPackage(r.Context(), pack, r.Header.Get("X-Mosaune-Previous-Checksum"), false); err != nil {
+		problem(w, 409, err.Error())
+		return
+	}
+	sendJSON(w, 201, pack)
 }

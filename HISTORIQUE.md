@@ -1,3 +1,10 @@
+## 0.0.79 — gestion de paquets indépendante du fournisseur
+
+- Contrat de gestion commun pour les adaptateurs fournisseurs : état, vérification, installation, restauration et retrait. Le routeur ne lit plus directement la table TMDB ni sa clé de signature.
+- Routes adressées par identifiant de fournisseur et liste des gestionnaires réellement disponibles. Les adaptateurs sans cette capacité ne sont pas proposés ; aucune déclaration de manifeste ne suffit à ouvrir des droits.
+- Anciens chemins TMDB conservés vers les mêmes contrôles. Exemples, signature et restauration TMDB regroupés dans son adaptateur. Permissions administrateur, limite d’archive, confirmations par empreinte et refus des états périmés conservés.
+- Tests d’un second adaptateur et d’isolation entre fournisseurs, plus vérification des vrais paquets signés TMDB. Le format pilote et les écrans spécifiques restent à généraliser ; aucune nouvelle extension visible ni modification des archives médias.
+
 ## 0.0.78 — composition minimale au lancement
 
 - L’option `-providers` et la variable `MOSAUNE_PROVIDERS` choisissent les adaptateurs chargés : `tmdb,musicbrainz` par défaut, un seul ou `none`. Les valeurs inconnues ou répétées sont refusées avant ouverture du catalogue. Les adaptateurs exclus ne sont pas construits.

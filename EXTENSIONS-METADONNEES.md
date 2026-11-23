@@ -1,3 +1,24 @@
+## Gestion des paquets fournisseurs — 0.0.79
+
+Un adaptateur approuvé peut implémenter `metadataPackageProvider` pour proposer le cycle de vie de ses paquets. Le routeur commun ne connaît ni sa base de données, ni sa clé de signature, ni son identifiant de fournisseur. Il applique l’authentification, la restriction administrateur, la limite de 9 Mio, la confirmation de l’empreinte du fichier, la sérialisation des mutations et les réponses communes.
+
+L’adaptateur assure la vérification cryptographique, la compatibilité du manifeste avec son moteur et Mosaune, les contrôles de versions, la persistance atomique et la gestion du programme chargé. Les contrôles de l’état attendu doivent être refaits à la mutation : un aperçu n’accorde aucune autorisation et ne réserve aucune version. Une restauration doit vérifier les empreintes de la version actuelle **et** de la version précédente. Le retrait ne doit pas effacer les médias ni les données communes consommées par d’autres composants.
+
+API administrateur, `id` étant l’identifiant de l’adaptateur chargé :
+
+| Méthode | Chemin | Fonction |
+| --- | --- | --- |
+| GET | `/api/v1/provider-packages` | Adaptateurs qui implémentent réellement le contrat |
+| GET | `/api/v1/provider-packages/{id}` | Paquet installé, version précédente et état |
+| POST | `/api/v1/provider-packages/{id}/preview` | Vérification d’une archive envoyée dans le corps |
+| POST | `/api/v1/provider-packages/{id}/install` | Installation avec `X-Mosaune-Package-Checksum` et `X-Mosaune-Previous-Checksum` |
+| POST | `/api/v1/provider-packages/{id}/rollback` | Restauration avec JSON `checksum` et `previousChecksum` |
+| DELETE | `/api/v1/provider-packages/{id}` | Retrait avec JSON `checksum` |
+
+Les anciennes URL `/preview` et `/install` sans identifiant restent des alias TMDB vers les mêmes contrôles. L’URL historique `/example` reste réservée aux exemples TMDB. Les exemples signés et la lecture de la version précédente appartiennent désormais à cet adaptateur, pas au routeur commun. Un fournisseur absent ou sans contrat de paquets renvoie 404 ; un compte ordinaire reste refusé avant tout appel à l’adaptateur.
+
+Les tests couvrent un deuxième adaptateur simulé, l’isolation des fournisseurs, les permissions, les aperçus sans mutation, les échecs et états périmés, ainsi que de vrais paquets signés TMDB sur les nouvelles URL. Le format signé `packageformat` reste le format pilote TMDB ; cette étape ne prétend pas fournir un chargeur natif universel ni terminer les écrans spécifiques des fournisseurs.
+
 ## Composition au lancement — 0.0.78
 
 `-providers tmdb,musicbrainz` sélectionne les adaptateurs hôte à construire, dans cet ordre. `-providers none` n’en construit aucun. La variable `MOSAUNE_PROVIDERS` fournit la valeur par défaut ; une option explicite est prioritaire. Identifiants inconnus, doublons et éléments vides sont refusés avant ouverture du catalogue. Sans configuration, les deux adaptateurs habituels restent chargés.
