@@ -1,3 +1,5 @@
+Version 0.0.78 — démarrage minimal accessible par les options du serveur : aucun fournisseur ni famille installée au départ, puis ajout de Musique sans réinstaller le reste. Parcours administrateur et redémarrage testés avec l’exécutable. [Configuration](EXTENSIONS-METADONNEES.md#composition-au-lancement--0078).
+
 Version 0.0.77 — les fournisseurs peuvent lier leurs opérations au composant installé, jusqu’à l’enregistrement des résultats. MusicBrainz suit sa désactivation, son retrait et son remplacement. Initialisation Radarr/Sonarr corrigée. [Contrat](EXTENSIONS-METADONNEES.md).
 
 Version 0.0.76 — une installation neuve peut choisir Films, Séries ou Musique indépendamment. Les familles utilisent le même installateur que leurs ajouts ultérieurs ; composants partagés, écrans et reprise après interruption sont conservés. [Options et contrat](extensions/MEDIA-BUNDLES.md#installation-initiale--0076).

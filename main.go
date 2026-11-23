@@ -25,7 +25,7 @@ import (
 //go:embed all:web/dist
 var frontend embed.FS
 
-const version = "0.0.77"
+const version = "0.0.78"
 
 type module struct {
 	ID    string   `json:"id"`
@@ -91,6 +91,7 @@ func run() error {
 	ca := flag.String("tls-ca", os.Getenv("MOSAUNE_TLS_CA"), "autorité locale optionnelle pour le contrôle de santé")
 	healthcheck := flag.Bool("healthcheck", false, "vérifier le serveur déjà démarré, puis quitter")
 	moduleList := flag.String("modules", "video,music", "modules actifs : video,music")
+	providerList := flag.String("providers", envDefault("MOSAUNE_PROVIDERS", "tmdb,musicbrainz"), "adaptateurs fournisseurs chargés : tmdb,musicbrainz ou none ; ne supprime pas les données existantes")
 	initialMedia := flag.String("initial-media", envDefault("MOSAUNE_INITIAL_MEDIA", "films,series,music"), "familles à installer sur un nouveau catalogue : films,series,music ou none")
 	initialHome := flag.Bool("initial-home", true, "installer l’écran d’accueil sur un nouveau catalogue")
 	executable, err := os.Executable()
@@ -124,6 +125,10 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	providers, err := selectMetadataProviders(*providerList, suppliedMetadataProviders())
+	if err != nil {
+		return err
+	}
 	ui, err := fs.Sub(frontend, "web/dist")
 	if err != nil {
 		return err
@@ -133,7 +138,7 @@ func run() error {
 		return fmt.Errorf("impossible de démarrer le serveur : %w", err)
 	}
 	defer listener.Close()
-	catalog, err := openCatalogWithComposition(*dataDir, suppliedMetadataProviders(), initialSelection)
+	catalog, err := openCatalogWithComposition(*dataDir, providers, initialSelection)
 	if err != nil {
 		listener.Close()
 		return fmt.Errorf("catalogue : %w", err)

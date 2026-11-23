@@ -1,3 +1,21 @@
+## Composition au lancement — 0.0.78
+
+`-providers tmdb,musicbrainz` sélectionne les adaptateurs hôte à construire, dans cet ordre. `-providers none` n’en construit aucun. La variable `MOSAUNE_PROVIDERS` fournit la valeur par défaut ; une option explicite est prioritaire. Identifiants inconnus, doublons et éléments vides sont refusés avant ouverture du catalogue. Sans configuration, les deux adaptateurs habituels restent chargés.
+
+Pour une installation de développement minimale, dans un **nouveau dossier dédié** :
+
+```sh
+./mosaune -data-dir ./minimal-data -providers none -initial-media none -initial-home=false
+```
+
+Remplacer `./mosaune` par le nom de l’exécutable téléchargé. Le code de configuration affiché au démarrage permet de créer l’administrateur. Les comptes, paramètres et gestionnaire d’extensions restent accessibles ; Musique peut ensuite être préparée avec ses composants locaux, sans fournisseur en ligne.
+
+Le filtre `-providers` s’applique à **chaque lancement**, contrairement aux options `-initial-media` et `-initial-home`, qui ne réinstallent rien dans une base existante. Omettre un adaptateur conserve ses paquets, clés et choix enregistrés. Pour utiliser ensuite ce fournisseur, le réinclure au prochain démarrage et installer/activer son paquet si nécessaire : le retour d’un adaptateur ne réinstalle pas silencieusement un paquet absent.
+
+`node scripts/test-minimal.mjs [chemin-exécutable]`, après construction, vérifie ce parcours sur un catalogue temporaire : création administrateur, installation de Musique seule, paramètres et redémarrage. Le script n’utilise aucun média personnel et ne publie ni code de configuration ni session.
+
+Les fabriques sélectionnables restent des adaptateurs hôte approuvés dans `suppliedMetadataProviders`. Cette option ne charge pas de code Go arbitraire depuis un dépôt et ne retire pas les programmes embarqués du binaire.
+
 ## Dépendance à un composant sélectionné — 0.0.77
 
 Un adaptateur hôte peut implémenter moduleBackedProvider et retourner providerModuleBinding (catalogue, emplacement). Le lien vise l’emplacement et suit le choix enregistré, pas l’identité d’un éditeur. MusicBrainz utilise music-results ; un autre adaptateur peut utiliser un autre emplacement sans modifier le mécanisme commun.

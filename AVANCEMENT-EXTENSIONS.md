@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 23 novembre 2026 · étape 0.0.77.
+État du 24 novembre 2026 · étape 0.0.78.
 
-**Environ 95 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 96 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -107,6 +107,7 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 
 ### Condition de fin du découpage
 
+- [x] 0.0.78 — exécutable démarré sans fournisseur ni famille ; création administrateur, paramètres, ajout de Musique seule et redémarrage vérifiés sur Windows. Test reproductible ajouté à la validation Linux. Adaptateurs et programmes toujours embarqués ; cela ne clôt pas les conditions ci-dessous.
 - [ ] Démarrer avec seulement le noyau : comptes, permissions, stockage commun et gestionnaire d’extensions.
 - [ ] Ajouter uniquement Musique puis uniquement Films ou Séries, avec leurs dépendances.
 - [ ] Retirer/remplacer chaque famille sans casser les autres ni perdre les données communes.

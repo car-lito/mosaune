@@ -1,3 +1,10 @@
+## 0.0.78 — composition minimale au lancement
+
+- L’option `-providers` et la variable `MOSAUNE_PROVIDERS` choisissent les adaptateurs chargés : `tmdb,musicbrainz` par défaut, un seul ou `none`. Les valeurs inconnues ou répétées sont refusées avant ouverture du catalogue. Les adaptateurs exclus ne sont pas construits.
+- Ce filtre s’applique à chaque lancement ; il ne supprime ni paquets, ni clés, ni préférences existantes. La composition initiale des familles reste un choix distinct, appliqué uniquement à une nouvelle installation.
+- Parcours authentifié testé sans fournisseur ni famille : compte administrateur, paramètres, ajout de Musique, lecture des tags d’un MP3 et redémarrage. Un test supplémentaire lance le véritable exécutable et vérifie les options, leur priorité sur l’environnement et la conservation de cette installation. Ce test rejoint la vérification Linux sur GitHub.
+- Windows et les deux cibles Linux compilées ; six archives familles inchangées. Aucun changement de protocole. Les adaptateurs et programmes fournis restent embarqués dans le binaire : leur distribution indépendante n’est pas déclarée terminée.
+
 ## 0.0.77 — services liés aux composants installés
 
 - Contrat hôte commun de dépendance à un emplacement de composant sélectionné, sans imposer l’identifiant du programme fourni. Disponibilité, démarrage d’opération et enregistrement final utilisent le cycle de vie commun des exécutables.

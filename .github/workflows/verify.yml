@@ -46,6 +46,9 @@ jobs:
       - name: Construire Windows, Linux et ARM64
         if: runner.os == 'Linux'
         run: node scripts/project.mjs build
+      - name: Tester le démarrage minimal et l'installation d'une famille
+        if: runner.os == 'Linux'
+        run: node scripts/test-minimal.mjs
       - name: Conserver les exécutables de test
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
