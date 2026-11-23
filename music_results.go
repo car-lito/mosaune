@@ -167,14 +167,15 @@ func (p *musicBrainzProvider) openMusicResults(ctx context.Context) (context.Con
 			return ctx, func() {}, e
 		}
 	} else {
-		call, stop, desc, code, e := p.owner.beginRecognition(ctx, "music-results")
+		call, stop, e := beginProvider(ctx, p)
 		if e != nil {
 			release()
 			return ctx, func() {}, fmt.Errorf("Le composant Albums et artistes MusicBrainz est indisponible. Vérifiez-le dans Musique : %w", e)
 		}
 		ctx = call
 		done = stop
-		reader, e = loadFactProjector(ctx, desc, code, d.Capability)
+		lease := call.Value(providerModuleLeaseKey{}).(*providerModuleLease)
+		reader, e = loadFactProjector(ctx, lease.descriptor, lease.code, d.Capability)
 		if e != nil {
 			done()
 			release()
@@ -226,23 +227,8 @@ func (p *musicBrainzProvider) DiscoverySurfaceContext(ctx context.Context) (disc
 	if p.db == nil {
 		return p.legacyDiscoverySurface(), ctx.Err()
 	}
-	if p.owner.extensionSafeMode {
-		return empty, nil
-	}
-	var selected string
-	if e := p.db.QueryRowContext(ctx, "SELECT id FROM recognition_selection WHERE kind='music-results'").Scan(&selected); e != nil {
-		if e == sql.ErrNoRows {
-			return empty, nil
-		}
-		return empty, e
-	}
-	s, e := (registry.SQLStore{DB: p.db}).Load(ctx)
-	if e != nil {
-		return empty, e
-	}
-	entry, ok := registryEntryFor(s, selected)
-	if !ok || !entry.Enabled {
-		return empty, nil
+	if !providerModuleAvailable(ctx, p) {
+		return empty, ctx.Err()
 	}
 	return p.legacyDiscoverySurface(), nil
 }

@@ -1,3 +1,11 @@
+## 0.0.77 — services liés aux composants installés
+
+- Contrat hôte commun de dépendance à un emplacement de composant sélectionné, sans imposer l’identifiant du programme fourni. Disponibilité, démarrage d’opération et enregistrement final utilisent le cycle de vie commun des exécutables.
+- MusicBrainz n’est plus annoncé actif quand son composant est absent, désactivé ou en mode de secours. Installation et réactivation sont prises en compte sans redémarrage ; un remplacement sélectionné fonctionne après retrait du composant fourni.
+- Une opération garde son composant et son autorisation de terminer jusqu’à l’enregistrement des résultats, même après fermeture du lecteur de réponses. Désactivation, retrait ou changement de sélection annulent les anciens résultats ; une réactivation ne les ressuscite pas. Une mutation échouée ne les annule pas.
+- Correction des échecs GitHub de 0.0.76 : sur une base neuve, la migration des réglages Radarr/Sonarr ne les crée plus avant l’installation de leur composant. Cela évite une suppression/récréation et des compteurs de révision artificiels. Les bases existantes gardent leur parcours et leurs révisions.
+- Aucun changement de protocole ni nouvelle archive média. Les adaptateurs restent du code hôte approuvé ; cette étape ne rend pas arbitraires les services réseau ni ne retire tous les adaptateurs du binaire.
+
 ## 0.0.76 — composition initiale des familles médias
 
 - Les migrations créent les tables sans installer les composants médias d’office sur un nouveau catalogue. La composition initiale est mémorisée séparément des choix de fournisseurs.

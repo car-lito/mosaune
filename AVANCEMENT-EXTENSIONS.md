@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 22 novembre 2026 · étape 0.0.76.
+État du 23 novembre 2026 · étape 0.0.77.
 
-**Environ 94 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
+**Environ 95 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 
 La référence est exigeante : une fonction doit pouvoir être installée, désactivée, retirée et remplacée sans modifier le noyau, avec des droits contrôlés et des données communes conservées. Déplacer du code dans un fichier ne suffit pas. Les pourcentages ci-dessous sont des évaluations manuelles, arrondies ; les cases cochées désignent des parcours effectivement implémentés et testés.
 
@@ -89,6 +89,7 @@ Les ensembles 0.0.40 sont des recettes de gestion des composants existants. Ils 
 - [x] 0.0.74 — composition officielle et initialisation/fermeture des adaptateurs séparées du catalogue ; nettoyage après échec, autre fournisseur et composition vide testés. Les migrations restent intégrées.
 - [ ] Achever l’indépendance de TMDB : autres adaptateurs du transport, configuration et interface fournisseur complète.
 - [x] Extraire l’interprétation des réponses MusicBrainz (albums, éditions, pistes et artistes) dans un composant Wasm de Musique, remplaçable et désactivable.
+- [x] 0.0.77 — liaison commune fournisseur/composant sélectionné : disponibilité et opérations couvrant le calcul puis la persistance ; MusicBrainz et autre emplacement testés.
 - [ ] Achever MusicBrainz : adaptateur du transport réseau, autorisation de nouvelles sources, configuration et distribution comme fournisseur indépendant.
 - [x] 0.0.59 — préparation des ajouts, saisons et recherches Radarr/Sonarr dans un composant partagé installable et remplaçable. Activation et retrait contrôlent les échanges, y compris le suivi.
 - [x] 0.0.60–0.0.62 — suivi, routes HTTP et formulaires Radarr/Sonarr pilotés par le composant partagé.

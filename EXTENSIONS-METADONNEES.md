@@ -1,3 +1,15 @@
+## Dépendance à un composant sélectionné — 0.0.77
+
+Un adaptateur hôte peut implémenter moduleBackedProvider et retourner providerModuleBinding (catalogue, emplacement). Le lien vise l’emplacement et suit le choix enregistré, pas l’identité d’un éditeur. MusicBrainz utilise music-results ; un autre adaptateur peut utiliser un autre emplacement sans modifier le mécanisme commun.
+
+providerModuleAvailable consulte la sélection, la présence du paquet et son activation dans le registre, ainsi que le mode de secours. Ce contrôle léger ne charge pas le programme en mémoire ; son intégrité est vérifiée à l’ouverture effective de l’opération. Une erreur de lecture rend le service indisponible. La liste des fournisseurs et les appels de découverte reflètent ce statut.
+
+beginProvider acquiert une opération du cycle de vie des exécutables et conserve le descripteur et le programme sélectionnés. Les appels imbriqués pour le même lien réutilisent ce contexte ; ils ne libèrent pas l’opération extérieure. Mélanger deux liens différents dans une même opération est refusé. Le décodage musical utilise cet instantané plutôt que de rouvrir une sélection susceptible de changer.
+
+providerCommit protège l’enregistrement final avec le verrou de ce cycle de vie, puis l’éventuel état propre au fournisseur. Le verrou doit être acquis avant toute transaction SQL et relâché après sa validation. Désactivation, retrait, remplacement ou arrêt invalident les appels existants ; réactiver le paquet ne réactive pas leurs anciens contextes. Les méthodes sans liaison et les fournisseurs à cycle de vie propre conservent leur comportement.
+
+Les adaptateurs et leurs connexions HTTP restent disponibles dans la composition hôte pour prendre en charge les installations ultérieures. Les programmes lourds ne sont ouverts qu’à la demande. Le contrat n’autorise aucun programme invité à accéder directement à SQL ni à déclarer des destinations réseau arbitraires. Les fournisseurs autonomes et la composition minimale complète restent à finaliser.
+
 ## Installation initiale des adaptateurs — 0.0.75
 
 La fabrique peut déclarer InstallDefault(context.Context, *sql.Tx) error. Ce contrat appartient au code hôte approuvé ; aucun programme invité ne reçoit la connexion SQL. La composition officielle attribue cette fonction à TMDB ; MusicBrainz n’a pas de paquet initial à installer par ce mécanisme.

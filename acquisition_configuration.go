@@ -52,6 +52,11 @@ func migrateAcquisitionConfiguration(db *sql.DB) error {
 	}
 	defer tx.Rollback()
 	ctx := context.Background()
+	if deferred, err := deferMediaSeed(ctx, tx, 46); err != nil {
+		return err
+	} else if deferred {
+		return tx.Commit()
+	}
 	store := a.ConfigurationStore{DB: tx}
 	for _, id := range []string{"radarr", "sonarr"} {
 		if err = store.Register(ctx, id); err != nil {

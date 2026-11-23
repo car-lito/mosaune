@@ -36,6 +36,9 @@ type providerLease struct{ owner *providerLifecycle }
 type providerLeaseKey struct{}
 
 func providerAvailable(p MetadataProvider) bool {
+	if !providerModuleAvailable(context.Background(), p) {
+		return false
+	}
 	if managed, ok := p.(lifecycleProvider); ok {
 		s := managed.lifecycle()
 		s.mu.Lock()
@@ -46,6 +49,9 @@ func providerAvailable(p MetadataProvider) bool {
 }
 
 func providerEnabled(p MetadataProvider) bool {
+	if !providerModuleAvailable(context.Background(), p) {
+		return false
+	}
 	if managed, ok := p.(lifecycleProvider); ok {
 		s := managed.lifecycle()
 		s.mu.Lock()
@@ -54,7 +60,7 @@ func providerEnabled(p MetadataProvider) bool {
 	}
 	return true
 }
-func beginProvider(ctx context.Context, p MetadataProvider) (context.Context, func(), error) {
+func beginProviderState(ctx context.Context, p MetadataProvider) (context.Context, func(), error) {
 	managed, ok := p.(lifecycleProvider)
 	if !ok {
 		return ctx, func() {}, ctx.Err()
@@ -92,7 +98,7 @@ func beginProvider(ctx context.Context, p MetadataProvider) (context.Context, fu
 
 // Acquire before opening a write transaction, never while holding one. A disable
 // cannot overtake a committing result, and old leases stay cancelled on re-enable.
-func providerCommit(ctx context.Context) (func(), error) {
+func commitProviderState(ctx context.Context) (func(), error) {
 	if lease, ok := ctx.Value(providerLeaseKey{}).(providerLease); ok {
 		lease.owner.mu.Lock()
 		if err := context.Cause(ctx); err != nil {
