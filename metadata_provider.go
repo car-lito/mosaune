@@ -18,6 +18,9 @@ type MetadataProvider interface {
 }
 
 type ProviderInfo struct {
+	Profiles           bool               `json:"profiles"`
+	ResolveArtists     bool               `json:"resolveArtists"`
+	Available          bool               `json:"available"`
 	Catalogue          *discovery.Surface `json:"catalogue,omitempty"`
 	Enabled            bool               `json:"enabled"`
 	Discovery          bool               `json:"discovery"`

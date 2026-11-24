@@ -1,6 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 25 novembre 2026 · étape 0.0.81.
+État du 25 novembre 2026 · étape 0.0.82.
+
+Dernière étape : profils d’artistes sans fournisseur imposé dans l’interface, capacités calculées depuis les contrats implémentés, permissions et invalidation des réponses après désactivation testées. Restent notamment les associations musicales, les images et les réglages spécifiques des fournisseurs.
 
 **Environ 97 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 

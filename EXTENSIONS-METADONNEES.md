@@ -1,3 +1,11 @@
+## Profils et identification d’artistes — 0.0.82
+
+L’inventaire `GET /api/v1/metadata/providers` expose `profiles`, `resolveArtists` et `available`. Le serveur calcule ces capacités depuis les interfaces `ProfileProvider` et `ArtistResolver` réellement implémentées ; une valeur annoncée par `Info()` ne suffit pas. L’identification requiert également les profils et le type `music`. L’interface retient les fournisseurs activés, configurés et disponibles. Plusieurs sources impliquent un choix explicite, sans préférence fondée sur leur nom.
+
+`POST /api/v1/people/{provider}/resolve` reçoit `{ "name": "…" }` et renvoie les candidats `Contributor`. Cette opération musicale exige les permissions correspondantes, même si le fournisseur propose aussi des films. Son appel utilise `beginProvider`, puis `providerCommit` avant de livrer le résultat. Désactiver puis réactiver le fournisseur ne rend pas une ancienne réponse valide. Le client conserve le fournisseur des candidats et utilise ensuite `GET /api/v1/people/{provider}/{id}?page=…`.
+
+Les liens de profils déjà identifiés gardent leur fournisseur. Sans source d’identification disponible, les albums locaux de l’artiste restent affichés. Cette étape ne généralise pas encore la correction d’association musicale, la route des images, ni le chargement d’adaptateurs natifs depuis un dépôt.
+
 ## Distribution depuis un dépôt — 0.0.81
 
 Pour recevoir des paquets depuis un dépôt, un adaptateur implémente `providerRepositoryManager` en plus du contrat de gestion. Sa méthode `repositoryPackageIDs()` déclare les identifiants exacts des paquets acceptés, au maximum 128, sans doublon. Cette déclaration appartient au code hôte approuvé ; le catalogue distant ne peut pas l’ajouter ni la remplacer. Un gestionnaire local qui ne déclare pas cette capacité reste utilisable par import local.

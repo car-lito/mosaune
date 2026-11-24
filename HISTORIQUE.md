@@ -1,3 +1,11 @@
+## 0.0.82 — profils dirigés par les capacités des fournisseurs
+
+- La page de profil ne choisit plus MusicBrainz par son nom : elle utilise les capacités réellement implémentées et l’état du fournisseur. Un seul fournisseur disponible est proposé automatiquement ; plusieurs demandent un choix explicite.
+- Les profils et collaborations utilisent des intitulés communs. Sans fournisseur disponible, les albums locaux restent accessibles. Les candidats conservent le fournisseur qui les a produits.
+- L’identification d’artiste exige l’accès à la musique, y compris pour un fournisseur prenant aussi en charge les films. Les appels suivent le cycle de vie du fournisseur ; une réponse arrivée après désactivation puis réactivation est refusée.
+- Tests avec un autre adaptateur, fausses déclarations de capacités, permissions et désactivation pendant un appel. Constructions Windows/Linux amd64/ARM64, démarrage minimal et archives médias inchangées vérifiés.
+- Les adaptateurs restent approuvés et embarqués. La correction d’association musicale et la route des images ont encore des traitements spécifiques à extraire.
+
 ## 0.0.81 — distribution dirigée vers le fournisseur
 
 - Les adaptateurs déclarent explicitement les identifiants de paquets qu’ils prennent en charge depuis les dépôts. Le catalogue distant ne choisit pas un moteur ni une clé de confiance.

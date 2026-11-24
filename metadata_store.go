@@ -150,6 +150,10 @@ func (c *catalog) providerInfo(ctx context.Context) []ProviderInfo {
 	for _, p := range c.providers {
 		info := p.Info()
 		info.Enabled = providerEnabled(p)
+		info.Available = providerAvailable(p)
+		_, info.Profiles = p.(ProfileProvider)
+		_, info.ResolveArtists = p.(ArtistResolver)
+		info.ResolveArtists = info.ResolveArtists && info.Profiles && supportsProvider(p, "music")
 		_, info.Discovery = p.(DiscoveryProvider)
 		surface, e := providerDiscoverySurface(ctx, p)
 		if e != nil {

@@ -1,3 +1,5 @@
+Version 0.0.82 — les profils d’artistes utilisent les capacités des fournisseurs disponibles, avec sélection explicite s’il y en a plusieurs. Permissions musicales et arrêt des résultats lors d’une désactivation sont contrôlés côté serveur. [Contrat](EXTENSIONS-METADONNEES.md).
+
 Version 0.0.81 — les dépôts dirigent les paquets vers leur fournisseur déclaré, sans passage imposé par TMDB. Un gestionnaire absent ou ambigu est signalé avant téléchargement. [Contrat](EXTENSIONS-METADONNEES.md#distribution-depuis-un-dépôt--0081).
 
 Version 0.0.80 — les cartes, réglages et imports locaux des fournisseurs sont construits depuis leurs capacités. La page Extensions fonctionne aussi sans TMDB chargé. [Contrat](EXTENSIONS-METADONNEES.md#cartes-et-réglages-des-fournisseurs--0080).

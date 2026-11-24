@@ -187,6 +187,10 @@ func visualRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 		http.ServeContent(w, r, "image.jpg", time.Time{}, bytes.NewReader(data))
 	})
 	mux.HandleFunc("POST /api/v1/people/{provider}/resolve", func(w http.ResponseWriter, r *http.Request) {
+		if !canKind(r.Context(), "music") {
+			problem(w, 403, "Votre compte n’a pas accès à la musique.")
+			return
+		}
 		p := c.provider(r.PathValue("provider"))
 		if p == nil || !allowed("music") || !supportsProvider(p, "music") {
 			http.NotFound(w, r)
@@ -210,11 +214,23 @@ func visualRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 		}
 		ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 		defer cancel()
+		ctx, done, err := beginProvider(ctx, p)
+		if err != nil {
+			problem(w, 409, err.Error())
+			return
+		}
+		defer done()
 		people, err := resolver.ResolveArtist(ctx, input.Name)
 		if err != nil {
 			problem(w, 502, err.Error())
 			return
 		}
+		unlock, err := providerCommit(ctx)
+		if err != nil {
+			problem(w, 409, "Le fournisseur a changé. Relancez la recherche.")
+			return
+		}
+		defer unlock()
 		sendJSON(w, 200, people)
 	})
 }
