@@ -1,3 +1,11 @@
+## 0.0.80 — interface commune des fournisseurs
+
+- La page Extensions ne réclame plus systématiquement le moteur et le paquet TMDB. Elle affiche les fournisseurs présents et leurs commandes réelles ; une composition sans fournisseur n’empêche plus le chargement des réglages.
+- Une fiche commune gère l’activation, le module, le paquet et le formulaire déclaré. Les états de paquet sont chargés à l’ouverture et les réponses anciennes sont écartées lors d’une actualisation.
+- Import local avec sélection du fournisseur, aperçu réinitialisé lors d’un changement et utilisation des routes nommées. Panneaux d’installation, restauration et retrait sans textes ni chemins TMDB imposés.
+- Commande générique du module, réservée aux administrateurs, avec refus des valeurs absentes et des adaptateurs sans cette capacité. Ancienne commande TMDB conservée vers les mêmes contrôles.
+- Tests de capacités et permissions avec un autre adaptateur, contrôles TMDB réels, états d’interface et démarrage sans fournisseur. Les archives médias et le format pilote restent inchangés ; distribution distante indépendante encore à terminer.
+
 ## 0.0.79 — gestion de paquets indépendante du fournisseur
 
 - Contrat de gestion commun pour les adaptateurs fournisseurs : état, vérification, installation, restauration et retrait. Le routeur ne lit plus directement la table TMDB ni sa clé de signature.

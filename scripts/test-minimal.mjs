@@ -91,6 +91,7 @@ async function enter(setup) {
 
 async function composition(musicInstalled) {
   assert.deepEqual(await (await request('/api/v1/metadata/providers')).json(), []);
+  assert.deepEqual(await (await request('/api/v1/metadata/provider-management')).json(), []);
   const { bundles } = await (await request('/api/v1/media-bundles')).json();
   assert.equal(bundles.length, 3);
   for (const bundle of bundles) {

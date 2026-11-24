@@ -1,3 +1,5 @@
+Version 0.0.80 — les cartes, réglages et imports locaux des fournisseurs sont construits depuis leurs capacités. La page Extensions fonctionne aussi sans TMDB chargé. [Contrat](EXTENSIONS-METADONNEES.md#cartes-et-réglages-des-fournisseurs--0080).
+
 Version 0.0.79 — le gestionnaire de paquets utilise un contrat commun aux fournisseurs : installation, mise à jour, restauration et retrait. TMDB conserve sa compatibilité ; un autre adaptateur peut utiliser les mêmes routes et contrôles. [Contrat](EXTENSIONS-METADONNEES.md#gestion-des-paquets-fournisseurs--0079).
 
 Version 0.0.78 — démarrage minimal accessible par les options du serveur : aucun fournisseur ni famille installée au départ, puis ajout de Musique sans réinstaller le reste. Parcours administrateur et redémarrage testés avec l’exécutable. [Configuration](EXTENSIONS-METADONNEES.md#composition-au-lancement--0078).

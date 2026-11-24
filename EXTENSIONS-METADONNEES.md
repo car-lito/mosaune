@@ -1,3 +1,15 @@
+## Cartes et réglages des fournisseurs — 0.0.80
+
+`GET /api/v1/metadata/provider-management` renvoie aux administrateurs les fournisseurs effectivement chargés, leurs états et leurs commandes disponibles : `activation`, `packages`, `runtimeControl` et `configurationOwner`. Ces capacités proviennent des interfaces implémentées par l’adaptateur approuvé, jamais d’une simple déclaration dans un paquet. Sans fournisseur, la liste est vide et les autres réglages restent accessibles.
+
+L’interface utilise ces descriptions pour construire les cartes et un même composant de détail. Elle charge l’état d’un paquet uniquement quand sa fiche est ouverte ; une erreur de ce paquet n’empêche pas l’affichage des autres extensions. Le formulaire de configuration existant est relié par son propriétaire, sans identifiant TMDB dans la page Extensions. Le sélecteur d’import local présente les adaptateurs qui savent vérifier et installer des archives ; changer de fournisseur annule l’aperçu précédent.
+
+Pour une commande d’exécution distincte de l’activation globale, implémenter `providerRuntimeManager` : `providerRuntime()` retourne les états publics et `setProviderRuntime(ctx, enabled)` applique la transition contrôlée. La route administrateur `PUT /api/v1/metadata/providers/{id}/runtime` exige un booléen `enabled` explicite. L’adaptateur reste responsable de ses transactions, de l’annulation des appels et du refus d’une activation impossible. TMDB réutilise sa logique existante ; son ancienne URL est conservée comme alias.
+
+L’état d’exécution utilise les clés communes `installed`, `enabled`, `safeMode` et `serviceAccess` lorsqu’elles sont pertinentes. Les fournisseurs sans commande propre sont affichés sans interrupteur fictif. MusicBrainz ne reçoit pas de nouveaux boutons d’installation : ses composants restent gérés dans la famille Musique.
+
+Cette étape généralise les cartes, fiches, formulaires et imports locaux. Le catalogue distant conserve son parcours de distribution pilote ; elle ne change pas le format signé TMDB et ne charge pas automatiquement un adaptateur natif téléchargé.
+
 ## Gestion des paquets fournisseurs — 0.0.79
 
 Un adaptateur approuvé peut implémenter `metadataPackageProvider` pour proposer le cycle de vie de ses paquets. Le routeur commun ne connaît ni sa base de données, ni sa clé de signature, ni son identifiant de fournisseur. Il applique l’authentification, la restriction administrateur, la limite de 9 Mio, la confirmation de l’empreinte du fichier, la sérialisation des mutations et les réponses communes.

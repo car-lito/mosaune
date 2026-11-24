@@ -52,6 +52,7 @@ func (c *catalog) applyProvider(ctx context.Context, p MetadataProvider, secret 
 func metadataRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 	tmdbExtensionRoutes(mux, c)
 	providerStateRoutes(mux, c)
+	c.providerManagementRoutes(mux)
 	metadataQueueRoutes(mux, c, allowed)
 	mux.HandleFunc("GET /api/v1/metadata/providers", func(w http.ResponseWriter, r *http.Request) { sendJSON(w, 200, c.providerInfo(r.Context())) })
 	mux.HandleFunc("PUT /api/v1/metadata/providers/{provider}", func(w http.ResponseWriter, r *http.Request) {

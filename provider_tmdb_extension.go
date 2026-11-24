@@ -196,22 +196,8 @@ func tmdbExtensionRoutes(mux *secureMux, c *catalog) {
 		sendJSON(w, 200, p.extensionStatus())
 	})
 	mux.HandleFunc("PUT /api/v1/metadata/tmdb-runtime", func(w http.ResponseWriter, r *http.Request) {
-		var input struct {
-			Enabled bool `json:"enabled"`
-		}
-		if !readJSON(w, r, &input) {
-			return
-		}
-		p, ok := c.provider("tmdb").(*tmdbProvider)
-		if !ok {
-			problem(w, 404, "Fournisseur absent.")
-			return
-		}
-		if err := p.setExtension(r.Context(), input.Enabled); err != nil {
-			problem(w, 400, err.Error())
-			return
-		}
-		sendJSON(w, 200, p.extensionStatus())
+		r.SetPathValue("provider", "tmdb")
+		c.changeProviderRuntime(w, r)
 	})
 }
 
