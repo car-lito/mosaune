@@ -1,6 +1,13 @@
 export type Entry={id:string;name:string;publisher:string;description:string;version:string;kind:string;minCore:string;path:string;sha256:string};
 export type Repository={id:string;url:string;ref:string;updatedAt:number;bundled:boolean;official:boolean;index:{name:string;packages:Entry[]}};
 export type Choice={repo:Repository;entry:Entry};
+export type ProviderBinding={packageId:string;providerId:string;name:string};
+export function repositoryProvider(bindings:ProviderBinding[],packageId:string):{id:string;error:string}{
+ const matches=bindings.filter(b=>b.packageId===packageId);
+ if(!matches.length)return {id:'',error:'L’adaptateur de ce fournisseur n’est pas chargé sur ce serveur.'};
+ if(matches.length!==1)return {id:'',error:'Plusieurs fournisseurs prennent en charge ce paquet. Le choix doit être clarifié avant son installation.'};
+ return {id:matches[0].providerId,error:''};
+}
 
 export function compareVersions(a:string,b:string){
  const aa=a.split('.').map(Number),bb=b.split('.').map(Number);

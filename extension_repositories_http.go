@@ -86,7 +86,11 @@ func (c *catalog) extensionRepositoryRoutes(mux *secureMux) {
 			problem(w, 500, "Extensions illisibles.")
 			return
 		}
-		if p, ok := c.provider("tmdb").(*tmdbProvider); ok {
+		for _, provider := range c.providers {
+			p, ok := provider.(metadataPackageProvider)
+			if !ok {
+				continue
+			}
 			pack, e := p.installedPackage(r.Context())
 			if e == nil {
 				installed = append(installed, installedVersion{pack.Manifest.Descriptor.ID, pack.Manifest.Descriptor.Version, "provider"})
@@ -151,7 +155,12 @@ func (c *catalog) extensionRepositoryRoutes(mux *secureMux) {
 			problem(w, 500, "Familles illisibles.")
 			return
 		}
-		sendJSON(w, 200, map[string]any{"repositories": repos, "installed": installed, "coreVersion": version})
+		bindings, err := c.providerRepositoryBindings()
+		if err != nil {
+			problem(w, 500, err.Error())
+			return
+		}
+		sendJSON(w, 200, map[string]any{"repositories": repos, "installed": installed, "coreVersion": version, "providerBindings": bindings})
 	})
 	mux.HandleFunc("POST /api/v1/extension-repositories", func(w http.ResponseWriter, r *http.Request) {
 		var input struct {
@@ -271,8 +280,16 @@ func (c *catalog) extensionRepositoryRoutes(mux *secureMux) {
 			return
 		}
 		matched := false
+		providerID := ""
 		for _, p := range repo.Index.Packages {
 			if p.ID == input.ID && p.Version == input.Version && p.SHA256 == input.SHA256 {
+				if p.Kind == "provider" {
+					providerID, _, err = c.repositoryProvider(p.ID)
+					if err != nil {
+						problem(w, 409, err.Error())
+						return
+					}
+				}
 				matched = true
 				break
 			}
@@ -288,6 +305,9 @@ func (c *catalog) extensionRepositoryRoutes(mux *secureMux) {
 		}
 		w.Header().Set("Content-Type", "application/zip")
 		w.Header().Set("Cache-Control", "no-store")
+		if providerID != "" {
+			w.Header().Set("X-Mosaune-Package-Provider", providerID)
+		}
 		_, _ = w.Write(raw)
 	})
 }

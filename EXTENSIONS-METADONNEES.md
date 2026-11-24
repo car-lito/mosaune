@@ -1,3 +1,13 @@
+## Distribution depuis un dépôt — 0.0.81
+
+Pour recevoir des paquets depuis un dépôt, un adaptateur implémente `providerRepositoryManager` en plus du contrat de gestion. Sa méthode `repositoryPackageIDs()` déclare les identifiants exacts des paquets acceptés, au maximum 128, sans doublon. Cette déclaration appartient au code hôte approuvé ; le catalogue distant ne peut pas l’ajouter ni la remplacer. Un gestionnaire local qui ne déclare pas cette capacité reste utilisable par import local.
+
+Le schéma du dépôt ne change pas. Pour une entrée `kind: provider`, Mosaune cherche un seul adaptateur chargé qui déclare son `id`. Aucun résultat ou plusieurs résultats bloquent le téléchargement. Il n’y a ni repli TMDB, ni premier résultat choisi arbitrairement. Une fois le fichier téléchargé, son empreinte est vérifiée, puis `parseProviderPackage` assure la vérification propre à l’adaptateur. Le manifeste vérifié doit correspondre à l’identifiant, la version, le nom, l’éditeur, la description et la version minimale annoncés dans le dépôt.
+
+`GET /api/v1/extension-repositories` fournit `providerBindings` (`packageId`, `providerId`, `name`) et les versions installées des gestionnaires chargés. La réponse au téléchargement porte `X-Mosaune-Package-Provider`, produit par le serveur après résolution et validation. L’interface vérifie ce destinataire puis utilise les routes nommées de l’adaptateur pour l’aperçu et l’installation. Ces opérations revalident le fichier et l’état attendu ; télécharger un paquet ne l’installe pas.
+
+Le test de référence utilise un second adaptateur et un format de test signé avec une autre clé. Il couvre le parcours de dépôt jusqu’à l’installation, l’inventaire des versions, les permissions, le refus avant accès réseau, les métadonnées trompeuses et une signature invalide malgré une empreinte correcte. TMDB conserve son propre format et sa clé ; les anciens catalogues restent compatibles.
+
 ## Cartes et réglages des fournisseurs — 0.0.80
 
 `GET /api/v1/metadata/provider-management` renvoie aux administrateurs les fournisseurs effectivement chargés, leurs états et leurs commandes disponibles : `activation`, `packages`, `runtimeControl` et `configurationOwner`. Ces capacités proviennent des interfaces implémentées par l’adaptateur approuvé, jamais d’une simple déclaration dans un paquet. Sans fournisseur, la liste est vide et les autres réglages restent accessibles.

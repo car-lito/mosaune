@@ -4,6 +4,8 @@ Catalogue officiel publié : https://github.com/car-lito/mosaune-extensions. Int
 
 Un dépôt annonce des paquets ; il ne définit ni leur format ni leurs droits d’exécution. Le lecteur de dépôt remet les octets vérifiés aux installateurs existants. Les modèles de médias, comptes et réglages restent indépendants de la source de téléchargement.
 
+Depuis la 0.0.81, les entrées `provider` sont remises au seul adaptateur chargé qui déclare leur identifiant de paquet. Aucun gestionnaire ou plusieurs gestionnaires : téléchargement refusé. Le schéma du catalogue reste identique ; chaque adaptateur vérifie le format et les signatures qu’il accepte. Voir le [contrat fournisseur](../EXTENSIONS-METADONNEES.md#distribution-depuis-un-dépôt--0081).
+
 ## Structure
 
 Le fichier `mosaune-repository.json` est à la racine d’un dépôt GitHub public. Les paquets ZIP sont suivis dans le même dépôt. Pas de GitHub Releases, de liens arbitraires, de scripts d’installation, d’identifiants GitHub ou de jetons dans ce contrat.

@@ -64,7 +64,8 @@ func (c *catalog) tmdbPackageCompatibilityRoutes(mux *secureMux) {
 func (p *tmdbProvider) parseProviderPackage(raw []byte) (packageformat.Package, error) {
 	return packageformat.Parse(raw, p.packageKey(), version)
 }
-func (p *tmdbProvider) packageSigner() string { return "Clé de développement Mosaune" }
+func (p *tmdbProvider) packageSigner() string          { return "Clé de développement Mosaune" }
+func (p *tmdbProvider) repositoryPackageIDs() []string { return []string{tmdbConfigurationOwner} }
 func (p *tmdbProvider) rollbackPackage(ctx context.Context, current, previous string) error {
 	var raw []byte
 	var checksum string

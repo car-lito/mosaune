@@ -1,6 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {catalogCandidates} from './repository-catalog.ts';
+import {catalogCandidates,repositoryProvider} from './repository-catalog.ts';
+
+test('repository dispatch uses explicit package ownership and refuses ambiguity',()=>{
+ const bindings=[{packageId:'org.other.source',providerId:'other-adapter',name:'Other'}];
+ assert.deepEqual(repositoryProvider(bindings,'org.other.source'),{id:'other-adapter',error:''});
+ assert.equal(repositoryProvider(bindings,'tmdb').id,'');
+ assert.ok(repositoryProvider([], 'org.other.source').error);
+ assert.ok(repositoryProvider([...bindings,{...bindings[0],providerId:'competitor'}],'org.other.source').error);
+ assert.ok(repositoryProvider([...bindings,...bindings],'org.other.source').error);
+});
 
 const entry={id:'atelier.ambre',name:'Ambre',publisher:'Mosaune',description:'Papier et ambre',version:'2.0.0',kind:'theme',minCore:'0.0.15',path:'ambre.zip',sha256:'a'.repeat(64)};
 const repository=(id,packages=[entry])=>({id,url:'https://github.com/a/'+id,ref:'',updatedAt:1,bundled:id==='bundled',official:id==='official',index:{name:id,packages}});

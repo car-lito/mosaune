@@ -304,6 +304,14 @@ func (c *catalog) repositoryPackage(ctx context.Context, repo extensionRepositor
 	if compareExtensionVersions(entry.MinCore, version) > 0 {
 		return nil, errors.New("Mettez Mosaune à jour avant d’installer ce paquet.")
 	}
+	var manager metadataPackageProvider
+	if entry.Kind == "provider" {
+		var err error
+		_, manager, err = c.repositoryProvider(entry.ID)
+		if err != nil {
+			return nil, err
+		}
+	}
 	var raw []byte
 	var err error
 	if repo.Bundled {
@@ -370,7 +378,7 @@ func (c *catalog) repositoryPackage(ctx context.Context, repo extensionRepositor
 		m := p.Manifest
 		actual = repositoryEntry{ID: m.Module.ID, Version: m.Module.Version, Name: m.Name, Publisher: m.Publisher, MinCore: m.MinCore, Description: m.Description}
 	} else if entry.Kind == "provider" {
-		p, err := packageformat.Parse(raw, trustedProviderKey(), version)
+		p, err := manager.parseProviderPackage(raw)
 		if err != nil {
 			return nil, err
 		}

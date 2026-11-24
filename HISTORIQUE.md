@@ -1,3 +1,11 @@
+## 0.0.81 — distribution dirigée vers le fournisseur
+
+- Les adaptateurs déclarent explicitement les identifiants de paquets qu’ils prennent en charge depuis les dépôts. Le catalogue distant ne choisit pas un moteur ni une clé de confiance.
+- Résolution du gestionnaire avant téléchargement, refus d’un choix absent ou ambigu, puis vérification du paquet par son adaptateur. Empreinte du fichier et concordance complète avec la fiche du dépôt restent obligatoires.
+- Le catalogue affiche les versions installées de tous les gestionnaires chargés. L’interface utilise le fournisseur confirmé par le serveur pour l’aperçu, l’installation et le retour vers sa fiche ; aucun repli automatique TMDB.
+- Tests d’un deuxième format signé avec sa propre clé, du parcours dépôt → aperçu → installation, des permissions, des conflits et des signatures invalides. Les formats de catalogue et archives médias restent inchangés.
+- Les adaptateurs sont toujours du code hôte approuvé. Cette étape ne permet pas à un dépôt de télécharger et charger un nouvel adaptateur natif.
+
 ## 0.0.80 — interface commune des fournisseurs
 
 - La page Extensions ne réclame plus systématiquement le moteur et le paquet TMDB. Elle affiche les fournisseurs présents et leurs commandes réelles ; une composition sans fournisseur n’empêche plus le chargement des réglages.
