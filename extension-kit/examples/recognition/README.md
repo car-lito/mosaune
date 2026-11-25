@@ -37,4 +37,4 @@ Ce mécanisme remplace uniquement la reconnaissance, pas encore les catalogues, 
 
 ## Distribution par dépôt (0.0.32)
 
-Les reconnaisseurs utilisent `kind: "recognition"` dans `mosaune-repository.json`. La construction du projet produit un dépôt autonome dans `build/recognition-repository/`, avec les versions 1.0.0 et 1.1.0 du même exemple. Voir [le guide de distribution](REPOSITORY.md) et [le parcours complet](../../../ESSAYER-LES-EXTENSIONS-032.md). Les empreintes et les champs de catalogue sont générés depuis les archives et manifestes utilisés. Un dépôt ne confère aucune confiance supplémentaire au programme.
+Les reconnaisseurs utilisent `kind: "recognition"` dans `mosaune-repository.json`. La construction du projet produit un dépôt autonome dans `build/recognition-repository/`, avec les versions 1.0.0 et 1.1.0 du même exemple. Voir [le guide de distribution](REPOSITORY.md) et [le parcours complet](../../../docs/archive/versions/ESSAYER-LES-EXTENSIONS-032.md). Les empreintes et les champs de catalogue sont générés depuis les archives et manifestes utilisés. Un dépôt ne confère aucune confiance supplémentaire au programme.

@@ -6,7 +6,7 @@ WORKDIR /source
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY web ./web
-COPY theme ./theme
+COPY resources/theme ./resources/theme
 COPY scripts ./scripts
 COPY vite.config.ts tsconfig.json ./
 RUN npm run build
@@ -17,14 +17,14 @@ COPY go.mod go.sum ./
 COPY extension-kit/go.mod extension-kit/go.sum ./extension-kit/
 RUN go mod download && cd extension-kit && go mod download
 COPY . .
-COPY --from=web /source/web/dist ./web/dist
+COPY --from=web /source/resources/web/dist ./resources/web/dist
 COPY --from=web /usr/local/bin/node /usr/local/bin/node
 COPY --from=web /source/node_modules/svelte ./node_modules/svelte
 COPY --from=web /source/node_modules/esm-env ./node_modules/esm-env
 RUN node scripts/build-bundled-wasm.mjs
 ARG TARGETOS
 ARG TARGETARCH
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags="-s -w" -o /out/mosaune .
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags="-s -w" -o /out/mosaune ./server
 RUN mkdir -p build /empty-data && chmod 700 /empty-data && node --input-type=module -e "import {buildNotices} from './scripts/build-notices.mjs'; buildNotices('/source', 'go', process.env)"
 
 FROM scratch

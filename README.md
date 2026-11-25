@@ -1,104 +1,49 @@
-Version 0.0.84 — les fournisseurs peuvent exposer leurs images par un contrat commun, sans exception liée à leur nom. Les références et les permissions sont vérifiées avant l’accès au cache partagé. [Contrat](EXTENSIONS-METADONNEES.md).
-
-Version 0.0.83 — la correction d’association musicale utilise un contrat commun aux fournisseurs. L’écran propose les sources disponibles ; chaque adaptateur valide ses propres liens et identifiants. [Contrat](EXTENSIONS-METADONNEES.md).
-
-Version 0.0.82 — les profils d’artistes utilisent les capacités des fournisseurs disponibles, avec sélection explicite s’il y en a plusieurs. Permissions musicales et arrêt des résultats lors d’une désactivation sont contrôlés côté serveur. [Contrat](EXTENSIONS-METADONNEES.md).
-
-Version 0.0.81 — les dépôts dirigent les paquets vers leur fournisseur déclaré, sans passage imposé par TMDB. Un gestionnaire absent ou ambigu est signalé avant téléchargement. [Contrat](EXTENSIONS-METADONNEES.md#distribution-depuis-un-dépôt--0081).
-
-Version 0.0.80 — les cartes, réglages et imports locaux des fournisseurs sont construits depuis leurs capacités. La page Extensions fonctionne aussi sans TMDB chargé. [Contrat](EXTENSIONS-METADONNEES.md#cartes-et-réglages-des-fournisseurs--0080).
-
-Version 0.0.79 — le gestionnaire de paquets utilise un contrat commun aux fournisseurs : installation, mise à jour, restauration et retrait. TMDB conserve sa compatibilité ; un autre adaptateur peut utiliser les mêmes routes et contrôles. [Contrat](EXTENSIONS-METADONNEES.md#gestion-des-paquets-fournisseurs--0079).
-
-Version 0.0.78 — démarrage minimal accessible par les options du serveur : aucun fournisseur ni famille installée au départ, puis ajout de Musique sans réinstaller le reste. Parcours administrateur et redémarrage testés avec l’exécutable. [Configuration](EXTENSIONS-METADONNEES.md#composition-au-lancement--0078).
-
-Version 0.0.77 — les fournisseurs peuvent lier leurs opérations au composant installé, jusqu’à l’enregistrement des résultats. MusicBrainz suit sa désactivation, son retrait et son remplacement. Initialisation Radarr/Sonarr corrigée. [Contrat](EXTENSIONS-METADONNEES.md).
-
-Version 0.0.76 — une installation neuve peut choisir Films, Séries ou Musique indépendamment. Les familles utilisent le même installateur que leurs ajouts ultérieurs ; composants partagés, écrans et reprise après interruption sont conservés. [Options et contrat](extensions/MEDIA-BUNDLES.md#installation-initiale--0076).
-
-Version 0.0.75 — l’installation initiale des fournisseurs suit la composition choisie, mémorisée et reprise après interruption. Un fournisseur retiré n’est pas réinstallé au démarrage. [Contrat contributeurs](EXTENSIONS-METADONNEES.md).
-
-Version 0.0.74 — démarrage et fermeture des fournisseurs passent par une composition et un contrat communs, séparés du catalogue. [Contrat contributeurs](EXTENSIONS-METADONNEES.md).
-
-Version 0.0.73 — autorisations, révocation des appels et descriptions des services passent par un adaptateur fournisseur commun. [Contrat contributeurs](extension-kit/authorization/README.md).
-
-Version 0.0.72 — les réglages et clés des fournisseurs passent par des contrats communs. Les formulaires ouverts avant un remplacement ou une réinstallation sont refusés ; les champs d’une autre version restent conservés sans être exposés. [Contrat contributeurs](extension-kit/configuration/README.md).
-
-Version 0.0.71 — les correspondances d’identifiants nécessaires aux demandes de séries sont déclarées par le paquet du fournisseur. TMDB 0.8.0 les fournit ; les anciens paquets demandent une mise à jour, sans repli intégré.
-
-Version 0.0.69 — le composant de demandes calcule aussi la disponibilité locale, à partir des fichiers ouverts et vérifiés par Mosaune. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
-
-Version 0.0.68 — l’extension choisit aussi les fichiers importés à associer, à partir de candidats vérifiés et sans recevoir leurs chemins privés. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
-
-Version 0.0.67 — l’extension de demandes pilote aussi la préparation des aperçus avant confirmation. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
-
-Version 0.0.66 — les connecteurs utilisent le stockage commun des réglages d’extensions ; les formulaires périmés sont refusés. [Détails](extension-kit/acquisitionconfig/README.md).
-
-Version 0.0.65 — le composant partagé pilote aussi les lectures nécessaires au suivi Radarr/Sonarr et leurs limites. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
-
-Version 0.0.64 — le composant partagé fournit maintenant le programme d’envoi des demandes Radarr/Sonarr. [Contrat contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
-
-Version 0.0.60 — le composant partagé Demandes Radarr et Sonarr interprète aussi le suivi : progression, saisons, blocages et disponibilité. Le serveur vérifie les fichiers locaux avant de les annoncer disponibles. [Contrat pour contributeurs](extension-kit/capabilities/acquisition/v1/README.md).
-
-Version 0.0.58 — le composant Musique pilote aussi les sources réseau, délais, cadences et limites des réponses. Les familles 7.0/7.1 embarquent ce composant remplaçable. [Contrat de transport](TRANSPORT-FOURNISSEURS.md).
-
-Version 0.0.57 : le paquet TMDB définit ses sources et ses réglages. Dans Réglages → Extensions → TMDB, choisissez la langue des fiches et le pays des sorties. [Contrat de transport](TRANSPORT-FOURNISSEURS.md).
-**Préversion 0.0.50 :** les extensions de catalogue définissent aussi leurs résultats de recherche locale, leurs mots-clés et leurs vignettes. [Guide d’essai](ESSAYER-LA-RECHERCHE-050.md).
-
-**Préversion 0.0.49 :** retour coordonné à la version précédente d’une famille depuis sa fiche. [Guide d’essai](ESSAYER-LE-RETOUR-ARRIERE-049.md). Le découpage complet et les lecteurs restent en cours ; pas encore de déploiement NAS recommandé.
-
-**0.0.48 :** installation et mise à jour des familles depuis le catalogue GitHub, avec aperçu commun à l’import local et choix conservés. [Essayer](ESSAYER-LE-CATALOGUE-048.md).
-
-**0.0.47 :** import et mise à jour de familles depuis une seule archive, avec aperçu, choix conservés et exemples téléchargeables. [Essayer](ESSAYER-LES-FAMILLES-047.md).
-
-**0.0.46 :** Films, Séries et Musique regroupent leurs composants extraits et leur écran, avec opérations communes et réglages avancés. [Essayer les familles](ESSAYER-LES-FAMILLES-046.md).
-
-**0.0.45 :** TMDB livré comme un paquet installé et réellement retirable ; aucune réactivation sans réinstallation. [Essayer le retrait et le retour](ESSAYER-TMDB-045.md).
-
-**0.0.44 :** TMDB utilise uniquement son module de traitement, avec pause persistante et aucun moteur natif de remplacement. [Essayer et comprendre la migration](ESSAYER-TMDB-044.md).
-
-**Étape 0.0.43 :** [catalogue, profils et affiches dans TMDB 0.5.0](ESSAYER-TMDB-043.md).
-
-Écrans médias : [composition remplaçable — 0.0.42](ESSAYER-LES-ECRANS-042.md). [Checklist du découpage : environ 78 %](AVANCEMENT-EXTENSIONS.md).
-
 # Mosaune
 
-[![Vérifications](https://github.com/car-lito/mosaune/actions/workflows/verify.yml/badge.svg)](https://github.com/car-lito/mosaune/actions/workflows/verify.yml)
+**Votre collection, vos découvertes, une interface commune.**
 
-Un espace pour vos films, séries et musiques, hébergé chez vous. Mosaune réunit une bibliothèque locale, des fiches enrichies et la découverte de contenus dans une interface commune. Le projet privilégie un serveur léger en Go et une architecture extensible.
+Mosaune est un serveur multimédia personnel auto-hébergé en Go, avec une interface web Svelte. Films, séries et musique constituent les premières familles ; les autres médias et clients viendront comme extensions et applications optionnelles.
 
-**Prototype 0.0.48 — développement actif.** Reconnaissance, tags audio, catalogues, saisons, descriptions, en-têtes et comportements des fiches sont exécutés dans des extensions installables et remplaçables. Les familles médias complètes, fournisseurs/connecteurs restants et lecteurs restent à terminer avant le premier essai NAS. HTTPS direct et images Docker amd64/arm64 sont préparés pour les essais ; ce n’est pas encore la bêta. [Plan avant le NAS](PLAN-AVANT-NAS.md).
+**État : prototype 0.0.85.** Bibliothèques, métadonnées, recherche, fiches, reprise, playlists, comptes et demandes Radarr/Sonarr fonctionnent déjà. Le découpage complet en extensions reste à terminer avant les lecteurs personnalisés, puis le premier essai NAS. Les lecteurs actuels dépendent des codecs du navigateur. [Fonctionnalités et limites](docs/STATUS.md).
 
-## Déjà disponible
+## Reprendre le projet
 
-- Films, séries et musique : dossiers persistants, identification, affiches, recherche, grandes fiches et profils.
-- Reprise de lecture, file musicale, playlists, favoris et liste personnelle.
-- Comptes locaux, invitations, permissions par bibliothèque et type de média.
-- Demandes Radarr/Sonarr et suivi des arrivées après configuration.
-- Thèmes déclaratifs, catalogue de dépôts GitHub et pilote TMDB installable en Wasm signé.
+Pour un contributeur ou une IA découvrant Mosaune : lire [AGENTS.md](AGENTS.md), puis les [décisions produit](docs/product/DECISIONS.md), l’[architecture](docs/architecture/OVERVIEW.md) et la [roadmap](docs/ROADMAP.md). Ces documents consolident les choix du projet sans nécessiter l’historique d’une conversation.
 
-Les fonctions des familles médias restent partiellement intégrées au serveur. La reconnaissance des noms fonctionne déjà en modules indépendants installables ; leurs programmes externes restent limités à ce contrat. Les fournisseurs exécutables restent les paquets TMDB signés reconnus. Désactiver TMDB arrête effectivement ses accès, sans effacer les fiches et affiches conservées. Les métadonnées et images dépendent des services configurés.
+## Construire et essayer
 
-## Commencer
+Prérequis : Git, Go selon [go.mod](go.mod), Node.js 24 et npm.
 
-- [Construire et tester le projet](DEVELOPPEMENT.md)
-- [Comprendre le dépôt et récupérer un exécutable de test](GITHUB-PREMIERS-PAS.md)
-- [Configurer TMDB](CONFIGURER-TMDB.md) et [Radarr/Sonarr](CONFIGURER-LES-DEMANDES.md)
-- [Plan avant le NAS](PLAN-AVANT-NAS.md)
-- [Contrats et moteur d'extensions](extension-kit/README.md)
-- [Créer un thème](ESSAYER-LES-THEMES.md)
-- [Historique des étapes](HISTORIQUE.md)
+```sh
+git clone https://github.com/car-lito/mosaune.git
+cd mosaune
+npm ci
+node scripts/project.mjs ci
+node scripts/run-server.mjs
+```
 
-Les vérifications automatiques reconstruisent l'interface et les extensions, testent Windows et Linux et produisent aussi un exécutable Linux ARM64. Une compilation ARM64 ne remplace pas les essais sur Raspberry Pi.
+Le dernier appel démarre explicitement le serveur local et conserve ses données dans `data/`. Ouvrir l’adresse affichée dans le terminal ; le code de création du premier administrateur y apparaît aussi. Les tests n’utilisent pas vos bibliothèques. [Guide complet](docs/development/BUILD.md).
 
-Les paquets officiels sont distribués dans [car-lito/mosaune-extensions](https://github.com/car-lito/mosaune-extensions). Ils ont leur propre cycle de mise à jour, distinct de celui du serveur.
+Les exécutables Windows amd64, Linux amd64 et Linux arm64 sont produits dans `build/`. Docker/CasaOS et HTTPS sont préparés, mais la compilation ARM64 ne remplace pas une recette sur NAS. Aucune action GitHub ne déploie sur une machine personnelle.
 
-## État et limites
+## Repères
 
-Le lecteur utilise encore les capacités du navigateur : les codecs non pris en charge ne sont pas convertis automatiquement. Les applications Android/Android TV, le mode hors ligne, les autres types de médias et le magasin universel d'extensions restent prévus. Ne pas exposer ce prototype sur Internet. Le serveur écoute par défaut uniquement sur 127.0.0.1 ; l’accès réseau nécessite une adresse HTTPS et un certificat explicitement configurés.
+| Dossier | Contenu |
+|---|---|
+| [server/](server/README.md) | Serveur, services hôtes, adaptateurs et tests Go |
+| [web/](web/) | Interface web et tests |
+| [extension-kit/](extension-kit/README.md) | Contrats, runtime WASI, composants et outils de contribution |
+| [resources/](resources/) | Manifestes, thèmes, paquets signés et données embarquées |
+| [scripts/](scripts/) | Construction, validation, lancement et publication |
+| [deploy/](deploy/README.md) | Docker, HTTPS et CasaOS |
+| [docs/](docs/README.md) | État, roadmap, architecture, guides et archives |
 
-Les médias et données personnelles restent hors du dépôt. Les tests ne nécessitent pas de clé API personnelle. Ne jamais publier le dossier data, une clé privée de signature ou un export de configuration contenant des secrets.
+Le modèle vise **quelques grandes extensions regroupées**, avec des composants internes remplaçables, des données communes et un cycle de vie contrôlé. Certains adaptateurs restent embarqués : Mosaune n’est pas encore un chargeur universel d’extensions natives. [Contrats fournisseurs](docs/extensions/PROVIDERS.md).
 
-## Licence
+Le [dépôt officiel d’extensions](https://github.com/car-lito/mosaune-extensions) suit un cycle distinct du serveur. Les [notes de versions](docs/history/CHANGELOG.md) détaillent les étapes ; les anciens guides d’essai sont séparés des instructions actuelles.
 
-La licence du code Mosaune reste à choisir. L'accès public aux sources ne vaut pas encore licence open source. Les dépendances gardent leurs propres licences ; voir leurs manifestes et les notices présentes dans licenses/ et [NOTICES-METADONNEES.md](NOTICES-METADONNEES.md).
+## Données et licence
+
+Médias, comptes, configurations et clés privées ne doivent jamais être publiés. Voir les [règles et le périmètre de l’audit](docs/security/PRIVACY.md).
+
+La licence propre à Mosaune reste à choisir : des sources publiques ne constituent pas encore une licence open source générale. Les dépendances conservent leurs licences et notices, générées avec les exécutables. [Notices métadonnées](docs/legal/METADATA.md).

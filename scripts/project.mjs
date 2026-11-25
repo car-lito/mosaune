@@ -28,6 +28,7 @@ function wasm(output, source) {
   run(go, ['build', '-trimpath', '-buildvcs=false', '-ldflags=-s -w', '-o', output, source], kit, { GOOS: 'wasip1', GOARCH: 'wasm' });
 }
 try {
+  run(process.execPath, ['scripts/check-repository.mjs']);
   buildBundledWasm(wasm);
   wasm('examples/recognition/module.wasm', './examples/recognition/source');
   wasm('examples/audiotags/module.wasm', './examples/audiotags/source');
@@ -62,13 +63,13 @@ try {
   }
   if (mode !== 'check') {
     const { version } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-    const serverVersion = readFileSync(join(root, 'main.go'), 'utf8').match(/const version = "([^"]+)"/)?.[1];
+    const serverVersion = readFileSync(join(root, 'server/main.go'), 'utf8').match(/const version = "([^"]+)"/)?.[1];
     if (version !== serverVersion) throw new Error('La version du serveur et celle du paquet ne correspondent pas.');
     mkdirSync(join(root, 'build'), { recursive: true });
     const checksums = [];
     for (const [os, arch, suffix] of [['windows', 'amd64', '.exe'], ['linux', 'amd64', ''], ['linux', 'arm64', '']]) {
       const name = `mosaune-${version}-${os}-${arch}${suffix}`;
-      run(go, ['build', '-trimpath', '-ldflags=-s -w', '-o', `build/${name}`, '.'], root, { GOOS: os, GOARCH: arch });
+      run(go, ['build', '-trimpath', '-ldflags=-s -w', '-o', `build/${name}`, './server'], root, { GOOS: os, GOARCH: arch });
       const hash = createHash('sha256').update(readFileSync(join(root, 'build', name))).digest('hex');
       checksums.push(`${hash}  ${name}`);
     }

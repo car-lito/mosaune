@@ -3,7 +3,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export function buildTheme(){
- const theme=JSON.parse(fs.readFileSync(path.join(root,'theme/default.json'),'utf8'));
+ const theme=JSON.parse(fs.readFileSync(path.join(root,'resources/theme/default.json'),'utf8'));
  const css=['light','dark'].map(mode=>{
   const declarations=Object.keys(theme.tokens).sort().map(key=>{
    let value=theme.tokens[key];

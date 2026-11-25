@@ -14,9 +14,9 @@ try {
  & $goCommand build -trimpath "-ldflags=-s -w -X main.buildVersion=$Version" -o providers/tmdb/provider.wasm ./providers/tmdb/source
  if($LASTEXITCODE -ne 0){throw 'Compilation du fournisseur impossible.'}
  $env:GOOS=$previousOS;$env:GOARCH=$previousArch
- $packages=Join-Path $projectRoot 'packages'
+ $packages=Join-Path $projectRoot 'resources/packages'
  [IO.Directory]::CreateDirectory($packages) | Out-Null
- $arguments=@('run','./cmd/package-provider','-key',$keyFile,'-public',(Join-Path $projectRoot 'provider-package-key.pub'),'-version',$Version,'-code','providers/tmdb/provider.wasm','-out',(Join-Path $packages "tmdb-$Version.mosaune.zip"))
+ $arguments=@('run','./cmd/package-provider','-key',$keyFile,'-public',(Join-Path $projectRoot 'resources/provider-package-key.pub'),'-version',$Version,'-code','providers/tmdb/provider.wasm','-out',(Join-Path $packages "tmdb-$Version.mosaune.zip"))
  if($NewSigningKey){$arguments+='-create-key'}
  & $goCommand @arguments
  if($LASTEXITCODE -ne 0){throw 'Signature du fournisseur impossible.'}

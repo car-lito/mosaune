@@ -4,7 +4,7 @@ Le registre conserve les modules, leurs descripteurs, l’empreinte du code vér
 
 ## Intégration actuelle
 
-Depuis 0.0.30, les trois reconnaisseurs officiels rejoignent ce registre. Leur programme installé est stocké dans `recognition_packages` et modifié dans la même transaction que l’intention d’activation. Leur source initiale est la distribution officielle embarquée, sans import externe. Ils démarrent à la demande pendant le scan, vérifient l’empreinte du programme installé et respectent la désactivation, le retrait et le mode de secours. La migration au schéma 18 les installe une seule fois pour préserver les scans existants. [Parcours et limites](../../ESSAYER-LES-EXTENSIONS-030.md).
+Depuis 0.0.30, les trois reconnaisseurs officiels rejoignent ce registre. Leur programme installé est stocké dans `recognition_packages` et modifié dans la même transaction que l’intention d’activation. Leur source initiale est la distribution officielle embarquée, sans import externe. Ils démarrent à la demande pendant le scan, vérifient l’empreinte du programme installé et respectent la désactivation, le retrait et le mode de secours. La migration au schéma 18 les installe une seule fois pour préserver les scans existants. [Parcours et limites](../../docs/archive/versions/ESSAYER-LES-EXTENSIONS-030.md).
 
 Le paquet TMDB installé est le premier utilisateur réel du registre. Installation, mise à jour, restauration, choix de moteur et désinstallation mettent à jour l’archive et le registre dans la même transaction SQLite. Le démarrage à la demande vérifie la correspondance avec le paquet authentifié et utilise les choix enregistrés. La fiche du paquet affiche « Dépendances et démarrage ».
 

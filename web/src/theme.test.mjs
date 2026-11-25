@@ -5,8 +5,8 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import postcss from 'postcss';
 const src=path.dirname(fileURLToPath(import.meta.url)),root=path.resolve(src,'../..');
-const contract=JSON.parse(fs.readFileSync(path.join(root,'theme/contract.json'),'utf8'));
-const theme=JSON.parse(fs.readFileSync(path.join(root,'theme/default.json'),'utf8'));
+const contract=JSON.parse(fs.readFileSync(path.join(root,'resources/theme/contract.json'),'utf8'));
+const theme=JSON.parse(fs.readFileSync(path.join(root,'resources/theme/default.json'),'utf8'));
 test('every component style consumes declared visual tokens, including scoped Svelte styles',()=>{
  const known=new Set(Object.keys(contract.tokens).map(k=>'--m-'+k.replaceAll('.','-')));
  assert.equal(known.size,Object.keys(contract.tokens).length,'CSS variable name collision');

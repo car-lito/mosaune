@@ -1,0 +1,100 @@
+# Mosaune 0.0.12 — demander un film ou une série
+
+Le suivi des fichiers et l’identification en arrière-plan sont expliqués dans [ESSAYER-LE-SCAN.md](../archive/versions/ESSAYER-LE-SCAN.md). La demande Radarr et le démarrage dans Transmission ont été validés par l’utilisateur en 0.0.9 ; l’arrivée finale sur son NAS reste à vérifier.
+
+Les boutons des fiches peuvent maintenant envoyer une demande à **Radarr** pour les films ou à **Sonarr** pour les séries. La musique conserve son bouton « bientôt » : son raccordement viendra séparément.
+
+## 1. Lancer la mise à jour
+
+1. Arrêter l’ancien serveur Mosaune avec **Ctrl+C** dans sa fenêtre.
+2. Copier **tout le dossier data**, serveur arrêté, pour conserver une sauvegarde.
+3. Relancer **scripts/windows/DEMARRER-WINDOWS.cmd**, puis recharger la page du navigateur.
+4. Vérifier **v0.0.12** dans la barre latérale. La base passe au format 8 ; gardez la sauvegarde avant mise à jour.
+
+Le serveur reste un prototype accessible depuis ce PC uniquement. Il peut joindre les services de ton NAS ; ce n’est pas encore le déploiement de Mosaune sur le NAS.
+
+## 2. Relier les services
+
+Dans **Réglages → Téléchargements**, un guide dépliable est également disponible.
+
+1. Ouvrir Radarr dans son interface habituelle. Dans **Settings → General → Security**, copier sa **API Key**.
+2. Dans le bloc **Radarr** de Mosaune, saisir son adresse accessible depuis le PC. Exemple fictif : `http://nas.example:7878`. Si tu utilises un préfixe comme `/radarr`, le conserver. Ne pas ajouter de clé dans l’URL.
+3. Coller la clé dans le champ prévu. Elle reste côté serveur après enregistrement et n’est pas renvoyée dans les réponses de réglages. Inutile de la partager dans le chat.
+4. Cliquer **Tester la connexion**. Ce test lit les réglages du service et ne demande aucun téléchargement.
+5. Choisir un **profil qualité** et un **dossier de destination** parmi ceux déjà configurés dans Radarr.
+6. Choisir le **dossier correspondant dans Mosaune**. Si la liste est vide, cliquer **Ajouter un dossier de films** (ou de séries), coller son chemin accessible depuis ce PC, puis **Ajouter et sélectionner**. Terminer par **Enregistrer et activer**.
+7. Répéter pour Sonarr, avec sa propre clé et son propre port (souvent 8989).
+
+Le dossier de Radarr/Sonarr est celui vu par leur conteneur, par exemple `/movies` ou `/tv`. Le dossier Mosaune est celui que ton PC peut lire, par exemple un partage réseau `\\NAS\Medias\Films`. Les chemins peuvent être différents, mais ils doivent désigner les mêmes fichiers. S’il manque dans la liste, le bouton **Ajouter un dossier** sous celle-ci permet maintenant de l’ajouter directement ; son type Films/Séries est choisi automatiquement. Le même ajout reste possible dans **Réglages → Vos dossiers**. Un dossier d’essai local sans rapport avec le NAS ne permettra pas de détecter les arrivées sur le NAS.
+
+Les œuvres déjà présentes dans le service conservent leur destination et leur profil existants. Si elles se trouvent ailleurs, le dossier Mosaune choisi doit aussi permettre de les lire. Un connecteur a une seule bibliothèque associée dans cette première version.
+
+Les clés sont conservées dans le catalogue SQLite local, comme la clé TMDB : protège sa sauvegarde. Changer l’adresse d’un service impose de saisir à nouveau sa clé. Une clé laissée vide est conservée uniquement si l’adresse reste identique.
+
+## 3. Faire une première demande
+
+1. Rechercher un film absent de ta collection et ouvrir sa fiche TMDB.
+2. Cliquer **Demander le téléchargement**.
+3. Lire le récapitulatif : service, qualité, destination et bibliothèque Mosaune.
+4. Cliquer **Confirmer la demande** pour autoriser l’ajout, la surveillance et la recherche dans ta stack existante.
+5. Ouvrir **Demandes** dans le menu de gauche pour suivre le résultat.
+
+Pour une série : **Demander la série** concerne toutes ses saisons, les spéciaux et les futures saisons. Pour un essai plus petit, cliquer sur une **affiche de saison**, puis **Demander cette saison**. Seule cette saison est ajoutée à la surveillance ; les autres réglages déjà actifs dans Sonarr restent tels quels.
+
+**Ma liste** et les favoris ne déclenchent aucun téléchargement. Les demandes de cette version passent par une confirmation explicite. TMDB doit pouvoir fournir l’identifiant TVDB de la série pour Sonarr ; s’il manque, Mosaune refuse l’envoi plutôt que de choisir une autre série par son nom. Certains découpages de saisons TMDB/TVDB peuvent différer : vérifier le numéro dans le récapitulatif et dans Sonarr.
+
+## 4. Comprendre les états
+
+| État | Ce qu’il signifie |
+| --- | --- |
+| En attente | Demande acceptée ; aucune activité de téléchargement détectée pour le moment. La disponibilité dépend des indexeurs et des règles du service. |
+| En téléchargement | Une entrée correspondante figure dans sa file. Le pourcentage concerne la file active, pas toute la série. |
+| À vérifier | Radarr/Sonarr signale un blocage : ouvrir sa file d’activité pour en voir la cause. |
+| Importé · dossier à vérifier | Le service possède le fichier, mais Mosaune ne peut pas encore le lire et l’identifier dans la bibliothèque associée. |
+| Partiellement disponible | Certains épisodes sont lisibles ; la saison ou la série n’est pas complète. Le décompte inclut les épisodes futurs déjà référencés par Sonarr. |
+| Disponible | Les fichiers attendus sont identifiés et lisibles dans Mosaune. Cela ne garantit pas que leurs codecs sont pris en charge par le navigateur actuel. |
+| Envoi à vérifier | Le service n’a pas confirmé toutes les étapes. Vérifier directement dans Radarr/Sonarr ; Mosaune ne renvoie pas la recherche automatiquement. |
+| Service inaccessible / Suivi en pause | Mosaune ne peut pas actualiser le suivi. Une demande déjà envoyée continue d’être gérée par le service. |
+
+Le serveur vérifie les demandes environ une fois par minute, tant qu’il reste ouvert. Les demandes déjà entièrement disponibles sont revérifiées moins souvent (environ 15 minutes). Après import, les dossiers concernés sont analysés au maximum une fois toutes les cinq minutes. Un gros dossier, plusieurs demandes ou un fournisseur lent peuvent allonger l’attente. **Actualiser le suivi** relit les services immédiatement ; le délai de cinq minutes entre analyses du même dossier reste appliqué. Le bouton **Actualiser** du dossier permet aussi une analyse manuelle.
+
+Les nouveaux fichiers sont identifiés avec le mécanisme TMDB existant, par lots. Si une identification manque ou reste ambiguë, actualiser le dossier et utiliser **Corriger l’association**. Une petite notification dans Mosaune annonce les nouvelles disponibilités lorsque l’application est ouverte et visible ; le contenu apparaît alors dans sa bibliothèque. Ce n’est pas une notification système ou mobile.
+
+Un double clic ne crée pas une deuxième demande identique. Les demandes et leur destination sont conservées au redémarrage. Après une coupure pendant l’envoi, le suivi recherche l’œuvre dans le service, sans répéter une commande potentiellement déjà exécutée. Pour relancer une recherche incertaine, le faire dans Radarr/Sonarr après vérification.
+
+## Limites de cette tranche
+
+- API v3 de Radarr et Sonarr (Sonarr 4 visé) ; ta configuration NAS réelle reste à tester. Les essais de développement utilisent des services simulés.
+- Pas encore de webhook entrant, de demandes musicales, de demandes automatiques depuis les abonnements, de suppression/annulation distante ni de relance de recherche depuis Mosaune.
+- Mettre le suivi en pause ne stoppe pas les téléchargements du NAS. Les arrêter ou changer leur surveillance se fait dans Radarr/Sonarr.
+- Changer l’adresse du connecteur met les anciennes demandes en pause pour éviter de suivre une autre installation par erreur. Restaurer l’adresse d’origine reprend leur suivi. La bibliothèque associée à une demande est mémorisée au moment de l’envoi.
+- Maximum 1 000 demandes conservées ; pas encore d’archivage. La file distante est lue par pages, jusqu’à 2 000 entrées. Pas de garantie de performances sur une grande bibliothèque ou sur le Pi : ces mesures viendront avec le déploiement.
+- Aucune nouvelle dépendance serveur, aucun transcodage et aucun changement du lecteur vidéo dans cette version.
+
+Références des contrats : [API Radarr](https://radarr.video/docs/api/), [API Sonarr](https://sonarr.tv/docs/api/), [identifiants externes TMDB](https://developer.themoviedb.org/reference/tv-series-external-ids).
+
+Depuis la 0.0.59, activez le composant « Demandes Radarr et Sonarr » dans les composants avancés de Films ou Séries. Un seul programme est partagé par les deux familles. Sa désactivation suspend les échanges Mosaune avec ces services. Vous pouvez choisir un remplaçant depuis la même fiche.
+
+Depuis la 0.0.60, le composant partagé de demandes interprète aussi le suivi. Sa version fournie est 0.2.0 ; un remplaçant plus ancien peut demander une mise à jour pour afficher la progression. Aucun repli automatique ne réactive le composant fourni. Les fichiers doivent toujours être lisibles et identifiés dans Mosaune avant d’être annoncés disponibles.
+
+Depuis la 0.0.61, utilisez le composant fourni 0.3.0 ou un remplaçant compatible avec les opérations réseau. Une ancienne extension sans ces déclarations doit être mise à jour avant de tester la connexion, envoyer une demande ou suivre les téléchargements. Les services déjà configurés conservent leurs adresses et clés ; le composant officiel est mis à jour sans changer son activation.
+
+Depuis la 0.0.62, la configuration nécessite les formulaires du composant 0.4.0 ou d’un remplaçant compatible. Votre adresse et votre clé sont conservées. Après un changement de composant, cliquez sur « Recharger les réglages ». Un ancien composant peut toujours être mis en pause.
+
+Depuis la 0.0.63, le composant de demandes doit aussi déclarer les formats des données du service (composant fourni 0.5.0). Les anciens remplaçants sans cette déclaration demandent une mise à jour avant tout échange réseau. Vos adresses, clés et destinations restent conservées.
+
+Depuis la 0.0.64, l’envoi nécessite aussi le programme du composant fourni 0.6.0 ou d’un remplaçant compatible. Les anciens remplaçants sans cette fonction doivent être mis à jour ; Mosaune ne se substitue pas à eux pour envoyer une demande.
+
+Depuis la0.0.65, le suivi nécessite le composant fourni0.7.0 ou un remplaçant proposant `observation-plan`. Les anciennes versions officielles intactes sont mises à jour en conservant leur état ; les composants retirés ou personnalisés ne sont pas remplacés. Si une limite de collecte est dépassée, le suivi signale une erreur et conserve les demandes, sans renvoyer de téléchargement.
+
+En 0.0.66, vos réglages sont migrés automatiquement vers le stockage commun des extensions. Si un autre onglet a enregistré des changements ou mis le connecteur en pause, rechargez le formulaire avant de sauvegarder. Une clé laissée vide est conservée uniquement si l’adresse normalisée reste identique. Aucun nouveau réglage ni paquet à installer pour cette migration.
+
+En 0.0.67, la préparation des demandes nécessite acquisition 0.8.0 ou un remplaçant compatible. Le composant officiel intact est mis à jour automatiquement, sans réactiver les composants en pause ou recréer ceux retirés. Un remplaçant peut choisir de ne traiter que les médias déjà présents dans Radarr/Sonarr. Les destinations existantes restent prioritaires sur les valeurs configurées pour les nouveaux ajouts.
+
+Depuis la 0.0.68, le composant de demandes décide aussi quels imports confirmés associer aux fichiers locaux. Les composants personnalisés doivent fournir `import-plan` et `match-imports`. Le mode `deferred` laisse l’identification habituelle travailler ; le mode `verified` utilise uniquement les candidats contrôlés par le serveur. Un protocole manquant est signalé, sans remplacement silencieux par le composant intégré.
+
+Depuis la 0.0.69, le composant doit aussi fournir `local-availability`. Mosaune vérifie que les fichiers sont réellement accessibles avant de lui demander ce calcul. Un fichier supprimé ne reste pas disponible simplement parce que sa fiche existe encore. Les composants personnalisés sans cette opération doivent être mis à jour ; le suivi ne les remplace pas silencieusement.
+
+Depuis la 0.0.70, désactiver un composant conserve les réglages. Désinstaller le dernier composant de demandes supprime les adresses, destinations et clés Radarr/Sonarr ; un remplaçant installé, même désactivé, les conserve. Réinstaller exige alors une nouvelle configuration. Les fichiers, fiches et historique des demandes restent conservés, et les services continuent les téléchargements déjà envoyés. Les réglages sont partagés par le composant films/séries : retirer seulement une famille ne les supprime pas si le composant partagé est encore installé.
+
+Depuis Mosaune 0.0.71, les demandes de séries nécessitent les correspondances d’identifiants du fournisseur installé. Pour TMDB, mettez son paquet à jour vers **0.8.0** dans **Réglages → Extensions** si Mosaune vous le demande. La clé déjà configurée est conservée. Aucun téléchargement n’est lancé en cas de correspondance absente ou invalide.

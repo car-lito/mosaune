@@ -1,4 +1,4 @@
-**0.0.45 :** le module TMDB de démarrage est désormais installé depuis son archive signée dans provider_packages et le registre, une seule fois (schéma 29). effectiveEngine charge exclusivement le paquet installé ; aucun programme fourni de remplacement. Retrait, absence persistante et réinstallation explicite suivent le même cycle que les imports. Les archives du catalogue inclus restent disponibles hors ligne. [Migration et limites](../ESSAYER-TMDB-045.md).
+**0.0.45 :** le module TMDB de démarrage est désormais installé depuis son archive signée dans provider_packages et le registre, une seule fois (schéma 29). effectiveEngine charge exclusivement le paquet installé ; aucun programme fourni de remplacement. Retrait, absence persistante et réinstallation explicite suivent le même cycle que les imports. Les archives du catalogue inclus restent disponibles hors ligne. [Migration et limites](../docs/archive/versions/ESSAYER-TMDB-045.md).
 
 # Paquets de fournisseurs — pilote 0.0.19
 
@@ -6,7 +6,7 @@
 
 Un paquet contient exactement trois fichiers à sa racine : `extension.json`, `provider.wasm` et `signature.ed25519`. Maximum 9 Mio pour l’archive, 8 Mio pour le programme, 64 Kio pour le manifeste. Les chemins, fichiers supplémentaires, doublons, liens et tailles décompressées excessives sont refusés ; aucune extraction n’est effectuée sur le système de fichiers.
 
-Le manifeste est signé avec Ed25519 et contient le SHA-256 du programme. L’hôte vérifie la signature sur les octets exacts du manifeste avant son interprétation, puis vérifie les déclarations et l’empreinte du Wasm avant toute compilation. La clé publique reconnue est `provider-package-key.pub`. Elle correspond à une clé de développement propre à ce projet, pas à une identité vérifiée par un service extérieur.
+Le manifeste est signé avec Ed25519 et contient le SHA-256 du programme. L’hôte vérifie la signature sur les octets exacts du manifeste avant son interprétation, puis vérifie les déclarations et l’empreinte du Wasm avant toute compilation. La clé publique reconnue est `resources/provider-package-key.pub`. Elle correspond à une clé de développement propre à ce projet, pas à une identité vérifiée par un service extérieur.
 
 La signature autorise des mises à jour provenant de cette clé ; elle n’est pas une preuve d’absence de bogue. Les paquets signés par d’autres clés restent refusés. Les budgets globaux de compilation et de processus doivent encore être renforcés et mesurés sur ARM avant l’ouverture au code communautaire non fiable. Les plafonds actuels de mémoire linéaire ne représentent pas la consommation totale du processus.
 
@@ -39,7 +39,7 @@ Depuis la racine du projet, avec Go installé :
 ./scripts/build-provider.ps1 -Key 'C:/chemin-prive/mosaune-provider.private' -Version '0.4.2'
 ```
 
-Le script compile le programme du fournisseur avec sa propre version et signe `packages/tmdb-0.4.2.mosaune.zip`. Il ne reconstruit pas le serveur. La clé privée existante est requise ; son contenu n’est jamais affiché ni embarqué dans le paquet. La clé publique seule peut être versionnée. Conserver une sauvegarde privée de la clé ; la perdre exige une rotation explicite de confiance. Le script refuse de remplacer silencieusement une clé publique déjà différente.
+Le script compile le programme du fournisseur avec sa propre version et signe `resources/packages/tmdb-0.4.2.mosaune.zip`. Il ne reconstruit pas le serveur. La clé privée existante est requise ; son contenu n’est jamais affiché ni embarqué dans le paquet. La clé publique seule peut être versionnée. Conserver une sauvegarde privée de la clé ; la perdre exige une rotation explicite de confiance. Le script refuse de remplacer silencieusement une clé publique déjà différente.
 
 Pour un nouveau projet sans clé publique, l’option `-NewSigningKey` initialise une paire. Elle n’autorise pas la rotation d’un serveur existant. Ne pas publier les fichiers `.private` : ils sont aussi exclus par le `.gitignore` du projet.
 

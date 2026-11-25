@@ -40,4 +40,4 @@ Les anciens descripteurs sans `dependencies` gardent leur comportement. Le moteu
 3. Distribution automatique des dépendances officielles une seule fois, sans exécuter un paquet avant validation et autorisation.
 4. Réglages/stockage génériques, extraction des modules et contributions UI ; lecteurs après ce travail.
 
-Cible produit : [Lecteurs et extensions](../../LECTEURS-ET-EXTENSIONS.md).
+Cible produit : [Lecteurs et extensions](../../docs/product/PLAYERS.md).

@@ -2,6 +2,7 @@
 .github
 node_modules
 **/node_modules
+resources/web/dist
 web/dist
 build
 data

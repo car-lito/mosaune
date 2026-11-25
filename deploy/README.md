@@ -1,6 +1,6 @@
 # Préparer Mosaune pour Docker et CasaOS
 
-Version 0.0.38 : [en-têtes des fiches par extension](../ESSAYER-LES-EXTENSIONS-038.md), sur la base réseau et conteneur introduite en 0.0.23. **Préversion de développement ; le premier déploiement sur le NAS attend encore les autres points du [plan avant NAS](../PLAN-AVANT-NAS.md).** Aucun certificat, secret, média ou catalogue personnel n'est inclus dans l'image.
+Préversion de développement. Les définitions Docker/HTTPS/CasaOS sont préparées ; le premier essai NAS attend les extensions complètes et les lecteurs selon la [roadmap](../docs/ROADMAP.md). Aucun certificat, secret, média ou catalogue personnel n’est inclus dans l’image.
 
 ## Ce que cette version apporte
 
@@ -13,7 +13,7 @@ Version 0.0.38 : [en-têtes des fiches par extension](../ESSAYER-LES-EXTENSIONS-
 
 ## Les éléments à préparer ensemble avant le NAS
 
-1. **Adresse stable** : une adresse HTTPS exacte, par exemple `https://192.168.1.50:47831` (exemple fictif), ou un nom résolu sur le réseau. Le certificat doit couvrir cette IP ou ce nom. Un changement de port publié doit aussi être reporté dans cette adresse.
+1. **Adresse stable** : une adresse HTTPS exacte, par exemple `https://nas.example:47831` (exemple fictif), ou un nom résolu sur le réseau. Le certificat doit couvrir cette IP ou ce nom. Un changement de port publié doit aussi être reporté dans cette adresse.
 2. **Certificat et confiance** : un certificat serveur avec sa chaîne (`server.crt`) et sa clé privée (`server.key`). Pour une autorité locale, son certificat public (`ca.crt`) doit être reconnu par chaque appareil client. Un certificat public reconnu peut aussi être utilisé. Ne pas désactiver les vérifications HTTPS pour contourner une erreur de certificat.
 3. **Dossiers** : données Mosaune, certificats et médias. Le dossier des données doit être accessible en écriture au compte du conteneur ; les certificats et médias en lecture. La clé privée doit rester accessible uniquement aux comptes nécessaires. Adapter UID/GID ou les droits des dossiers, sans lancer le service en administrateur pour éviter le réglage.
 4. **Première installation** : utiliser un dossier de données Mosaune vide et monter les dossiers de médias dans le conteneur. Il n’est pas nécessaire de reprendre le catalogue du PC. Pour une éventuelle migration ultérieure, les chemins `N:\films` du PC ne correspondent pas aux chemins `/media/...` du conteneur. Ne pas brancher directement la base Windows sans préparer cette migration et sauvegarder les données.
@@ -77,7 +77,7 @@ GitHub teste d'abord les sources sur Windows et Linux. Il construit ensuite l'im
 
 Références : [Docker — constructions multiarchitectures](https://docs.docker.com/build/building/multi-platform/), [GitHub — publication d'images](https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images), [CasaOS — exemples de définitions](https://github.com/IceWhaleTech/CasaOS-AppStore/tree/main/Apps). Le magasin récent ZimaOS utilise un protocole différent ; cette préparation cible CasaOS 0.4.15.
 
-## Validation de la préversion 0.0.23
+## Résultat historique : préversion 0.0.23 (pas une validation du commit courant)
 
 Le 17 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-lito/mosaune/actions/runs/39049806714), tests Windows/Linux puis exécution des conteneurs amd64 et arm64 sous émulation pour ce dernier. HTTPS, refus d’origine étrangère, cookies sécurisés, lecture partielle d’un média fictif, arrêt propre et conservation du compte/catalogue après redémarrage sont vérifiés. Aucun test sur le NAS réel.
 
@@ -97,7 +97,7 @@ Le 18 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-li
 
 Image publique : `ghcr.io/car-lito/mosaune:0.0.25-preview`. Empreinte de l’index : `sha256:33acccbc28dca64d43800d18f5322627027371a6dc9428edc43c7312284cbd64`. Téléchargement anonyme des fichiers de chaque architecture avec contrôle SHA-256 ; archive CasaOS publiée identique à l’archive locale. Aucun essai sur le NAS réel.
 
-Localement : 21 tests web réussis, Svelte sans erreur ni avertissement, tests et analyse Go du serveur et du kit réussis, trois exécutables construits. Le serveur livré a accepté une bibliothèque synthétique de trois fichiers. La vérification visuelle reste à faire : le navigateur intégré n’a pas pu joindre cette instance de test, malgré son fonctionnement via l’API locale. Guide : [Essayer la recherche](../ESSAYER-RECHERCHE-025.md).
+Localement : 21 tests web réussis, Svelte sans erreur ni avertissement, tests et analyse Go du serveur et du kit réussis, trois exécutables construits. Le serveur livré a accepté une bibliothèque synthétique de trois fichiers. La vérification visuelle reste à faire : le navigateur intégré n’a pas pu joindre cette instance de test, malgré son fonctionnement via l’API locale. Guide : [Essayer la recherche](../docs/archive/versions/ESSAYER-RECHERCHE-025.md).
 
 ## Validation de la préversion 0.0.26
 
@@ -105,7 +105,7 @@ Le 19 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-li
 
 Image publique : `ghcr.io/car-lito/mosaune:0.0.26-preview`. Empreinte de l’index : `sha256:25a254ce47b7476e5161edc33aafd0964e0bb6d230ab2e7c3c3033006853414d`. Téléchargement anonyme des fichiers de chaque architecture avec contrôle SHA-256 ; archive CasaOS publiée identique à l’archive locale. Aucun essai sur le NAS réel.
 
-Localement : 21 tests web réussis, Svelte sans erreur ni avertissement, tests et analyse Go du serveur et du kit réussis, trois exécutables construits. Tests de migration du schéma 14 vers 15 avec sauvegarde, d’installation/mise à jour/restauration/retrait transactionnels du paquet TMDB et de refus des écritures concurrentes. Aucun catalogue personnel utilisé pour ces essais. La nouvelle section de la fiche TMDB n’a pas fait l’objet d’une validation visuelle dans le navigateur. Guide : [Extensions 0.0.26](../ESSAYER-LES-EXTENSIONS-026.md).
+Localement : 21 tests web réussis, Svelte sans erreur ni avertissement, tests et analyse Go du serveur et du kit réussis, trois exécutables construits. Tests de migration du schéma 14 vers 15 avec sauvegarde, d’installation/mise à jour/restauration/retrait transactionnels du paquet TMDB et de refus des écritures concurrentes. Aucun catalogue personnel utilisé pour ces essais. La nouvelle section de la fiche TMDB n’a pas fait l’objet d’une validation visuelle dans le navigateur. Guide : [Extensions 0.0.26](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-026.md).
 
 ## Validation de la préversion 0.0.27
 
@@ -113,7 +113,7 @@ Le 19 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-li
 
 Image publique : `ghcr.io/car-lito/mosaune:0.0.27-preview`. Empreinte de l’index : `sha256:58e4715145384b527b47ac2a3fddd7cff46c3ea05ca70a0e0c6bc2b2b41d5b5a`. Téléchargement anonyme des fichiers de chaque architecture avec contrôle SHA-256 ; archive CasaOS publique identique à l’archive locale. Aucun essai sur le NAS réel.
 
-Localement : 21 tests web et 102 tests principaux du serveur réussis ; tests du kit, analyse Go et Svelte sans erreur ni avertissement, exécutables Windows/Linux/ARM64 construits. La suite serveur a terminé en 207.802 secondes, avec un délai local de 12 minutes après des interruptions à cinq minutes ; les limites de production et celles des vérifications GitHub sont inchangées. Un premier lancement avant autorisation réseau avait aussi échoué sur les serveurs de simulation locaux. Aucun catalogue personnel utilisé ; aucun essai visuel du nouveau bouton de rechargement dans le navigateur. Guide : [Extensions 0.0.27](../ESSAYER-LES-EXTENSIONS-027.md).
+Localement : 21 tests web et 102 tests principaux du serveur réussis ; tests du kit, analyse Go et Svelte sans erreur ni avertissement, exécutables Windows/Linux/ARM64 construits. La suite serveur a terminé en 207.802 secondes, avec un délai local de 12 minutes après des interruptions à cinq minutes ; les limites de production et celles des vérifications GitHub sont inchangées. Un premier lancement avant autorisation réseau avait aussi échoué sur les serveurs de simulation locaux. Aucun catalogue personnel utilisé ; aucun essai visuel du nouveau bouton de rechargement dans le navigateur. Guide : [Extensions 0.0.27](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-027.md).
 
 ## Validation de la préversion 0.0.28
 
@@ -121,7 +121,7 @@ Le 20 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-li
 
 Image publique : `ghcr.io/car-lito/mosaune:0.0.28-preview`. Empreinte de l’index : `sha256:4897698bef10cd427aa377a1a03ac39c8394d3dce5a216546c02750daee4ece3`. Téléchargement anonyme des fichiers des deux architectures avec contrôle SHA-256 ; archive CasaOS publique identique à l’archive locale. Aucun essai sur le NAS réel.
 
-Localement : 21 tests web et 108 tests principaux du serveur réussis ; tests du kit et analyse Go réussis, Svelte sans erreur ni avertissement, trois exécutables construits. La suite serveur a terminé en 539.981 secondes avec un délai local de 12 minutes ; limites de production et GitHub inchangées. Le formulaire de retrait d’accès et sa persistance après rechargement ont été vérifiés dans le navigateur, avec une installation vide et un compte fictif. L’ajustement final du libellé de la carte a été recompilé et vérifié par Svelte. Guide : [Extensions 0.0.28](../ESSAYER-LES-EXTENSIONS-028.md).
+Localement : 21 tests web et 108 tests principaux du serveur réussis ; tests du kit et analyse Go réussis, Svelte sans erreur ni avertissement, trois exécutables construits. La suite serveur a terminé en 539.981 secondes avec un délai local de 12 minutes ; limites de production et GitHub inchangées. Le formulaire de retrait d’accès et sa persistance après rechargement ont été vérifiés dans le navigateur, avec une installation vide et un compte fictif. L’ajustement final du libellé de la carte a été recompilé et vérifié par Svelte. Guide : [Extensions 0.0.28](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-028.md).
 
 ## Validation de la préversion 0.0.29
 
@@ -129,7 +129,7 @@ Le 22 octobre 2026 : [vérifications GitHub réussies](https://github.com/car-li
 
 Image publique : `ghcr.io/car-lito/mosaune:0.0.29-preview`. Empreinte de l’index : `sha256:379941b62aa4b43ad6c53038c7441f38b2ea6b5f36024c1cd66ada152b658559`. Téléchargement anonyme des fichiers des deux architectures avec contrôle SHA-256 ; archive CasaOS publique identique à l’archive locale. Aucun essai sur le NAS réel.
 
-Localement : 21 tests web et 111 tests principaux du serveur réussis ; tests du kit et analyse Go réussis, Svelte sans erreur ni avertissement, trois exécutables construits. Suite serveur complète relancée avec le mode interprété : 124.8 secondes, sans échec. Limites de production inchangées ; la sonde HTTP du scan en CI attend désormais jusqu’à 30 secondes pour laisser le serveur restituer ses erreurs. Le texte de progression a été compilé et vérifié par Svelte ; aucun essai visuel dans le navigateur pour cette étape. Guide : [Extensions 0.0.29](../ESSAYER-LES-EXTENSIONS-029.md).
+Localement : 21 tests web et 111 tests principaux du serveur réussis ; tests du kit et analyse Go réussis, Svelte sans erreur ni avertissement, trois exécutables construits. Suite serveur complète relancée avec le mode interprété : 124.8 secondes, sans échec. Limites de production inchangées ; la sonde HTTP du scan en CI attend désormais jusqu’à 30 secondes pour laisser le serveur restituer ses erreurs. Le texte de progression a été compilé et vérifié par Svelte ; aucun essai visuel dans le navigateur pour cette étape. Guide : [Extensions 0.0.29](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-029.md).
 
 ## Validation de la préversion 0.0.30
 
@@ -139,7 +139,7 @@ Image publique : `ghcr.io/car-lito/mosaune:0.0.30-preview`. Empreinte de l’ind
 
 Localement : 21 tests web et 116 tests principaux du serveur réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement, trois exécutables construits. La suite serveur a terminé en 628.902 secondes (délai local de 12 minutes, limites CI inchangées). Après l’optimisation de lecture des manifestes et le raccordement du bouton Actualiser, les tests de reconnaissance, les vérifications web et les trois constructions ont été repassés ; GitHub vérifie ensuite toutes les sources finales.
 
-Parcours navigateur testé sur une installation vide et un compte fictif : cartes, désactivation, fiche, confirmation et retrait, réinstallation depuis les modules disponibles puis activation explicite. Le dernier raccordement du bouton Actualiser est compilé et vérifié par Svelte. Guide : [Extensions 0.0.30](../ESSAYER-LES-EXTENSIONS-030.md).
+Parcours navigateur testé sur une installation vide et un compte fictif : cartes, désactivation, fiche, confirmation et retrait, réinstallation depuis les modules disponibles puis activation explicite. Le dernier raccordement du bouton Actualiser est compilé et vérifié par Svelte. Guide : [Extensions 0.0.30](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-030.md).
 
 ## Validation de la préversion 0.0.31
 
@@ -149,7 +149,7 @@ Image publique : `ghcr.io/car-lito/mosaune:0.0.31-preview`. Empreinte de l’ind
 
 Localement : 21 tests web et 120 tests principaux du serveur réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement, trois exécutables construits. Suite serveur : 169.754 secondes. Après un premier blocage des connexions par le bac à sable, la suite complète a été repassée avec l’autorisation réseau, sans échec.
 
-Parcours navigateur vérifié sur une installation isolée et un compte fictif : carte externe, activation, sélection explicite et restauration 1.1.0 vers 1.0.0. L’import et les erreurs sont couverts par les tests HTTP et conteneurs. Le sélecteur de fichiers de l’outil navigateur n’a pas pu être utilisé de bout en bout ; le parcours d’import complet n’est donc pas déclaré validé visuellement. Guide : [Extensions 0.0.31](../ESSAYER-LES-EXTENSIONS-031.md).
+Parcours navigateur vérifié sur une installation isolée et un compte fictif : carte externe, activation, sélection explicite et restauration 1.1.0 vers 1.0.0. L’import et les erreurs sont couverts par les tests HTTP et conteneurs. Le sélecteur de fichiers de l’outil navigateur n’a pas pu être utilisé de bout en bout ; le parcours d’import complet n’est donc pas déclaré validé visuellement. Guide : [Extensions 0.0.31](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-031.md).
 
 ## Validation de la préversion 0.0.32
 
@@ -161,7 +161,7 @@ Localement : 122 tests du serveur et 22 tests de l’interface réussis, kit et 
 
 Parcours navigateur exécuté sur une installation temporaire et un compte fictif, avec le véritable dépôt public et sa branche `recognition-preview` : téléchargement/vérification de la version 1.0.0, installation et ouverture de sa fiche, activation, sélection, filtre du catalogue, mise à jour 1.1.0 et restauration 1.0.0 avec choix conservé. Le test a révélé le libellé « Import local », corrigé en « Module externe » dans le dernier commit. Le sélecteur de fichiers local n’est pas nécessaire à ce parcours ; il n’est pas déclaré validé visuellement par cette étape.
 
-Guide : [Extensions 0.0.32](../ESSAYER-LES-EXTENSIONS-032.md). Catalogue d’exemple : [branche publique](https://github.com/car-lito/mosaune-extensions/tree/recognition-preview), commit `cd0bfbbc0de6479b2358450f60fdd411d1c022b2`. La branche principale du catalogue d’extensions n’a pas été modifiée.
+Guide : [Extensions 0.0.32](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-032.md). Catalogue d’exemple : [branche publique](https://github.com/car-lito/mosaune-extensions/tree/recognition-preview), commit `cd0bfbbc0de6479b2358450f60fdd411d1c022b2`. La branche principale du catalogue d’extensions n’a pas été modifiée.
 
 ## Validation de la préversion 0.0.33
 
@@ -171,7 +171,7 @@ Image publique : ghcr.io/car-lito/mosaune:0.0.33-preview. Index : sha256:a0181b3
 
 Localement : 127 tests du serveur et 22 tests de l’interface réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Suite serveur : 128.183 secondes. Exécutables Windows/Linux amd64/Linux arm64 construits.
 
-Parcours navigateur sur une installation temporaire : carte installée active, désactivation, ouverture de la fiche, retrait, disparition de la liste installée, présence dans À télécharger, réinstallation désactivée puis activation. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-033.md).
+Parcours navigateur sur une installation temporaire : carte installée active, désactivation, ouverture de la fiche, retrait, disparition de la liste installée, présence dans À télécharger, réinstallation désactivée puis activation. [Guide utilisateur](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-033.md).
 
 ## Validation de la préversion 0.0.34
 
@@ -181,7 +181,7 @@ Image publique : ghcr.io/car-lito/mosaune:0.0.34-preview. Index : sha256:0217382
 
 Localement : 131 tests serveur et 22 tests interface réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Exécutables Windows/Linux amd64/Linux arm64 construits. Les tests couvrent notamment migration, sélection explicite, annulation, refus des accès excessifs, mise à jour, restauration et conservation des métadonnées.
 
-Parcours navigateur sur une installation temporaire : dépôt public audiotags-preview, installation 1.0.0, activation sans sélection implicite, sélection, mise à jour 1.1.0 et restauration 1.0.0 en conservant le choix. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-034.md).
+Parcours navigateur sur une installation temporaire : dépôt public audiotags-preview, installation 1.0.0, activation sans sélection implicite, sélection, mise à jour 1.1.0 et restauration 1.0.0 en conservant le choix. [Guide utilisateur](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-034.md).
 
 ## Validation de la préversion 0.0.35
 
@@ -191,7 +191,7 @@ Image publique : ghcr.io/car-lito/mosaune:0.0.35-preview. Index : sha256:d913a53
 
 Localement : 136 tests serveur et 23 tests interface réussis, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Exécutables Windows/Linux amd64/Linux arm64 construits. Les tests couvrent migration, permissions, sélection explicite d'un module indépendant, annulation, mises à jour, restauration, panne, mode secours et conservation des données.
 
-Parcours navigateur sur une installation temporaire : les deux morceaux se séparent après désactivation du catalogue musical et se regroupent en album après réactivation sans scan. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-035.md).
+Parcours navigateur sur une installation temporaire : les deux morceaux se séparent après désactivation du catalogue musical et se regroupent en album après réactivation sans scan. [Guide utilisateur](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-035.md).
 
 ## Validation de la préversion 0.0.36
 
@@ -201,7 +201,7 @@ Image publique : ghcr.io/car-lito/mosaune:0.0.36-preview. Index : sha256:5b631fa
 
 Localement : 140 tests serveur et 25 tests interface validés, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Les dix tests de connexion locale lancés avant l’autorisation réseau ont été relancés avec succès après son accord ; les autres avaient réussi. Exécutables Windows/Linux amd64/Linux arm64 construits. La vérification GitHub repart de sources propres.
 
-Parcours navigateur sur une bibliothèque temporaire : saisons 1/2, filtre de saison, désactivation en liste individuelle, puis réactivation sans scan. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-036.md). Le remplacement externe, les permissions, migrations, mises à jour/restaurations et réponses invalides sont couverts par les tests automatisés.
+Parcours navigateur sur une bibliothèque temporaire : saisons 1/2, filtre de saison, désactivation en liste individuelle, puis réactivation sans scan. [Guide utilisateur](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-036.md). Le remplacement externe, les permissions, migrations, mises à jour/restaurations et réponses invalides sont couverts par les tests automatisés.
 
 ## Validation de la préversion 0.0.37
 
@@ -211,7 +211,7 @@ Image publique : ghcr.io/car-lito/mosaune:0.0.37-preview. Index : sha256:5612a97
 
 Localement : 144 tests serveur et 27 tests interface validés, kit et analyse Go réussis, Svelte sans erreur ni avertissement. La suite serveur locale a atteint sa limite globale de 12 minutes : les 17 tests restants ont été lancés séparément ; aucune assertion n’avait échoué. Trois essais conditionnels sont ignorés localement (liens symboliques Windows, médias personnels facultatifs, sources publiques facultatives). Une correction de libellé a ensuite été vérifiée et les trois exécutables reconstruits. GitHub repart des sources finales propres.
 
-Parcours navigateur sur une bibliothèque temporaire : résumé, informations, distribution et bande-annonce ; désactivation avec conservation des fichiers ; remplacement réel par l’exemple indépendant « Fiche épurée ». Le rendu mobile conserve les saisons et listes d’épisodes gérées séparément. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-037.md).
+Parcours navigateur sur une bibliothèque temporaire : résumé, informations, distribution et bande-annonce ; désactivation avec conservation des fichiers ; remplacement réel par l’exemple indépendant « Fiche épurée ». Le rendu mobile conserve les saisons et listes d’épisodes gérées séparément. [Guide utilisateur](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-037.md).
 
 ## Validation de la préversion 0.0.38
 
@@ -221,4 +221,4 @@ Image publique : ghcr.io/car-lito/mosaune:0.0.38-preview. Index : sha256:067b543
 
 Localement : 149 tests serveur et 28 tests interface validés, kit et analyse Go réussis, Svelte sans erreur ni avertissement. Un premier essai a détecté un numéro global de schéma oublié, corrigé avant de relancer la suite complète. Dix tests de connexions locales ont ensuite été relancés avec succès après renouvellement de l’autorisation réseau. Trois essais conditionnels sont ignorés localement (liens symboliques Windows, médias personnels facultatifs, sources publiques facultatives). L’exemple a été ajusté pour conserver les titres de groupes personnalisés, puis ses tests de cycle de vie et dépôt ont été relancés. GitHub repart des sources finales propres.
 
-Parcours navigateur sur une bibliothèque temporaire : titre, type, année, durée, genres, note et accroche ; désactivation avec conservation du titre simple, commandes et autres rubriques ; remplacement réel par l’exemple indépendant « Dans le cadre ». [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-038.md).
+Parcours navigateur sur une bibliothèque temporaire : titre, type, année, durée, genres, note et accroche ; désactivation avec conservation du titre simple, commandes et autres rubriques ; remplacement réel par l’exemple indépendant « Dans le cadre ». [Guide utilisateur](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-038.md).

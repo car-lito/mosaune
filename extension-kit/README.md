@@ -1,12 +1,12 @@
-Familles à partir de 0.0.48 : [distribution par catalogue GitHub](../extensions/FAMILY-ARCHIVES.md), export d’exemples et aperçu commun à l’import local.
+Familles à partir de 0.0.48 : [distribution par catalogue GitHub](../docs/extensions/FAMILY-ARCHIVES.md), export d’exemples et aperçu commun à l’import local.
 
-**Familles 0.0.47 :** [format des archives, outil de préparation et règles de mise à jour](../extensions/FAMILY-ARCHIVES.md). Import local fonctionnel pour les trois familles actuelles ; le catalogue de familles et leur indépendance métier complète restent ouverts.
+**Familles 0.0.47 :** [format des archives, outil de préparation et règles de mise à jour](../docs/extensions/FAMILY-ARCHIVES.md). Import local fonctionnel pour les trois familles actuelles ; le catalogue de familles et leur indépendance métier complète restent ouverts.
 
-**Regroupements 0.0.46 :** les manifestes de composition fournis réunissent programmes et écrans avec un cycle commun. Ils ne sont pas encore un format d’archive installable depuis un dépôt. [Contrat et limites](../extensions/MEDIA-BUNDLES.md).
+**Regroupements 0.0.46 :** les manifestes de composition fournis réunissent programmes et écrans avec un cycle commun. Ils ne sont pas encore un format d’archive installable depuis un dépôt. [Contrat et limites](../docs/extensions/MEDIA-BUNDLES.md).
 
-**Orientation confirmée après la 0.0.45 :** les composants techniques restent modulaires mais sont distribués dans quelques extensions principales, avec des points de remplacement ou de contribution explicites. [Architecture des extensions regroupées et prochaine migration](../ARCHITECTURE-EXTENSIONS-GROUPEES.md). Le format regroupé reste à implémenter.
+**Orientation confirmée après la 0.0.45 :** les composants techniques restent modulaires mais sont distribués dans quelques extensions principales, avec des points de remplacement ou de contribution explicites. [Architecture des extensions regroupées et prochaine migration](../docs/architecture/GROUPED-EXTENSIONS.md). Le format regroupé reste à implémenter.
 
-**0.0.45 :** le module TMDB de démarrage est désormais installé depuis son archive signée dans provider_packages et le registre, une seule fois (schéma 29). effectiveEngine charge exclusivement le paquet installé ; aucun programme fourni de remplacement. Retrait, absence persistante et réinstallation explicite suivent le même cycle que les imports. Les archives du catalogue inclus restent disponibles hors ligne. [Migration et limites](../ESSAYER-TMDB-045.md).
+**0.0.45 :** le module TMDB de démarrage est désormais installé depuis son archive signée dans provider_packages et le registre, une seule fois (schéma 29). effectiveEngine charge exclusivement le paquet installé ; aucun programme fourni de remplacement. Retrait, absence persistante et réinstallation explicite suivent le même cycle que les imports. Les archives du catalogue inclus restent disponibles hors ligne. [Migration et limites](../docs/archive/versions/ESSAYER-TMDB-045.md).
 
 ## Informations musicales (0.0.33)
 
@@ -14,7 +14,7 @@ Le [contrat audio-tags](capabilities/audiotags/v1/README.md) et son programme WA
 
 ## Reconnaisseurs dans les dépôts (0.0.32)
 
-Les paquets externes sont installables depuis le catalogue GitHub, avec les mêmes contrôles que les fichiers locaux. Le [dépôt d’exemple](examples/recognition/REPOSITORY.md) est produit par la construction et publié sur une branche séparée. [Guide utilisateur](../ESSAYER-LES-EXTENSIONS-032.md). Les autres rôles et familles médias restent à extraire.
+Les paquets externes sont installables depuis le catalogue GitHub, avec les mêmes contrôles que les fichiers locaux. Le [dépôt d’exemple](examples/recognition/REPOSITORY.md) est produit par la construction et publié sur une branche séparée. [Guide utilisateur](../docs/archive/versions/ESSAYER-LES-EXTENSIONS-032.md). Les autres rôles et familles médias restent à extraire.
 
 ## Paquets externes de reconnaissance (0.0.31)
 
@@ -40,11 +40,11 @@ Le [stockage commun des réglages](configuration/STORAGE.md) isole les propriét
 
 ## Dépendances partagées — travail du 19 octobre 2026
 
-Le moteur prend désormais en charge les [dépendances par capacités](dependencies/README.md) : choix explicite entre fournisseurs, protection contre le retrait d’un fournisseur utilisé, aperçu des consommateurs et désactivation en cascade. Le [registre durable 0.0.26](registry/README.md) conserve ces choix, restaure les modules avec états réels et raccorde le paquet TMDB à une transaction commune. Les installateurs et l’interface ne sont pas encore généralisés. [Cible lecteurs remplaçables et thèmes](../LECTEURS-ET-EXTENSIONS.md).
+Le moteur prend désormais en charge les [dépendances par capacités](dependencies/README.md) : choix explicite entre fournisseurs, protection contre le retrait d’un fournisseur utilisé, aperçu des consommateurs et désactivation en cascade. Le [registre durable 0.0.26](registry/README.md) conserve ces choix, restaure les modules avec états réels et raccorde le paquet TMDB à une transaction commune. Les installateurs et l’interface ne sont pas encore généralisés. [Cible lecteurs remplaçables et thèmes](../docs/product/PLAYERS.md).
 
 ## Distribution depuis un dépôt — 0.0.20
 
-[Contrat des dépôts GitHub](DEPOTS-GITHUB.md) : index v1, chemins et empreintes, paquets vérifiés puis remis aux installateurs existants. Catalogue local et dépôts publics ajoutables ; aucune confiance d’exécution accordée par l’ajout d’une source. [Guide utilisateur](../ESSAYER-LE-CATALOGUE-020.md).
+[Contrat des dépôts GitHub](DEPOTS-GITHUB.md) : index v1, chemins et empreintes, paquets vérifiés puis remis aux installateurs existants. Catalogue local et dépôts publics ajoutables ; aucune confiance d’exécution accordée par l’ajout d’une source. [Guide utilisateur](../docs/archive/versions/ESSAYER-LE-CATALOGUE-020.md).
 
 **0.0.19 :** [paquets de fournisseurs signés](PAQUETS-FOURNISSEURS.md), contrôle de démarrage versionné et publication indépendante. Deux versions TMDB installables depuis l’interface, remplacement atomique et restauration. Ce pilote accepte une clé de développement reconnue et l’adaptateur TMDB ; autres éditeurs/adaptateurs et budgets globaux restent à construire.
 
@@ -55,7 +55,7 @@ Le moteur prend désormais en charge les [dépendances par capacités](dependenc
 **0.0.17 :** le pilote TMDB 0.2.0 fournit recherche et fiches vidéo riches. Nouvelle capacité facultative dans capabilities/video/v1 ; transport et capacités précédentes conservés. Activation dans Réglages → Extensions → TMDB. Voir [les services hôte](SERVICES-HOTE.md) pour les droits par œuvre et les responsabilités du catalogue. Les images et suggestions spécialisées restent natives.
 
 
-**15 octobre — intégré au pilote Mosaune 0.0.16 :** le kit fournit aussi un service hôte contrôlé et un programme de recherche TMDB. Il s’active depuis les paramètres du serveur ; [guide utilisateur](../ESSAYER-TMDB-EXTENSION.md), [contrat technique](SERVICES-HOTE.md). La démonstration fictive ci-dessous reste indépendante. Les mesures du 14 octobre concernent uniquement cette démonstration, pas le serveur ni TMDB.
+**15 octobre — intégré au pilote Mosaune 0.0.16 :** le kit fournit aussi un service hôte contrôlé et un programme de recherche TMDB. Il s’active depuis les paramètres du serveur ; [guide utilisateur](../docs/archive/versions/ESSAYER-TMDB-EXTENSION.md), [contrat technique](SERVICES-HOTE.md). La démonstration fictive ci-dessous reste indépendante. Les mesures du 14 octobre concernent uniquement cette démonstration, pas le serveur ni TMDB.
 
 Le laboratoire initial du 14 octobre était distinct du serveur **0.0.15**. Il exécute une petite extension WebAssembly et vérifie le contrat d’échange, le cycle de vie et plusieurs limites de ressources. Depuis 0.0.16, le serveur importe aussi ce kit pour le pilote TMDB, activable dans ses paramètres.
 
