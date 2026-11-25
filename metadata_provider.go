@@ -18,6 +18,7 @@ type MetadataProvider interface {
 }
 
 type ProviderInfo struct {
+	ImageReferences    bool               `json:"imageReferences"`
 	AlbumMatches       bool               `json:"albumMatches"`
 	Profiles           bool               `json:"profiles"`
 	ResolveArtists     bool               `json:"resolveArtists"`

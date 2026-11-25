@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"net/http"
@@ -91,34 +90,7 @@ type ArtistResolver interface {
 
 func visualRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 	albumMatchRoutes(mux, c, allowed)
-	mux.HandleFunc("GET /api/v1/metadata/images/{provider}", func(w http.ResponseWriter, r *http.Request) {
-		p := c.provider(r.PathValue("provider"))
-		ref := r.URL.Query().Get("ref")
-		enabled := false
-		if p != nil {
-			for _, kind := range p.Info().Kinds {
-				enabled = enabled || allowed(kind)
-			}
-		}
-		if !enabled || len(ref) == 0 || len(ref) > 600 {
-			http.NotFound(w, r)
-			return
-		}
-		// Only built-in providers' strictly validated references are accepted; never URLs.
-		if p.Info().ID != "tmdb" && p.Info().ID != "musicbrainz" {
-			http.NotFound(w, r)
-			return
-		}
-		data, err := c.visualImage(r.Context(), p, ref)
-		if err != nil {
-			w.Header().Set("Cache-Control", "private, max-age=300")
-			http.NotFound(w, r)
-			return
-		}
-		w.Header().Set("Content-Type", "image/jpeg")
-		w.Header().Set("Cache-Control", "private, max-age=86400")
-		http.ServeContent(w, r, "image.jpg", time.Time{}, bytes.NewReader(data))
-	})
+	providerImageRoutes(mux, c, allowed)
 	mux.HandleFunc("POST /api/v1/people/{provider}/resolve", func(w http.ResponseWriter, r *http.Request) {
 		if !canKind(r.Context(), "music") {
 			problem(w, 403, "Votre compte n’a pas accès à la musique.")

@@ -1,3 +1,13 @@
+## Références d’images — 0.0.84
+
+Un adaptateur approuvé peut implémenter `ImageReferenceProvider.ImageReferenceKinds(ref string) []string` pour exposer ses images par `GET /api/v1/metadata/images/{provider}?ref=…`. Cette méthode doit être pure, rapide et sans entrée/sortie : elle valide une référence opaque et renvoie ses types de médias autorisés. Une liste vide refuse la référence. Elle ne télécharge rien ; `Artwork` reste responsable de l’obtention des octets via les transports autorisés et bornés du fournisseur.
+
+Le serveur limite la référence à 600 octets et la liste à 16 types, sans doublon ni type absent de `Info().Kinds`. Il faut au moins un même type autorisé à la fois par la composition et par le compte. Ces contrôles précèdent toute consultation du cache : un cache existant ne contourne pas une référence devenue invalide ni les permissions. L’inventaire expose `imageReferences`, calculé depuis l’interface réellement implémentée, sans se fier à une valeur déclarée dans `Info()`.
+
+Le cache partagé conserve son fonctionnement : index par fournisseur et référence, images normalisées en JPEG, taille bornée, réponses privées et maintien des images déjà stockées lorsque le fournisseur est désactivé. Une image manquante ne déclenche alors aucun appel au fournisseur. Le cycle de vie invalide les réponses en cours et empêche leur mise en cache après désactivation, même si l’adaptateur ignore l’annulation.
+
+TMDB accepte ses chemins d’affiches et références `yt:` validées pour Films/Séries. MusicBrainz réutilise la validation `VisualQuery` du contrat musical pour les éditions, groupes d’éditions et fichiers Commons. Un autre adaptateur peut définir une grammaire différente sans changer le routeur. La déclaration de ce contrat ne constitue pas une autorisation réseau et n’ajoute pas de chargeur de code natif téléchargé.
+
 ## Correction d’association musicale — 0.0.83
 
 Le contrat facultatif `AlbumMatchProvider.MatchAlbums(context.Context, credential, AlbumMatchQuery)` reçoit `title`, `artist`, `id` et `page`. Le titre et l’artiste sont limités à 250 octets, l’identifiant à 200, les pages à 1–50. Sans identifiant, le titre doit contenir au moins deux octets. L’adaptateur valide ses propres identifiants et liens ; il renvoie `errAlbumMatchInput` pour une saisie invalide, sans accès réseau arbitraire.

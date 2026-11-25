@@ -1,3 +1,11 @@
+## 0.0.84 — images des fournisseurs extensibles
+
+- La route des images utilise le contrat facultatif `ImageReferenceProvider`, au lieu d’une liste de noms TMDB/MusicBrainz. Chaque adaptateur valide ses références sans accès réseau et indique les types de médias auxquels elles appartiennent.
+- Le serveur contrôle la référence, les types annoncés, les médias activés et les permissions du compte avant de consulter le cache. Un fournisseur mixte ne donne plus accès à toutes ses images sur la seule base d’un type autorisé.
+- TMDB et MusicBrainz utilisent ce même contrat avec leurs formats existants. Les portraits, saisons, pochettes et miniatures conservent leurs URL ; stockage et normalisation restent communs.
+- Tests avec deux autres sources : isolation des caches, comptes limités, référence invalidée après mise en cache, données non graphiques, maintien des images conservées après désactivation et refus d’une réponse tardive après réactivation.
+- Les adaptateurs restent du code hôte approuvé. Les réglages spécifiques et la distribution indépendante des adaptateurs restent à terminer.
+
 ## 0.0.83 — correction d’association musicale extensible
 
 - Nouveau contrat facultatif `AlbumMatchProvider` et route nommée par fournisseur. Recherche par titre/artiste ou édition précise ; le serveur conserve les permissions, les secrets, le cycle de vie et le stockage partagé.

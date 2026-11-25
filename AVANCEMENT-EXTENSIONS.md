@@ -1,8 +1,8 @@
 # Vers un Mosaune entièrement extensible
 
-État du 25 novembre 2026 · étape 0.0.83.
+État du 25 novembre 2026 · étape 0.0.84.
 
-Dernière étape : correction d’association musicale sans fournisseur imposé dans l’interface, contrat commun et validation des identifiants dans chaque adaptateur. Le parcours est testé avec MusicBrainz et un autre fournisseur, notamment les permissions et les réponses périmées. Restent notamment les images, les réglages spécifiques des fournisseurs et la distribution indépendante des adaptateurs.
+Dernière étape : images accessibles par un contrat de références et de types de médias, sans noms de fournisseurs imposés dans la route commune. Permissions, maintien du cache après désactivation et refus des réponses périmées sont testés avec des sources indépendantes. Restent notamment les réglages spécifiques des fournisseurs et la distribution indépendante des adaptateurs.
 
 **Environ 97 % du découpage visé est réalisé.** C’est un ordre de grandeur pour Films, Séries et Musique. Les lecteurs personnalisés, Android/TV et le déploiement NAS viennent ensuite.
 

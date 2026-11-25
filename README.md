@@ -1,3 +1,5 @@
+Version 0.0.84 — les fournisseurs peuvent exposer leurs images par un contrat commun, sans exception liée à leur nom. Les références et les permissions sont vérifiées avant l’accès au cache partagé. [Contrat](EXTENSIONS-METADONNEES.md).
+
 Version 0.0.83 — la correction d’association musicale utilise un contrat commun aux fournisseurs. L’écran propose les sources disponibles ; chaque adaptateur valide ses propres liens et identifiants. [Contrat](EXTENSIONS-METADONNEES.md).
 
 Version 0.0.82 — les profils d’artistes utilisent les capacités des fournisseurs disponibles, avec sélection explicite s’il y en a plusieurs. Permissions musicales et arrêt des résultats lors d’une désactivation sont contrôlés côté serveur. [Contrat](EXTENSIONS-METADONNEES.md).
