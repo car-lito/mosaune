@@ -151,6 +151,8 @@ func (c *catalog) providerInfo(ctx context.Context) []ProviderInfo {
 		info := p.Info()
 		info.Enabled = providerEnabled(p)
 		info.Available = providerAvailable(p)
+		_, info.AlbumMatches = p.(AlbumMatchProvider)
+		info.AlbumMatches = info.AlbumMatches && supportsProvider(p, "music")
 		_, info.Profiles = p.(ProfileProvider)
 		_, info.ResolveArtists = p.(ArtistResolver)
 		info.ResolveArtists = info.ResolveArtists && info.Profiles && supportsProvider(p, "music")

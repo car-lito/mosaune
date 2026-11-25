@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	musicrequests "mosaune/extensionkit/capabilities/musicresults/v1"
 	"net/http"
 	"net/url"
 	"strings"
@@ -91,73 +90,7 @@ type ArtistResolver interface {
 }
 
 func visualRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
-	mux.HandleFunc("POST /api/v1/music/matches", func(w http.ResponseWriter, r *http.Request) {
-		p, ok := c.provider("musicbrainz").(*musicBrainzProvider)
-		if !ok || !allowed("music") {
-			http.NotFound(w, r)
-			return
-		}
-		var input struct {
-			Title  string `json:"title"`
-			Artist string `json:"artist"`
-			ID     string `json:"id"`
-			Page   int    `json:"page"`
-		}
-		if !readJSON(w, r, &input) {
-			return
-		}
-		input.Title = strings.TrimSpace(input.Title)
-		input.Artist = strings.TrimSpace(input.Artist)
-		input.ID = strings.TrimSpace(input.ID)
-		if input.Page == 0 {
-			input.Page = 1
-		}
-		if len(input.Title) > 250 || len(input.Artist) > 250 || len(input.ID) > 200 || input.Page < 1 || input.Page > 50 {
-			problem(w, 400, "Recherche invalide.")
-			return
-		}
-		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
-		defer cancel()
-		page := DiscoveryPage{Page: input.Page, Pages: 1}
-		var err error
-		if input.ID != "" {
-			id := input.ID
-			if u, e := url.Parse(id); e == nil && u.Scheme == "https" && u.Host == "musicbrainz.org" && strings.HasPrefix(u.Path, "/release/") {
-				id = strings.TrimPrefix(strings.TrimSuffix(u.Path, "/"), "/release/")
-			}
-			if !mbID.MatchString(id) {
-				problem(w, 400, "Collez un identifiant ou un lien d’édition MusicBrainz /release/.")
-				return
-			}
-			var md Metadata
-			md, err = p.Details(ctx, "", MetadataSelection{Kind: "music", ID: id})
-			if err == nil {
-				// A direct edition lookup is authoritative, including when a light
-				// search result for the same ID was already cached.
-				if _, saveErr := c.rememberWork(ctx, "music", md, true); saveErr != nil {
-					problem(w, 500, "Fiche non enregistrée.")
-					return
-				}
-				page.Items = []Metadata{md}
-			}
-		} else {
-			if len(input.Title) < 2 {
-				problem(w, 400, "Indiquez au moins deux caractères pour le titre.")
-				return
-			}
-			page, err = p.searchMusic(ctx, musicrequests.Request{Operation: "match", Title: input.Title, Artist: input.Artist, Page: input.Page})
-		}
-		if err != nil {
-			problem(w, 502, err.Error())
-			return
-		}
-		works, err := c.rememberPage(ctx, "musicbrainz", "music", page, allowed)
-		if err != nil {
-			problem(w, 500, "Recherche indisponible.")
-			return
-		}
-		sendJSON(w, 200, map[string]any{"items": works, "page": page.Page, "pages": page.Pages})
-	})
+	albumMatchRoutes(mux, c, allowed)
 	mux.HandleFunc("GET /api/v1/metadata/images/{provider}", func(w http.ResponseWriter, r *http.Request) {
 		p := c.provider(r.PathValue("provider"))
 		ref := r.URL.Query().Get("ref")

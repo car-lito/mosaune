@@ -1,3 +1,11 @@
+## 0.0.83 — correction d’association musicale extensible
+
+- Nouveau contrat facultatif `AlbumMatchProvider` et route nommée par fournisseur. Recherche par titre/artiste ou édition précise ; le serveur conserve les permissions, les secrets, le cycle de vie et le stockage partagé.
+- MusicBrainz possède désormais sa validation de liens et sa recherche d’éditions dans son adaptateur. L’ancienne URL reste un alias compatible ; aucun repli implicite sur cette source dans la nouvelle route.
+- La fenêtre de correction utilise la capacité réelle `albumMatches`, propose le choix entre plusieurs sources et indique leur absence. Les champs ne sont plus imposés au nom de MusicBrainz.
+- Tests avec un autre fournisseur : identité des résultats, remplacement d’un résumé par une édition détaillée, pagination, données invalides, droits des comptes, fournisseur désactivé et absence d’écriture après désactivation pendant un appel.
+- Vérifications Go, Svelte et Node réussies, constructions Windows/Linux amd64/ARM64 et installation minimale testées. Archives des familles inchangées. Les adaptateurs restent du code hôte approuvé ; la route des images et certains réglages spécifiques restent à découper.
+
 ## 0.0.82 — profils dirigés par les capacités des fournisseurs
 
 - La page de profil ne choisit plus MusicBrainz par son nom : elle utilise les capacités réellement implémentées et l’état du fournisseur. Un seul fournisseur disponible est proposé automatiquement ; plusieurs demandent un choix explicite.

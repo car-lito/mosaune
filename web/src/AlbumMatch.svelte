@@ -1,7 +1,13 @@
 <script lang="ts">
  import {onMount} from 'svelte';
  import Icon from './Icon.svelte';
- import type {Entry,Work} from './types';
+ import type {Entry,Work,Provider} from './types';
+ import {albumMatchSources,albumMatchRoute} from './album-matches';
+ export let providers:Provider[]=[];
+ let providerId='';
+ $: sources=albumMatchSources(providers);
+ $: if(!sources.some(p=>p.id===providerId)){providerId=sources.length===1?sources[0].id:'';reset();}
+ function reset(){candidates=[];selected=undefined;searched=false;pages=1;page=1;message='';releaseId='';}
  export let entry:Entry;
  export let token:string;
  export let matched:(work:Work)=>Promise<void>;
@@ -14,9 +20,9 @@
  let busy=false;let saving=false;let message='';let searched=false;let alive=true;
  let failed:Record<string,boolean>={};
  const abort=new AbortController();
- onMount(()=>{dialog.showModal();void search(1);return()=>{alive=false;abort.abort();};});
+ onMount(()=>{dialog.showModal();if(providerId)void search(1);return()=>{alive=false;abort.abort();};});
  async function request(path:string,method='GET',body?:unknown){const r=await fetch('/api/v1/'+path,{method,headers:{'Content-Type':'application/json','X-Mosaune-Token':token},body:body===undefined?undefined:JSON.stringify(body),signal:abort.signal});if(r.status===204)return null;const data=await r.json();if(!r.ok)throw new Error(data.error||'Opération indisponible.');return data;}
- async function search(next:number){busy=true;message='';selected=undefined;try{const data=await request('music/matches','POST',{title,artist,id:releaseId,page:next});if(alive){candidates=data.items;page=data.page;pages=data.pages;searched=true;}}catch(e){if(alive)message=e instanceof Error?e.message:'Recherche impossible.';}finally{if(alive)busy=false;}}
+ async function search(next:number){if(busy||!providerId)return;const source=providerId;busy=true;message='';selected=undefined;try{const data=await request(albumMatchRoute(source),'POST',{title,artist,id:releaseId,page:next});if(alive&&providerId===source){candidates=data.items;page=data.page;pages=data.pages;searched=true;}}catch(e){if(alive)message=e instanceof Error?e.message:'Recherche impossible.';}finally{if(alive)busy=false;}}
  async function preview(work:Work){busy=true;message='';try{const data=await request('discovery/works/'+work.id);if(data.warning)throw new Error(data.warning);if(alive)selected=data.work;}catch(e){if(alive)message=e instanceof Error?e.message:'Fiche indisponible.';}finally{if(alive)busy=false;}}
  async function associate(){if(!selected)return;saving=true;busy=true;message='';try{await request('music/associate','POST',{mediaId:entry.id,workId:selected.id});await matched(selected);if(alive)dialog.close();}catch(e){if(alive)message=e instanceof Error?e.message:'Association impossible.';}finally{if(alive){busy=false;saving=false;}}}
 </script>
@@ -24,10 +30,11 @@
  <div class="dialog-heading"><div><span class="eyebrow">LES BONNES INFORMATIONS</span><h2 id="album-match-title">Corriger l’association</h2></div><button class="icon-button" disabled={saving} aria-label="Fermer" onclick={()=>dialog.close()}><Icon name="close"/></button></div>
  <p>Choisissez l’édition de votre album. Vos fichiers et leurs tags restent intacts.</p>
  <form class="match-search" onsubmit={e=>{e.preventDefault();void search(1);}}>
+  {#if sources.length}<label>Fournisseur<select bind:value={providerId} disabled={busy} onchange={reset}><option value="" disabled>Choisir un fournisseur…</option>{#each sources as source}<option value={source.id}>{source.name}</option>{/each}</select></label>{:else}<p>Aucun fournisseur de correction d’association musicale n’est disponible.</p>{/if}
   <label>Album<input bind:value={title} maxlength="250" disabled={busy||!!releaseId} required={!releaseId}/></label>
   <label>Artiste<input bind:value={artist} maxlength="250" disabled={busy||!!releaseId} placeholder="Facultatif"/></label>
-  <details><summary>Utiliser un lien ou un identifiant MusicBrainz</summary><label>Édition MusicBrainz<input bind:value={releaseId} maxlength="200" disabled={busy} placeholder="https://musicbrainz.org/release/…"/></label><small>Effacez ce champ pour rechercher par album et artiste.</small></details>
-  <button class="primary" disabled={busy}>{busy?'Patientez…':'Rechercher'}</button>
+  <details><summary>Utiliser un lien ou un identifiant du fournisseur</summary><label>Édition<input bind:value={releaseId} maxlength="200" disabled={busy} placeholder="Identifiant ou lien de l’édition"/></label><small>Effacez ce champ pour rechercher par album et artiste.</small></details>
+  <button class="primary" disabled={busy||!providerId}>{busy?'Patientez…':'Rechercher'}</button>
  </form>
  {#if message}<p class="notice" role="alert">{message}</p>{/if}
  {#if selected}<section class="match-preview"><div class="match-preview-title"><h3>{selected.metadata.title}</h3><p>{selected.metadata.artist} · {selected.metadata.edition}</p></div><ol>{#each selected.metadata.tracks||[] as track}<li>{track.disc>1?`${track.disc}.`:''}{track.number}. {track.title}</li>{/each}</ol><button class="primary" disabled={busy||!selected.metadata.tracks?.length} onclick={associate}>Associer cet album</button><button class="text-action" disabled={busy} onclick={()=>selected=undefined}>Revenir aux résultats</button></section>{:else}

@@ -56,6 +56,6 @@
  <p class="content-source">{work?`Informations : ${providers.find(p=>p.id===work?.metadata.provider)?.name||work.metadata.provider}`:'Informations issues de vos fichiers'} · Votre collection reste chez vous.</p>
 </article>
 
-{#if matching&&matchingEntry}<AlbumMatch entry={matchingEntry} {token} {matched} close={()=>matching=false}/>{/if}
+{#if matching&&matchingEntry}<AlbumMatch entry={matchingEntry} {providers} {token} {matched} close={()=>matching=false}/>{/if}
 
 {#if downloadSeason!==null&&work}<RequestDownload {work} season={downloadSeason} {token} close={()=>downloadSeason=null}/>{/if}

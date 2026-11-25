@@ -1,3 +1,13 @@
+## Correction d’association musicale — 0.0.83
+
+Le contrat facultatif `AlbumMatchProvider.MatchAlbums(context.Context, credential, AlbumMatchQuery)` reçoit `title`, `artist`, `id` et `page`. Le titre et l’artiste sont limités à 250 octets, l’identifiant à 200, les pages à 1–50. Sans identifiant, le titre doit contenir au moins deux octets. L’adaptateur valide ses propres identifiants et liens ; il renvoie `errAlbumMatchInput` pour une saisie invalide, sans accès réseau arbitraire.
+
+Le résultat `AlbumMatchResult` contient une `DiscoveryPage` (20 résultats maximum, pages entre 1 et 50) et `Detailed`. Ce dernier permet de remplacer un résumé déjà en cache par les informations complètes d’une édition, notamment ses pistes. Le serveur impose l’identité du fournisseur sélectionné, conserve les œuvres dans le stockage commun et vérifie le cycle de vie avant chaque écriture et avant de livrer les résultats.
+
+`POST /api/v1/music/matches/{provider}` exige l’accès musical, une famille musicale autorisée et un fournisseur chargé prenant en charge ce type. Il ne choisit jamais une autre source à sa place. L’inventaire des fournisseurs expose `albumMatches`, calculé depuis l’interface effectivement implémentée. La fenêtre de correction sélectionne les sources activées, configurées et disponibles ; s’il y en a plusieurs, l’utilisateur choisit explicitement.
+
+L’ancienne route `POST /api/v1/music/matches` reste un alias MusicBrainz déclaré dans son adaptateur. La validation de ses liens `/release/` et sa recherche d’éditions ne résident plus dans le routeur commun. L’association finale conserve la route et les contrôles existants sur les bibliothèques ; elle n’altère pas les fichiers locaux. Ce contrat concerne les adaptateurs hôtes approuvés, pas le chargement de code natif arbitraire.
+
 ## Profils et identification d’artistes — 0.0.82
 
 L’inventaire `GET /api/v1/metadata/providers` expose `profiles`, `resolveArtists` et `available`. Le serveur calcule ces capacités depuis les interfaces `ProfileProvider` et `ArtistResolver` réellement implémentées ; une valeur annoncée par `Info()` ne suffit pas. L’identification requiert également les profils et le type `music`. L’interface retient les fournisseurs activés, configurés et disponibles. Plusieurs sources impliquent un choix explicite, sans préférence fondée sur leur nom.

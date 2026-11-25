@@ -129,7 +129,7 @@ func (c *catalog) authorize(pattern string, r *http.Request) bool {
 		}
 		return false
 	}
-	if pattern == "POST /api/v1/music/matches" || pattern == "POST /api/v1/music/associate" {
+	if pattern == "POST /api/v1/music/matches/{provider}" || pattern == "POST /api/v1/music/matches" || pattern == "POST /api/v1/music/associate" {
 		return canKind(ctx, "music")
 	} // Association checks every affected media.
 	if pattern == "POST /api/v1/acquisition/preview" || pattern == "POST /api/v1/acquisition/requests" {

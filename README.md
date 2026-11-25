@@ -1,3 +1,5 @@
+Version 0.0.83 — la correction d’association musicale utilise un contrat commun aux fournisseurs. L’écran propose les sources disponibles ; chaque adaptateur valide ses propres liens et identifiants. [Contrat](EXTENSIONS-METADONNEES.md).
+
 Version 0.0.82 — les profils d’artistes utilisent les capacités des fournisseurs disponibles, avec sélection explicite s’il y en a plusieurs. Permissions musicales et arrêt des résultats lors d’une désactivation sont contrôlés côté serveur. [Contrat](EXTENSIONS-METADONNEES.md).
 
 Version 0.0.81 — les dépôts dirigent les paquets vers leur fournisseur déclaré, sans passage imposé par TMDB. Un gestionnaire absent ou ambigu est signalé avant téléchargement. [Contrat](EXTENSIONS-METADONNEES.md#distribution-depuis-un-dépôt--0081).
