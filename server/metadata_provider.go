@@ -32,9 +32,12 @@ type ProviderInfo struct {
 	Kinds              []string           `json:"kinds"`
 	Configured         bool               `json:"configured"`
 	RequiresCredential bool               `json:"requiresCredential"`
-	NetworkHosts       []string           `json:"networkHosts"`
-	Attribution        string             `json:"attribution"`
-	Website            string             `json:"website"`
+	// Settings form declared by the provider's own adapter or package. The web
+	// client renders it generically; it never hard-codes provider forms.
+	ConfigurationOwner string   `json:"configurationOwner,omitempty"`
+	NetworkHosts       []string `json:"networkHosts"`
+	Attribution        string   `json:"attribution"`
+	Website            string   `json:"website"`
 }
 type MetadataQuery struct {
 	Kind  string

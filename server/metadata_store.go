@@ -169,6 +169,9 @@ func (c *catalog) providerInfo(ctx context.Context) []ProviderInfo {
 			}
 		}
 		info.Configured = !info.RequiresCredential || c.credential(ctx, info.ID) != ""
+		if configurable, ok := p.(MetadataConfigurationProvider); ok {
+			info.ConfigurationOwner = configurable.ConfigurationOwner()
+		}
 		infos = append(infos, info)
 	}
 	return infos

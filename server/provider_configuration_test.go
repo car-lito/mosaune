@@ -91,6 +91,61 @@ func TestProviderConfigurationOptionalAdapterHTTP(t *testing.T) {
 	}
 }
 
+// E1: another provider declares a shorter key than TMDB. Its own rules apply to
+// the legacy credential route, the provider list names its form, and an
+// unavailable schema refuses the write instead of borrowing other limits.
+func TestProviderCredentialUsesDeclaredRulesHTTP(t *testing.T) {
+	c, _, admin := accountFixture(t)
+	admin.enter("setup", map[string]string{"name": "Admin", "password": accountTestPassword, "code": c.auth.code})
+	ctx := context.Background()
+	store := configuration.SQLStore{DB: c.db}
+	schema := configuration.Schema{Version: 1, Title: "Autre source", Instructions: []string{"Créez une clé chez la source."}, Fields: []configuration.Field{{ID: "token", Label: "Clé", Type: "secret", MinLength: 8, MaxLength: 16, Format: "token"}}}
+	if err := store.Register(ctx, "fixture.settings", schema); err != nil {
+		t.Fatal(err)
+	}
+	bound, _ := store.For("fixture.settings")
+	p := &configurationProviderFixture{bound: bound}
+	c.providers = append(c.providers, p)
+	const route = "/api/v1/metadata/providers/fixture-provider"
+	for _, bad := range []string{"short", "far-too-long-for-this-source", "with space1"} {
+		if w := admin.request("PUT", route, map[string]string{"secret": bad}); w.Code != 400 || strings.Contains(w.Body.String(), bad) {
+			t.Fatal(bad, w.Code, w.Body.String())
+		}
+	}
+	if c.credential(ctx, "fixture-provider") != "" {
+		t.Fatal("invalid key stored")
+	}
+	// Ten characters: refused by TMDB's declared minimum, valid for this source.
+	if w := admin.request("PUT", route, map[string]string{"secret": "  key-12345 "}); w.Code != 200 {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	if c.credential(ctx, "fixture-provider") != "key-12345" {
+		t.Fatal("declared normalization not applied")
+	}
+	if w := admin.request("PUT", "/api/v1/metadata/providers/tmdb", map[string]string{"secret": "key-123456"}); w.Code != 400 {
+		t.Fatal("tmdb rules not applied", w.Code)
+	}
+	w := admin.request("GET", "/api/v1/metadata/providers", nil)
+	var infos []ProviderInfo
+	if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &infos) != nil {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	owners := map[string]string{}
+	for _, info := range infos {
+		owners[info.ID] = info.ConfigurationOwner
+	}
+	if owners["fixture-provider"] != "fixture.settings" || owners["tmdb"] != tmdbConfigurationOwner || strings.Contains(w.Body.String(), "key-12345") {
+		t.Fatal(owners)
+	}
+	p.failure = errors.New("unavailable")
+	if w = admin.request("PUT", route, map[string]string{"secret": "replaced-1"}); w.Code != 400 {
+		t.Fatal("unavailable schema fell back", w.Code)
+	}
+	if c.credential(ctx, "fixture-provider") != "key-12345" {
+		t.Fatal("refused write changed key")
+	}
+}
+
 func TestProviderConfigurationRejectsReinstalledFormHTTP(t *testing.T) {
 	c, _, admin := accountFixture(t)
 	admin.enter("setup", map[string]string{"name": "Admin", "password": accountTestPassword, "code": c.auth.code})

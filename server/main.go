@@ -23,7 +23,7 @@ import (
 // The UI is compiled once and included in the server executable.
 var frontend = resources.Frontend
 
-const version = "0.0.85"
+const version = "0.0.86"
 
 type module struct {
 	ID    string   `json:"id"`

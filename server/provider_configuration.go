@@ -5,8 +5,10 @@ import (
 	"crypto/ed25519"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"mosaune/extensionkit/configuration"
 	"mosaune/extensionkit/packageformat"
+	"strings"
 )
 
 // Optional host-adapter contracts. The generic settings and metadata routes
@@ -19,6 +21,52 @@ type MetadataConfigurationProvider interface {
 type MetadataCredentialProvider interface {
 	ReadCredential(context.Context) (string, error)
 	WriteCredential(context.Context, string) error
+}
+
+var (
+	errProviderSettingsUnavailable = errors.New("Réglages du fournisseur indisponibles. Vérifiez que son paquet est installé et valide dans Extensions.")
+	errProviderCredentialInvalid   = errors.New("Clé invalide. Copiez-la telle que fournie, sans espace ni préfixe.")
+)
+
+// normalizeProviderCredential applies the provider's own declared field rules
+// to the legacy single-credential route. A declared provider whose schema is
+// unavailable is refused: no other provider's limits are used as a fallback.
+func normalizeProviderCredential(ctx context.Context, p MetadataProvider, secret string) (string, error) {
+	secret = strings.TrimSpace(secret)
+	configurable, ok := p.(MetadataConfigurationProvider)
+	if !ok {
+		if secret == "" || len(secret) > 2048 || strings.ContainsAny(secret, " \r\n\t") {
+			return "", errProviderCredentialInvalid
+		}
+		return secret, nil
+	}
+	binding, err := configurable.Configuration(ctx)
+	if err != nil {
+		return "", errProviderSettingsUnavailable
+	}
+	field := ""
+	for _, f := range binding.schema.Fields {
+		if f.Type != "secret" {
+			continue
+		}
+		if field != "" {
+			return "", errors.New("Ce fournisseur déclare plusieurs clés : utilisez son formulaire de réglages.")
+		}
+		field = f.ID
+	}
+	if field == "" {
+		return "", errors.New("Ce fournisseur ne déclare aucune clé.")
+	}
+	raw, _ := json.Marshal(secret)
+	patch, err := binding.schema.NormalizePatch(configuration.Patch{Values: map[string]json.RawMessage{field: raw}})
+	if err != nil {
+		return "", errProviderCredentialInvalid
+	}
+	var normalized string
+	if json.Unmarshal(patch.Values[field], &normalized) != nil {
+		return "", errProviderCredentialInvalid
+	}
+	return normalized, nil
 }
 
 func installedProviderPackage(ctx context.Context, db configuration.Connection, id string, key ed25519.PublicKey) (packageformat.Package, error) {

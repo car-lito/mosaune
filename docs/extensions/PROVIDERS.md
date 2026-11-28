@@ -158,7 +158,11 @@ Les identifiants externes sont des chaînes associées à leur fournisseur. TMDB
 
 Le noyau conserve les clés, le catalogue, les images normalisées, la provenance des champs et les choix de correspondance. Les tags locaux sont extraits séparément. Une sélection manuelle n'est pas remplacée par l'identification automatique. Une modification du fichier invalide sa fiche précédente.
 
-Les écrans de recherche obtiennent la liste des fournisseurs via l'API. La configuration v1 accepte un secret textuel optionnel ; un fournisseur sans clé peut fonctionner directement. Le guide d'inscription et le logo TMDB restent spécifiques à cet adaptateur.
+Les écrans de recherche obtiennent la liste des fournisseurs via l'API. Un fournisseur sans clé peut fonctionner directement.
+
+**Réglages déclarés (0.0.86).** Un adaptateur qui implémente `MetadataConfigurationProvider` annonce `configurationOwner` dans `GET /api/v1/metadata/providers`. L'écran « Affiches et fournisseurs » affiche alors le formulaire générique de `GET/PUT /api/v1/extensions/{owner}/configuration` : titre, description, étapes, liens et champs viennent du schéma signé du paquet (`settings.json`), pas d'un écran propre au fournisseur. Sans schéma disponible, l'écran indique que le formulaire manque au lieu d'afficher un champ de clé par défaut.
+
+L'ancienne route `PUT/DELETE /api/v1/metadata/providers/{provider}` (`{ "secret": "…" }`) reste pour compatibilité. Elle applique les règles du **seul** champ secret déclaré par le fournisseur (longueurs, format `token`) ; plusieurs secrets ou un schéma indisponible sont refusés, sans emprunter les limites d'un autre fournisseur. Un adaptateur sans schéma garde des bornes génériques (non vide, 2048 caractères, sans espace). Les réglages des connecteurs Radarr/Sonarr restent réservés à leur capacité partagée (`acquisitionconfig.ReservedOwner`). Le logo d'attribution TMDB du pied de page reste spécifique.
 
 TMDB est le seul fournisseur livré. Un second fournisseur factice dans les tests vérifie le remplacement sans changement des routes ou du catalogue, avec des identifiants d'œuvres non numériques.
 

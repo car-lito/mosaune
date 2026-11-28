@@ -67,12 +67,12 @@ func metadataRoutes(mux *secureMux, c *catalog, allowed func(string) bool) {
 		if !readJSON(w, r, &input) {
 			return
 		}
-		input.Secret = strings.TrimSpace(input.Secret)
-		if len(input.Secret) < 20 || len(input.Secret) > 2048 || strings.ContainsAny(input.Secret, " \r\n\t") {
-			problem(w, 400, "Copiez le jeton de lecture ou la clé API, sans préfixe Bearer.")
+		secret, err := normalizeProviderCredential(r.Context(), p, input.Secret)
+		if err != nil {
+			problem(w, 400, err.Error())
 			return
 		}
-		err := c.setProviderCredential(r.Context(), p.Info().ID, input.Secret)
+		err = c.setProviderCredential(r.Context(), p.Info().ID, secret)
 		if err != nil {
 			problem(w, 500, "Configuration non enregistrée.")
 			return

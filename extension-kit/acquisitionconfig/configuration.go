@@ -32,6 +32,18 @@ func ConfigurationOwner(id string) (string, error) {
 	}
 	return "mosaune.acquisition." + id, nil
 }
+
+// ReservedOwner reports whether a settings owner belongs to a connector of this
+// shared capability. Such settings must pass through the connector's own
+// destination checks, never a generic module settings endpoint.
+func ReservedOwner(owner string) bool {
+	id, ok := strings.CutPrefix(owner, "mosaune.acquisition.")
+	if !ok {
+		return false
+	}
+	_, err := ConfigurationOwner(id)
+	return err == nil
+}
 func connectorSchema() configuration.Schema {
 	return configuration.Schema{Version: 1, Title: "Connexion de téléchargement", Fields: []configuration.Field{
 		{ID: "url", Label: "Adresse", Type: "text", MaxLength: 2048},

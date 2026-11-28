@@ -1,6 +1,6 @@
-# État réel — 0.0.85
+# État réel — 0.0.86
 
-Référence au 26 novembre 2026. Mosaune est un **prototype utilisable pour essais locaux**, pas encore une bêta complète à déployer sur le NAS cible. La 0.0.85 réorganise le dépôt et sa documentation ; elle n’ajoute pas de lecteur ni ne termine l’indépendance des familles.
+Référence au 28 novembre 2026. Mosaune est un **prototype utilisable pour essais locaux**, pas encore une bêta complète à déployer sur le NAS cible. La 0.0.85 a réorganisé le dépôt et sa documentation ; la 0.0.86 rend l’écran des fournisseurs de métadonnées générique (première partie d’E1). Aucune n’ajoute de lecteur ni ne termine l’indépendance des familles.
 
 ## Fonctionnalités existantes
 
@@ -25,13 +25,14 @@ Référence au 26 novembre 2026. Mosaune est un **prototype utilisable pour essa
 - Écrans, navigation, pages, réglages et thèmes déclaratifs ; exemples de remplacement.
 - Familles regroupées avec aperçu, installation, activation, retrait, mise à jour et restauration coordonnées des composants déjà extraits.
 - Dépôts GitHub, paquets signés pilotes, import local et résolution du gestionnaire par capacités ; pas de repli imposé vers TMDB.
+- Réglages des fournisseurs de métadonnées affichés depuis leur schéma déclaré (étapes, liens, champs), sans formulaire propre à TMDB ; l’ancienne route de clé applique les règles déclarées du fournisseur (`provider_configuration_test.go`).
 - Contrats communs de fournisseurs : composition initiale, cycle de vie, autorisations, gestion/configuration, paquets, profils, identification d’artistes, recherche d’éditions et références d’images.
 - Règles des demandes et du suivi largement déplacées vers un composant partagé, réglages/secrets communs et nettoyage au retrait du dernier utilisateur.
 - Test reproductible d’un serveur sans fournisseur ni famille installée, ajout de Musique seule et redémarrage : [test minimal](../scripts/test-minimal.mjs).
 
 ## Ce qui n’est pas terminé
 
-Les adaptateurs Go TMDB/MusicBrainz sont toujours embarqués. Des formulaires, commandes, services de profils/association/playlists, parties d’orchestration et initialisations restent dans le serveur ou l’interface. Le rôle exact de chacun doit être audité avant de les déclarer noyau générique ou extension complète. Les contrats communs ajoutés en 0.0.79–84 sont des points d’extension, pas la preuve d’une distribution indépendante de tous les adaptateurs.
+Les adaptateurs Go TMDB/MusicBrainz sont toujours embarqués. Les formulaires Téléchargements et reconnaissance restent spécifiques. Des formulaires, commandes, services de profils/association/playlists, parties d’orchestration et initialisations restent dans le serveur ou l’interface. Le rôle exact de chacun doit être audité avant de les déclarer noyau générique ou extension complète. Les contrats communs ajoutés en 0.0.79–84 sont des points d’extension, pas la preuve d’une distribution indépendante de tous les adaptateurs.
 
 L’installation minimale testée désactive/omet des familles dans un exécutable qui contient encore des ressources officielles. Il reste à prouver tout le cycle de chaque famille et un exemple communautaire complet sans modification du noyau. Les contrats de confiance, migrations, budgets globaux et dépendances inter-familles doivent être finalisés.
 

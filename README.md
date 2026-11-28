@@ -4,7 +4,7 @@
 
 Mosaune est un serveur multimédia personnel auto-hébergé en Go, avec une interface web Svelte. Films, séries et musique constituent les premières familles ; les autres médias et clients viendront comme extensions et applications optionnelles.
 
-**État : prototype 0.0.85.** Bibliothèques, métadonnées, recherche, fiches, reprise, playlists, comptes et demandes Radarr/Sonarr fonctionnent déjà. Le découpage complet en extensions reste à terminer avant les lecteurs personnalisés, puis le premier essai NAS. Les lecteurs actuels dépendent des codecs du navigateur. [Fonctionnalités et limites](docs/STATUS.md).
+**État : prototype 0.0.86.** Bibliothèques, métadonnées, recherche, fiches, reprise, playlists, comptes et demandes Radarr/Sonarr fonctionnent déjà. Le découpage complet en extensions reste à terminer avant les lecteurs personnalisés, puis le premier essai NAS. Les lecteurs actuels dépendent des codecs du navigateur. [Fonctionnalités et limites](docs/STATUS.md).
 
 ## Reprendre le projet
 

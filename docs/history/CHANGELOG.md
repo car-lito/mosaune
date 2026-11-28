@@ -1,3 +1,12 @@
+## 0.0.86 — réglages des fournisseurs déclarés (E1, première partie)
+
+- L’écran « Affiches et fournisseurs » n’a plus de guide ni de champ de clé écrit pour TMDB. Chaque fournisseur affiche le formulaire de son schéma déclaré (étapes, liens, champs, retrait de clé, autorisations), via le composant générique déjà utilisé dans Extensions. La liste des fournisseurs annonce ce formulaire par `configurationOwner`.
+- L’ancienne route de clé applique les règles du champ secret déclaré par le fournisseur au lieu des limites TMDB codées en dur ; un schéma indisponible refuse l’enregistrement, sans repli.
+- La protection des réglages Radarr/Sonarr passe par `acquisitionconfig.ReservedOwner` au lieu de noms écrits dans la route générique.
+- Tests : second fournisseur avec une clé plus courte que TMDB, normalisation, refus sans schéma, absence de fuite de la clé, propriétaires réservés et choix du formulaire côté web.
+- Test d’interruption d’identification : attente de démarrage portée à 60 s, la compilation du module fournisseur pouvant dépasser 5 s sur une machine lente.
+- Reste pour E1 : migrations de schéma entre versions d’un autre fournisseur, configuration des connecteurs et autres formulaires spécifiques (téléchargements, reconnaissance).
+
 ## 0.0.85 — dépôt organisé et dossier de reprise public
 
 - Serveur Go regroupé dans `server/`, ressources embarquées dans `resources/`, documentation actuelle classée dans `docs/` et anciens essais isolés en archives. Chemins Vite, scripts, Docker et tests adaptés ; format des familles conservé.

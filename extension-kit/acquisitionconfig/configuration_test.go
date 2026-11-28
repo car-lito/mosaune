@@ -2,6 +2,19 @@ package acquisitionconfig
 
 import "testing"
 
+func TestReservedOwnerFollowsConnectorList(t *testing.T) {
+	for _, owner := range []string{"mosaune.acquisition.radarr", "mosaune.acquisition.sonarr"} {
+		if !ReservedOwner(owner) {
+			t.Fatal("connector settings exposed", owner)
+		}
+	}
+	for _, owner := range []string{"mosaune.acquisition.plan", "mosaune.acquisition.", "radarr", "mosaune.tmdb-search", "x.mosaune.acquisition.radarr"} {
+		if ReservedOwner(owner) {
+			t.Fatal("ordinary module reserved", owner)
+		}
+	}
+}
+
 func TestConfigurationDestinationBinding(t *testing.T) {
 	old := Configuration{ID: "radarr", URL: "http://nas/radarr", Key: "private-key", Revision: 7}
 	input := Configuration{ID: "radarr", URL: "http://nas/radarr/api/v3/"}

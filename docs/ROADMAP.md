@@ -1,12 +1,14 @@
 # Roadmap active
 
-Mise à jour : 26 novembre 2026, base 0.0.85. Ce document remplace les anciennes listes dispersées. **Ordre : E → P → N**, puis élargissement progressif. Pas de dates promises sans estimation du lot. Les objectifs peuvent évoluer ; toute décision contraire à [DECISIONS](product/DECISIONS.md) doit être explicite.
+Mise à jour : 28 novembre 2026, base 0.0.86. Ce document remplace les anciennes listes dispersées. **Ordre : E → P → N**, puis élargissement progressif. Pas de dates promises sans estimation du lot. Les objectifs peuvent évoluer ; toute décision contraire à [DECISIONS](product/DECISIONS.md) doit être explicite.
 
 Les capacités déjà livrées sont dans [STATUS](STATUS.md). Une case ne se coche qu’avec code, documentation et preuve adaptée ; un changement de dossiers ou un pourcentage ne suffit pas.
 
 ## E — Terminer les extensions regroupées (priorité actuelle)
 
 - [ ] **E1 — Configuration générique.** Remplacer les formulaires/guides spécifiques encore imposés par le serveur ou l’UI (notamment `MetadataSettings.svelte` et les adaptateurs de configuration). Vérifier secrets, permissions, migrations et erreurs avec un autre fournisseur. Fini quand il peut déclarer ses réglages sans modifier l’écran central.
+  - [x] 0.0.86 : écran des fournisseurs de métadonnées rendu depuis le schéma déclaré ; ancienne route de clé soumise aux règles du fournisseur ; testé avec un second fournisseur.
+  - [ ] Formulaires Téléchargements (Radarr/Sonarr) et reconnaissance encore spécifiques ; migration de réglages d’un autre fournisseur entre deux versions à prouver ; logo d’attribution TMDB.
 - [ ] **E2 — Services médias restants.** Auditer profils, recherche/découverte, associations, playlists, commandes et orchestration. Déplacer les règles métier et garder seulement les primitives communes dans le noyau. Les contrats profils/association/images existent déjà ; éviter de recommencer ces extractions. Fini avec un remplacement réel, absence de repli caché et tests de retrait pendant une opération.
 - [ ] **E3 — Distribution indépendante.** Achever les adaptateurs fournisseurs et connecteurs comme capacités distribuables, ou formaliser précisément les primitives hôtes nécessaires. Étendre confiance des éditeurs, autorisations, quotas/budgets globaux, stockage privé et migrations sans permettre le chargement natif arbitraire. Fini avec un paquet externe crédible utilisant son format/sa source sans modification du noyau.
 - [ ] **E4 — Familles complètes.** Contraintes de versions inter-familles, changements de composition, dépendances partagées, éléments remplaçables/cumulables, installation partielle et récupération après échec. Retrait = nettoyage privé sûr, pas suppression des données partagées d’une autre famille.

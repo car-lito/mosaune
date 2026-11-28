@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"mosaune/extensionkit/acquisitionconfig"
 	"mosaune/extensionkit/configuration"
 	"mosaune/extensionkit/protocol"
 	"mosaune/extensionkit/registry"
@@ -26,7 +27,7 @@ func (c *catalog) configurationFor(id string) (configurationBinding, bool) {
 func (c *catalog) configurationForContext(ctx context.Context, id string) (configurationBinding, bool) {
 	// Connector settings belong to a shared capability. They must pass through
 	// its destination checks, never the generic module settings write endpoint.
-	if id == "mosaune.acquisition.radarr" || id == "mosaune.acquisition.sonarr" {
+	if acquisitionconfig.ReservedOwner(id) {
 		return configurationBinding{}, false
 	}
 	for _, provider := range c.providers {
@@ -71,7 +72,7 @@ func (c *catalog) extensionConfigurationRoutes(mux *secureMux) {
 	read := func(w http.ResponseWriter, r *http.Request) {
 		binding, ok := c.configurationForContext(r.Context(), r.PathValue("id"))
 		if !ok {
-			problem(w, 404, "Réglages d’extension introuvables.")
+			problem(w, 404, "Réglages d’extension introuvables. Vérifiez que son paquet est installé et valide dans Extensions.")
 			return
 		}
 		state, err := binding.read(r.Context())

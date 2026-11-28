@@ -357,9 +357,11 @@ func TestServiceAuthorizationInterruptedScanStaysPending(t *testing.T) {
 	})}
 	done := make(chan struct{})
 	go func() { c.metadataStep(ctx, allKinds); close(done) }()
+	// The first step compiles the provider module before any request; on slow
+	// machines that alone can exceed several seconds.
 	select {
 	case <-entered:
-	case <-time.After(5 * time.Second):
+	case <-time.After(60 * time.Second):
 		t.Fatal("scan did not start")
 	}
 	changeTMDBAccess(t, p, false)

@@ -1,6 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {providerStatus,providerRoute,providerPackageRoute} from './provider-management.ts';
+import {providerStatus,providerRoute,providerPackageRoute,providerSettingsView} from './provider-management.ts';
+
+test('settings come only from the form a provider declares, whatever its name',()=>{
+ for(const id of ['tmdb','another-source'])assert.deepEqual(providerSettingsView({id,configurationOwner:'example.settings',requiresCredential:true}),{kind:'declared',owner:'example.settings'});
+ // No built-in TMDB guide or key field replaces a missing declaration.
+ assert.deepEqual(providerSettingsView({id:'tmdb',requiresCredential:true}),{kind:'missing'});
+ assert.deepEqual(providerSettingsView({id:'musicbrainz',requiresCredential:false}),{kind:'none'});
+});
 
 test('status distinguishes missing, paused, denied and unavailable providers',()=>{
  const base={enabled:true,available:true};
